@@ -10,12 +10,15 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-
+import com.studica.frc.AHRS;
+import com.studica.frc.AHRS.NavXComType;
 import java.io.File;
 import java.util.function.Supplier;
 
@@ -26,6 +29,7 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathPlannerPath;
+import com.studica.frc.AHRS.NavXComType;
 
 import swervelib.SwerveDrive;
 import swervelib.parser.SwerveParser;
@@ -42,7 +46,7 @@ public class SwerveSubsystem extends SubsystemBase {
               .createSwerveDrive(
                   Constants.maxSpeed,
                   new Pose2d(
-                      new Translation2d(Meter.of(1), Meter.of(4)), Rotation2d.fromDegrees(0)));
+                      new Translation2d(Meter.of(0), Meter.of(4)), Rotation2d.fromDegrees(0)));
       // Alternative method if you don't want to supply the conversion factor via JSON files.
       // swerveDrive = new SwerveParser(directory).createSwerveDrive(maximumSpeed,
       // angleConversionFactor, driveConversionFactor);
@@ -67,6 +71,11 @@ public class SwerveSubsystem extends SubsystemBase {
           swerveDrive.driveFieldOriented(velocity.get());
         });
   }
+  private AHRS gyro = new AHRS(NavXComType.kMXP_SPI);
+  private final double gyroOffset= 90.0;
+
+  
+  
 
    public void setupPathPlanner()
   {
@@ -147,4 +156,54 @@ public class SwerveSubsystem extends SubsystemBase {
     // Create a path following command using AutoBuilder. This will also trigger event markers.
     return new PathPlannerAuto(pathName);
   }
+ 
+  
+  public void drive(ChassisSpeeds velocity)
+    {
+        swerveDrive.drive(velocity);
+    }
+
+
+    /**
+     * Get the swerve drive kinematics object.
+     *
+     * @return {@link SwerveDriveKinematics} of the swerve drive.
+     */
+  public SwerveDriveKinematics getKinematics()
+    {
+      return swerveDrive.kinematics;
+    }
+
+  /**
+   * Resets odometry to the given pose. Gyro angle and module positions do not need to be reset when calling this
+   * method.  However, if either gyro angle or module position is reset, this must be called in order for odometry to
+   * keep working.
+   *
+   * @param initialHolonomicPose The pose to set the odometry to
+   */
+  public void resetOdometry(Pose2d initialHolonomicPose)
+    {
+      swerveDrive.resetOdometry(initialHolonomicPose);
+    }
+
+  public Pose2d getPose()
+  {
+    return swerveDrive.getPose();
+  }
+  public Command zeroHeadingCommand(){
+    return this.runOnce(() -> gyro.reset());
+  }
+  public void zeroGyro(){
+    swerveDrive.zeroGyro();
+  }
+
+  @Override
+  public void periodic(){
+    var positions = swerveDrive.getModulePositions();
+    for(int i = 0; i < 4; i++){
+      SmartDashboard.putNumber("module " + i, positions[i].angle.getDegrees());
+    }
+
+  }
+
 }

@@ -53,7 +53,7 @@ public class RobotContainer {
       SwerveInputStream.of(
               drivebase.getSwerveDrive(),
               () -> m_driverController.getLeftX() * -1,
-              () -> m_driverController.getLeftY() * -1)
+              () -> m_driverController.getLeftY() * 1)
           .withControllerRotationAxis(m_driverController::getRightX)
           .deadband(OIConstants.DEADBAND)
           .scaleTranslation(0.8)
@@ -62,8 +62,8 @@ public class RobotContainer {
   SwerveInputStream driveDirectAngle =
       driveAngulareVelocity
           .copy()
-          .withControllerHeadingAxis(m_driverController::getRightX, m_driverController::getRightY)
-          .headingWhile(true);
+          .withControllerHeadingAxis(m_driverController::getRightY, m_driverController::getRightX)
+          .headingWhile(false);
 
   Command driveFieldOrietedDirectAngle = drivebase.driveFieldOriented(driveDirectAngle);
 
@@ -86,6 +86,10 @@ public class RobotContainer {
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
     m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
+
+    m_driverController.a().onTrue(Commands.runOnce(drivebase::zeroGyro));
+    m_driverController.start().onTrue(drivebase.zeroHeadingCommand());
+
   }
 
   /**
