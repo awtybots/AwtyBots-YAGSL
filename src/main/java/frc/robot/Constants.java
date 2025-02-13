@@ -62,8 +62,96 @@ public final class Constants {
     public static final boolean kGyroReversed = false;
   } 
 
+  public static final class ElevatorConstants{
+    public static final int LeftElevatorCanID = 10;
+    public static final int RightElevatorCanID = 11;
+  }
+
+  public static final class ArmConstants{
+    public static final int ArmLeftCanID = 12;
+    public static final int ArmRightCanID = 13;
+    public static final int WristCanID = 17;
+    public static final int IntakeCanID = 18;
+  }
+
+  public static final class FunnelConstants{
+    public static final int FunnelWrist = 9;
+    public static final int FunnelLIntake = 15;
+    public static final int FunnelRIntake = 16;
+  }
+
+  public static final class ElevatorSetpoints{
+    public static final int FeederStation = 0;
+    public static final int L1 = 15;
+    public static final int AlgaeLow = 20;
+    public static final int L2 = 40;
+    public static final int AlgaeHigh = 55;
+    public static final int L3 = 72;
+    public static final int L4 = 72;
+  }
+
+  public static final class ArmSetpoints{
+    public static final double FeederStation = 0;
+    public static final double L1 = -3;
+    public static final double AlgaeLow = -3;
+    public static final double L2 = -3;
+    public static final double AlgaeHigh = -3;
+    public static final double L3 = -3;
+    public static final double L4 = -15;
+  }
+
+  public static final class WristSetpoints{
+    public static final double FeederStation = -1;
+    public static final double L1 = 3;
+    public static final double AlgaeLow = 3;
+    public static final double L2 = 0;
+    public static final double AlgaeHigh = 3;
+    public static final double L3 = 0;
+    public static final double L4 = -2;
+  }
+
+  public static final class FunnelWristSetpoints{
+    public static final double FeederStation = -2;
+    public static final double Climb = 12;
+  }
+
+  public static final class FunnelIntakeSetpoints{
+    public static final double kForward = 0.5;
+    public static final double kReverse = 0.65;
+    public static final double kHold = 0.0;
+  }
+
+  public static final class IntakeSetpoints{
+    public static final double kForward = -.6;
+    public static final double kReverse = .6;
+    public static final double kHold = .25;
+  }
+
+  public static final class ModuleConstants {
+    // The MAXSwerve module can be configured with one of three pinion gears: 12T,
+    // 13T, or 14T. This changes the drive speed of the module (a pinion gear with
+    // more teeth will result in a robot that drives faster).
+    public static final int kDrivingMotorPinionTeeth = 14;
+
+    // Calculations required for driving motor conversion factors and feed forward
+    public static final double kDrivingMotorFreeSpeedRps = NeoMotorConstants.kFreeSpeedRpm / 60;
+    public static final double kWheelDiameterMeters = 0.0762;
+    public static final double kWheelCircumferenceMeters = kWheelDiameterMeters * Math.PI;
+    // 45 teeth on the wheel's bevel gear, 22 teeth on the first-stage spur gear, 15
+    // teeth on the bevel pinion
+    public static final double kDrivingMotorReduction = (45.0 * 22) / (kDrivingMotorPinionTeeth * 15);
+    public static final double kDriveWheelFreeSpeedRps = (kDrivingMotorFreeSpeedRps * kWheelCircumferenceMeters)
+        / kDrivingMotorReduction;
+  }
+
   public static final class OIConstants {
     public static final int kDriverControllerPort = 0;
+    public static final int kOperatorControllerPort = 1;
     public static final double DEADBAND = 0.05;
+    public static final double kTriggerThreshold = 0.2;
+  }
+
+  public static final class NeoMotorConstants {
+    public static final double kFreeSpeedRpm = 5676;
   }
 }
