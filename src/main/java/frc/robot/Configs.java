@@ -77,7 +77,7 @@ public final class Configs {
                 r_armMotorConfig.closedLoop.
                 feedbackSensor(FeedbackSensor.kPrimaryEncoder)
                 .p(0.1)
-                .outputRange(-1, 1)
+                .outputRange(-1, 0.5)
                 .maxMotion
                 .maxVelocity(2000)
                 .maxAcceleration(10000)
@@ -86,7 +86,7 @@ public final class Configs {
                 l_armMotorConfig.closedLoop.
                 feedbackSensor(FeedbackSensor.kPrimaryEncoder)
                 .p(0.1)
-                .outputRange(-1, 1)
+                .outputRange(-1, 0.5)
                 .maxMotion
                 .maxVelocity(2000)
                 .maxAcceleration(10000)

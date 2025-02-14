@@ -46,7 +46,7 @@ public class SwerveSubsystem extends SubsystemBase {
               .createSwerveDrive(
                   Constants.maxSpeed,
                   new Pose2d(
-                      new Translation2d(Meter.of(0), Meter.of(4)), Rotation2d.fromDegrees(0)));
+                      new Translation2d(Meter.of(1), Meter.of(4)), Rotation2d.fromDegrees(0)));
       // Alternative method if you don't want to supply the conversion factor via JSON files.
       // swerveDrive = new SwerveParser(directory).createSwerveDrive(maximumSpeed,
       // angleConversionFactor, driveConversionFactor);
@@ -56,7 +56,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
     setupPathPlanner();
   }
-
+  
   public SwerveDrive getSwerveDrive() {
     return swerveDrive;
   }
@@ -72,9 +72,20 @@ public class SwerveSubsystem extends SubsystemBase {
         });
   }
   private AHRS gyro = new AHRS(NavXComType.kMXP_SPI);
-  private final double gyroOffset= 90.0;
 
-  
+
+  /**
+   * Resets odometry to the given pose. Gyro angle and module positions do not need to be reset when calling this
+   * method.  However, if either gyro angle or module position is reset, this must be called in order for odometry to
+   * keep working.
+   *
+   * @param initialHolonomicPose The pose to set the odometry to
+   */
+  public void resetOdometry(Pose2d initialHolonomicPose)
+    {
+      swerveDrive.resetOdometry(initialHolonomicPose);
+    }
+
   
 
    public void setupPathPlanner()
@@ -111,9 +122,9 @@ public class SwerveSubsystem extends SubsystemBase {
           // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
           new PPHolonomicDriveController(
               // PPHolonomicController is the built in path following controller for holonomic drive trains
-              new PIDConstants(5.0, 0.0, 0.0),
+              new PIDConstants( 0.5, 0.0, 0.0),
               // Translation PID constants
-              new PIDConstants(5.0, 0.0, 0.0)
+              new PIDConstants(1, 0.0, 0.0)
               // Rotation PID constants
           ),
           config,
@@ -144,17 +155,17 @@ public class SwerveSubsystem extends SubsystemBase {
     // IF USING CUSTOM PATHFINDER ADD BEFORE THIS LINE
     PathfindingCommand.warmupCommand().schedule();
   }
-
+  
    /**
    * Get the path follower with events.
    *
    * @param pathName PathPlanner path name.
    * @return {@link AutoBuilder#followPath(PathPlannerPath)} path command.
    */
-  public Command getAutonomousCommand(String pathName)
+  public Command getAutonomousCommand(String TestAuto)
   {
     // Create a path following command using AutoBuilder. This will also trigger event markers.
-    return new PathPlannerAuto(pathName);
+    return new PathPlannerAuto(TestAuto);
   }
  
   
@@ -174,18 +185,7 @@ public class SwerveSubsystem extends SubsystemBase {
       return swerveDrive.kinematics;
     }
 
-  /**
-   * Resets odometry to the given pose. Gyro angle and module positions do not need to be reset when calling this
-   * method.  However, if either gyro angle or module position is reset, this must be called in order for odometry to
-   * keep working.
-   *
-   * @param initialHolonomicPose The pose to set the odometry to
-   */
-  public void resetOdometry(Pose2d initialHolonomicPose)
-    {
-      swerveDrive.resetOdometry(initialHolonomicPose);
-    }
-
+  
   public Pose2d getPose()
   {
     return swerveDrive.getPose();

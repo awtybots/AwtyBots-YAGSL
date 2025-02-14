@@ -14,10 +14,12 @@ import swervelib.SwerveInputStream;
 
 import java.io.File;
 
+import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -35,6 +37,7 @@ public class RobotContainer {
   private final SwerveSubsystem drivebase = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(), "swerve"));
   private final CoralSubsystem m_coralSubsystem = new CoralSubsystem();
   private final FunnelIntake m_funnelIntakeSubsystem = new FunnelIntake();
+  private final SendableChooser<Command> autoChooser;
   
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController =
@@ -44,7 +47,7 @@ public class RobotContainer {
   public RobotContainer() {
     // Configure the trigger bindings
 
-    autoChooser = AutoBuild.buildAutoChooser();
+    autoChooser = AutoBuilder.buildAutoChooser();
 
     SmartDashboard.putData("Auto Chooser", autoChooser);
 
@@ -54,13 +57,14 @@ public class RobotContainer {
 
     drivebase.setDefaultCommand(driveFieldOrientedAngluarVelocity);
     NamedCommands.registerCommand("test",Commands.print("Hello World"));
+    NamedCommands.registerCommand("L1",m_coralSubsystem.setSetpointCommand(Setpoint.L1));
   }
 
   SwerveInputStream driveAngulareVelocity =
       SwerveInputStream.of(
               drivebase.getSwerveDrive(),
-              () -> m_driverController.getLeftX() * -1,
-              () -> m_driverController.getLeftY() * 1)
+              () -> m_driverController.getLeftY() * 1,
+              () -> m_driverController.getLeftX() * 1)
           .withControllerRotationAxis(m_driverController::getRightX)
           .deadband(OIConstants.DEADBAND)
           .scaleTranslation(0.8)
@@ -115,16 +119,10 @@ public class RobotContainer {
      // D-Pad Down -> Elevator to 1st Algae pickup position
      m_driverController.povDown().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeLow));
  
-     // D-Pad Left -> Set funnel to feeder station position
-     m_driverController.povLeft().onTrue(m_funnelIntakeSubsystem.setSetpointCommand(FunnelIntake.Setpoint.FeederStation));
- 
-     // D-Pad Right -> Set funnel to climb position
-     m_driverController.povRight().onTrue(m_funnelIntakeSubsystem.setSetpointCommand(FunnelIntake.Setpoint.Climb));
- 
 
 
     //m_driverController.a().onTrue(Commands.runOnce(drivebase::zeroGyro));
-    m_driverController.start().onTrue(drivebase.zeroHeadingCommand());
+    m_driverController.start().onTrue(Commands.runOnce(drivebase::zeroGyro));
 
   }
 
