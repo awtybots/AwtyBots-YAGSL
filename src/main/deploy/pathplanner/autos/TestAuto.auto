@@ -19,6 +19,12 @@
                 "data": {
                   "pathName": "Test2"
                 }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "New Path"
+                }
               }
             ]
           }
