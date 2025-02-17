@@ -134,6 +134,7 @@ public final class Configs {
                 intakeMotorConfig.inverted(true).idleMode(IdleMode.kBrake).smartCurrentLimit(40);
 
         }
+
     };
 
     public static final class FunnelIntakeSubsystem {

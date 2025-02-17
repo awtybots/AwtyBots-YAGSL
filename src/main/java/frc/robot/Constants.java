@@ -18,7 +18,7 @@ import edu.wpi.first.math.util.Units;
  */
 public final class Constants {
 
-  public static final double maxSpeed = Units.feetToMeters(4.5);
+  public static final double maxSpeed = Units.feetToMeters(15.76);
   
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
@@ -147,7 +147,7 @@ public final class Constants {
   public static final class OIConstants {
     public static final int kDriverControllerPort = 0;
     public static final int kOperatorControllerPort = 1;
-    public static final double DEADBAND = 0.05;
+    public static final double DEADBAND = 0.2;
     public static final double kTriggerThreshold = 0.2;
   }
 

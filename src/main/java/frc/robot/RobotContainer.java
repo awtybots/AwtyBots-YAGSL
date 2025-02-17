@@ -5,10 +5,12 @@
 package frc.robot;
 
 import frc.robot.Constants.OIConstants;
+import frc.robot.commands.AutoIntake;
 import frc.robot.commands.Autos;
 import frc.robot.subsystems.CoralSubsystem;
 import frc.robot.subsystems.CoralSubsystem.Setpoint;
 import frc.robot.subsystems.FunnelIntake;
+import frc.robot.subsystems.IntakeCoralSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 import swervelib.SwerveInputStream;
 
@@ -37,6 +39,7 @@ public class RobotContainer {
   private final SwerveSubsystem drivebase = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(), "swerve"));
   private final CoralSubsystem m_coralSubsystem = new CoralSubsystem();
   private final FunnelIntake m_funnelIntakeSubsystem = new FunnelIntake();
+  private final IntakeCoralSubsystem intake = new IntakeCoralSubsystem();
   private final SendableChooser<Command> autoChooser;
   
   // Replace with CommandPS4Controller or CommandJoystick if needed
@@ -57,7 +60,7 @@ public class RobotContainer {
 
     drivebase.setDefaultCommand(driveFieldOrientedAngluarVelocity);
     NamedCommands.registerCommand("test",Commands.print("Hello World"));
-    NamedCommands.registerCommand("L1",m_coralSubsystem.setSetpointCommand(Setpoint.L1));
+    NamedCommands.registerCommand("intake", new AutoIntake(intake));
   }
 
   SwerveInputStream driveAngulareVelocity =
@@ -69,6 +72,8 @@ public class RobotContainer {
           .deadband(OIConstants.DEADBAND)
           .scaleTranslation(0.8)
           .allianceRelativeControl(true);
+
+  
 
   SwerveInputStream driveDirectAngle =
       driveAngulareVelocity
@@ -90,12 +95,22 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
+    //enable slow mode
+    m_driverController
+  .rightTrigger(OIConstants.kTriggerThreshold)
+  .onTrue(
+    Commands.runOnce(() -> {driveAngulareVelocity.scaleTranslation(.2);
+    }))
+    .onFalse(
+      Commands.runOnce(() -> {driveAngulareVelocity.scaleTranslation(.8);
+    }));
+
      // Left Bumper -> Run tube intake
-     m_driverController.leftBumper().whileTrue(m_coralSubsystem.reverseIntakeCommand());
+     //m_driverController.leftBumper().whileTrue(m_coralSubsystem.reverseIntakeCommand());
 
      // Right Bumper -> Run tube intake in reverse
      m_driverController.rightBumper().whileTrue(m_funnelIntakeSubsystem.runIntakeCommand());
-     m_driverController.rightBumper().whileTrue(m_coralSubsystem.runIntakeCommand());
+     //m_driverController.rightBumper().whileTrue(m_coralSubsystem.runIntakeCommand());
  
      // B Button -> Elevator/Arm to human player position, set ball intake to stow
      // when idle
