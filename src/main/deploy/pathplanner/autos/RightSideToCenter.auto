@@ -9,6 +9,12 @@
           "data": {
             "pathName": "Angle"
           }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ElevatorLiftL1"
+          }
         }
       ]
     }

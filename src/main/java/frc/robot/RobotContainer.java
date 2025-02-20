@@ -61,6 +61,13 @@ public class RobotContainer {
     drivebase.setDefaultCommand(driveFieldOrientedAngluarVelocity);
     NamedCommands.registerCommand("test",Commands.print("Hello World"));
     NamedCommands.registerCommand("intake", new AutoIntake(intake));
+    NamedCommands.registerCommand("outtake", m_funnelIntakeSubsystem.runIntakeCommand());
+    NamedCommands.registerCommand("ElevatorLiftL1", m_coralSubsystem.setSetpointCommand(Setpoint.L1));
+    NamedCommands.registerCommand("ElevatorLiftL2", m_coralSubsystem.setSetpointCommand(Setpoint.L2));
+    NamedCommands.registerCommand("ElevatorLiftL3", m_coralSubsystem.setSetpointCommand(Setpoint.L3));
+    NamedCommands.registerCommand("ElevatorLiftL4", m_coralSubsystem.setSetpointCommand(Setpoint.L4));
+    NamedCommands.registerCommand("AlgaeLow", m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeLow));
+    NamedCommands.registerCommand("AlgaeHigh", m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeHigh));
   }
 
   SwerveInputStream driveAngulareVelocity =

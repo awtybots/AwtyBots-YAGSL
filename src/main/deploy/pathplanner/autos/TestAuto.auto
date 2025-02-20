@@ -5,28 +5,39 @@
     "data": {
       "commands": [
         {
-          "type": "sequential",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "Test1"
-                }
-              },
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "Test2"
-                }
-              },
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "New Path"
-                }
-              }
-            ]
+            "pathName": "Path1S1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Path2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Path3S2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Path4"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Path5S3"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Path6"
           }
         }
       ]

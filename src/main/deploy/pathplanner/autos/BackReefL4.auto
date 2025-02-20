@@ -1,0 +1,31 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RightStartToBackReefMid"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ElevatorLiftL4"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BackReefMidToBackReefRight"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

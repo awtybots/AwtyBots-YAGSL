@@ -2,7 +2,11 @@
   "robotWidth": 0.889,
   "robotLength": 0.889,
   "holonomicMode": true,
-  "pathFolders": [],
+  "pathFolders": [
+    "BackReef",
+    "Leftauto",
+    "test"
+  ],
   "autoFolders": [],
   "defaultMaxVel": 15.0,
   "defaultMaxAccel": 3.0,
@@ -20,7 +24,7 @@
   "wheelCOF": 1.19,
   "flModuleX": 0.2966,
   "flModuleY": 0.2966,
-  "frModuleX": 0.2966,
+  "frModuleX": 0.297,
   "frModuleY": -0.2966,
   "blModuleX": -0.2966,
   "blModuleY": 0.2966,
