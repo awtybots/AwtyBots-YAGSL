@@ -55,7 +55,7 @@ public class CoralSubsystem extends SubsystemBase {
     private RelativeEncoder wristEncoder = wristMotor.getEncoder();
 
     //intake setup
-    //private SparkFlex intakeMotor = new SparkFlex(ArmConstants.IntakeCanID, MotorType.kBrushless);
+    private SparkFlex intakeMotor = new SparkFlex(ArmConstants.IntakeCanID, MotorType.kBrushless);
 
     
     private boolean wasReset = false;
@@ -90,10 +90,10 @@ public class CoralSubsystem extends SubsystemBase {
             ResetMode.kResetSafeParameters,
             PersistMode.kPersistParameters);
 
-        /*intakeMotor.configure(
+        intakeMotor.configure(
             Configs.CoralSubsystem.intakeMotorConfig,
             ResetMode.kResetSafeParameters,
-            PersistMode.kPersistParameters);*/
+            PersistMode.kPersistParameters);
         
         armEncoder.setPosition(0);
         elevatorEncoder.setPosition(0);
@@ -120,9 +120,9 @@ public class CoralSubsystem extends SubsystemBase {
         }
     }
 
-    /*private void setIntakePower(double power){
+    private void setIntakePower(double power){
         intakeMotor.set(power);
-    }*/
+    }
 
     public Command setSetpointCommand(Setpoint setpoint){
         return this.runOnce(
@@ -167,7 +167,7 @@ public class CoralSubsystem extends SubsystemBase {
             });
     }
 
-   /* public Command runIntakeCommand(){
+    public Command runIntakeCommand(){
         return Commands.startEnd(
             () -> setIntakePower(IntakeSetpoints.kForward), () -> setIntakePower(0.0));
     }
@@ -175,7 +175,7 @@ public class CoralSubsystem extends SubsystemBase {
     public Command reverseIntakeCommand() {
         return this.startEnd(
             () -> this.setIntakePower(IntakeSetpoints.kReverse), () -> this.setIntakePower(0.0));
-    }*/
+    }
 
    public void periodic() {
     moveToSetpoint();

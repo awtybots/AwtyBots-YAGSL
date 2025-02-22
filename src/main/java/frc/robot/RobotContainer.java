@@ -46,6 +46,8 @@ public class RobotContainer {
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController =
       new CommandXboxController(OIConstants.kDriverControllerPort);
+  private final CommandXboxController m_operatorController =
+      new CommandXboxController(OIConstants.kOperatorControllerPort);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -54,6 +56,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("test",Commands.print("Hello World"));
     NamedCommands.registerCommand("intake", new AutoIntake(intake));
     NamedCommands.registerCommand("outtake", m_funnelIntakeSubsystem.runIntakeCommand());
+    NamedCommands.registerCommand("FeederStation", m_coralSubsystem.setSetpointCommand(Setpoint.FeederStation));
     NamedCommands.registerCommand("ElevatorLiftL1", m_coralSubsystem.setSetpointCommand(Setpoint.L1));
     NamedCommands.registerCommand("ElevatorLiftL2", m_coralSubsystem.setSetpointCommand(Setpoint.L2));
     NamedCommands.registerCommand("ElevatorLiftL3", m_coralSubsystem.setSetpointCommand(Setpoint.L3));
@@ -115,33 +118,33 @@ public class RobotContainer {
     }));
 
      // Left Bumper -> Run tube intake
-     //m_driverController.leftBumper().whileTrue(m_coralSubsystem.reverseIntakeCommand());
+     m_operatorController.leftBumper().whileTrue(m_coralSubsystem.reverseIntakeCommand());
 
      // Right Bumper -> Run tube intake in reverse
-     m_driverController.rightBumper().whileTrue(m_funnelIntakeSubsystem.runIntakeCommand());
-     //m_driverController.rightBumper().whileTrue(m_coralSubsystem.runIntakeCommand());
+     m_operatorController.rightBumper().whileTrue(m_funnelIntakeSubsystem.runIntakeCommand());
+     m_operatorController.rightBumper().whileTrue(m_coralSubsystem.runIntakeCommand());
  
      // B Button -> Elevator/Arm to human player position, set ball intake to stow
      // when idle
-     m_driverController.back().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.FeederStation));
+     m_operatorController.back().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.FeederStation));
  
      // A Button -> Elevator/Arm to level 1 position
-     m_driverController.a().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.L1));
+     m_operatorController.a().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.L1));
  
      // B Button -> Elevator/Arm to level 2 position
-     m_driverController.b().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.L2));
+     m_operatorController.b().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.L2));
  
      // X Button -> Elevator/Arm to level 3 position
-     m_driverController.x().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.L3));
+     m_operatorController.x().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.L3));
  
      // Y Button -> Elevator/Arm to level 4 position
-     m_driverController.y().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.L4));
+     m_operatorController.y().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.L4));
  
      // D-Pad Up -> Elevator to 2st Algae pickup position
-     m_driverController.povUp().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeHigh));
+     m_operatorController.povUp().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeHigh));
  
      // D-Pad Down -> Elevator to 1st Algae pickup position
-     m_driverController.povDown().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeLow));
+     m_operatorController.povDown().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeLow));
  
 
 

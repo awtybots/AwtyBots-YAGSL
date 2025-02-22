@@ -39,6 +39,12 @@
           "data": {
             "pathName": "Path6"
           }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": null
+          }
         }
       ]
     }
