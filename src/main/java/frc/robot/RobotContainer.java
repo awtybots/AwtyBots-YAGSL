@@ -18,6 +18,7 @@ import java.io.File;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.events.EventTrigger;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
@@ -60,6 +61,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("AlgaeLow", m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeLow));
     NamedCommands.registerCommand("AlgaeHigh", m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeHigh));
 
+    new EventTrigger("prepareElevatorL1").onTrue(Commands.runOnce(()-> {System.out.println("Raising elevator to level 1!");}));
 
     autoChooser = AutoBuilder.buildAutoChooser();
 
