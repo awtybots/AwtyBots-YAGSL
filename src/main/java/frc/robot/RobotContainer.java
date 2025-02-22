@@ -5,12 +5,10 @@
 package frc.robot;
 
 import frc.robot.Constants.OIConstants;
-import frc.robot.commands.AutoIntake;
 import frc.robot.commands.Autos;
 import frc.robot.subsystems.CoralSubsystem;
 import frc.robot.subsystems.CoralSubsystem.Setpoint;
 import frc.robot.subsystems.FunnelIntake;
-import frc.robot.subsystems.IntakeCoralSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 import swervelib.SwerveInputStream;
 
@@ -39,7 +37,6 @@ public class RobotContainer {
   private final SwerveSubsystem drivebase = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(), "swerve"));
   private final CoralSubsystem m_coralSubsystem = new CoralSubsystem();
   private final FunnelIntake m_funnelIntakeSubsystem = new FunnelIntake();
-  private final IntakeCoralSubsystem intake = new IntakeCoralSubsystem();
   private final SendableChooser<Command> autoChooser;
   
   // Replace with CommandPS4Controller or CommandJoystick if needed
@@ -53,8 +50,8 @@ public class RobotContainer {
     // Configure the trigger bindings
     drivebase.setDefaultCommand(driveFieldOrientedAngluarVelocity);
     NamedCommands.registerCommand("test",Commands.print("Hello World"));
-    NamedCommands.registerCommand("intake", new AutoIntake(intake));
-    NamedCommands.registerCommand("outtake", m_funnelIntakeSubsystem.runIntakeCommand());
+    NamedCommands.registerCommand("outtake", m_coralSubsystem.reverseIntakeCommand());
+    NamedCommands.registerCommand("intake", m_funnelIntakeSubsystem.runIntakeCommand());
     NamedCommands.registerCommand("FeederStation", m_coralSubsystem.setSetpointCommand(Setpoint.FeederStation));
     NamedCommands.registerCommand("ElevatorLiftL1", m_coralSubsystem.setSetpointCommand(Setpoint.L1));
     NamedCommands.registerCommand("ElevatorLiftL2", m_coralSubsystem.setSetpointCommand(Setpoint.L2));
