@@ -129,11 +129,17 @@ public class RobotContainer {
         .rightTrigger(OIConstants.kTriggerThreshold)
         .onTrue(
             Commands.runOnce(() -> {
-              driveAngulareVelocity.scaleTranslation(.2);
+              driveAngulareVelocity.scaleTranslation(0.2); // Scale translation speed
+              driveAngulareVelocity.withControllerRotationAxis(() -> m_driverController.getRightX() * 0.2); // Scale
+                                                                                                            // rotation
+
             }))
         .onFalse(
             Commands.runOnce(() -> {
-              driveAngulareVelocity.scaleTranslation(.8);
+              driveAngulareVelocity.scaleTranslation(1.0); // Restore normal translation speed
+              driveAngulareVelocity.withControllerRotationAxis(m_driverController::getRightX); // Restore normal
+                                                                                               // rotation speed
+
             }));
 
     // Left Bumper -> Run tube intake
