@@ -144,8 +144,8 @@ public class RobotContainer {
 
     // Left Bumper -> Run tube intake
     m_operatorController.leftBumper().whileTrue(Commands.either(
-          m_coralSubsystem.reverseIntakeCommand(), // If ElevatorAtL4 is true, run Reverse Intake
-          m_coralSubsystem.runIntakeCommand(), // Otherwise, run normal intake
+          m_coralSubsystem.runIntakeCommand(), // If ElevatorAtL4 is true, run Reverse Intake
+          m_coralSubsystem.reverseIntakeCommand(), // Otherwise, run normal intake
           () -> CoralSubsystem.ElevatorAtL4 // Condition for reverse intake
     ));
 
