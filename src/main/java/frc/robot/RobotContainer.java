@@ -5,6 +5,7 @@
 package frc.robot;
 
 import frc.robot.Constants.OIConstants;
+import frc.robot.commands.AlignToAprilTagCommand;
 import frc.robot.commands.Autos;
 import frc.robot.subsystems.CoralSubsystem;
 import frc.robot.subsystems.CoralSubsystem.Setpoint;
@@ -42,7 +43,7 @@ public class RobotContainer {
   private final CoralSubsystem m_coralSubsystem = new CoralSubsystem();
   private final FunnelIntake m_funnelIntakeSubsystem = new FunnelIntake();
   private final SendableChooser<Command> autoChooser;
-  private final VisionSubsystem vision = new VisionSubsystem();
+  private final VisionSubsystem visionSubsystem = new VisionSubsystem();
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController = new CommandXboxController(OIConstants.kDriverControllerPort);
   private final CommandXboxController m_operatorController = new CommandXboxController(
@@ -186,6 +187,8 @@ public class RobotContainer {
 
     // m_driverController.a().onTrue(Commands.runOnce(drivebase::zeroGyro));
     m_driverController.start().onTrue(Commands.runOnce(drivebase::zeroGyro));
+
+    m_driverController.a().whileTrue(new AlignToAprilTagCommand(drivebase, visionSubsystem));
 
   }
 

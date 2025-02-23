@@ -189,6 +189,10 @@ public class SwerveSubsystem extends SubsystemBase {
     return this.runOnce(() -> gyro.reset());
   }
 
+  public double getGyroYaw() {
+    return gyro.getRotation2d().getDegrees();
+  }
+
   public void zeroGyro() {
     swerveDrive.zeroGyro();
   }

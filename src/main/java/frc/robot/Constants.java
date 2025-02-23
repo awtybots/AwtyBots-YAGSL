@@ -7,19 +7,24 @@ package frc.robot;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
+import java.lang.String;
 
 /**
- * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
- * constants. This class should not be used for any other purpose. All constants should be declared
+ * The Constants class provides a convenient place for teams to hold robot-wide
+ * numerical or boolean
+ * constants. This class should not be used for any other purpose. All constants
+ * should be declared
  * globally (i.e. public static). Do not put anything functional in this class.
  *
- * <p>It is advised to statically import this class (or one of its inner classes) wherever the
+ * <p>
+ * It is advised to statically import this class (or one of its inner classes)
+ * wherever the
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
 
   public static final double maxSpeed = Units.feetToMeters(15.76);
-  
+
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
   }
@@ -35,12 +40,11 @@ public final class Constants {
     // Distance between centers of right and left wheels on robot
     public static final double kWheelBase = Units.inchesToMeters(28);
     // Distance between front and back wheels on robot
-    public static final SwerveDriveKinematics kDriveKinematics =
-        new SwerveDriveKinematics(
-            new Translation2d(kWheelBase / 2, kTrackWidth / 2),
-            new Translation2d(kWheelBase / 2, -kTrackWidth / 2),
-            new Translation2d(-kWheelBase / 2, kTrackWidth / 2),
-            new Translation2d(-kWheelBase / 2, -kTrackWidth / 2));
+    public static final SwerveDriveKinematics kDriveKinematics = new SwerveDriveKinematics(
+        new Translation2d(kWheelBase / 2, kTrackWidth / 2),
+        new Translation2d(kWheelBase / 2, -kTrackWidth / 2),
+        new Translation2d(-kWheelBase / 2, kTrackWidth / 2),
+        new Translation2d(-kWheelBase / 2, -kTrackWidth / 2));
 
     // Angular offsets of the modules relative to the chassis in radians
     public static final double kFrontLeftChassisAngularOffset = -Math.PI / 2;
@@ -60,27 +64,27 @@ public final class Constants {
     public static final int kRearRightTurningCanId = 8;
 
     public static final boolean kGyroReversed = false;
-  } 
+  }
 
-  public static final class ElevatorConstants{
+  public static final class ElevatorConstants {
     public static final int LeftElevatorCanID = 10;
     public static final int RightElevatorCanID = 11;
   }
 
-  public static final class ArmConstants{
+  public static final class ArmConstants {
     public static final int ArmLeftCanID = 12;
     public static final int ArmRightCanID = 13;
     public static final int WristCanID = 17;
     public static final int IntakeCanID = 18;
   }
 
-  public static final class FunnelConstants{
+  public static final class FunnelConstants {
     public static final int FunnelWrist = 9;
     public static final int FunnelLIntake = 15;
     public static final int FunnelRIntake = 16;
   }
 
-  public static final class ElevatorSetpoints{
+  public static final class ElevatorSetpoints {
     public static final int FeederStation = 0;
     public static final int L1 = 15;
     public static final int AlgaeLow = 0;
@@ -90,7 +94,7 @@ public final class Constants {
     public static final int L4 = 72;
   }
 
-  public static final class ArmSetpoints{
+  public static final class ArmSetpoints {
     public static final double FeederStation = 0;
     public static final double L1 = -3;
     public static final double AlgaeLow = -9;
@@ -100,7 +104,7 @@ public final class Constants {
     public static final double L4 = -15;
   }
 
-  public static final class WristSetpoints{
+  public static final class WristSetpoints {
     public static final double FeederStation = -1;
     public static final double L1 = 3;
     public static final double AlgaeLow = -3;
@@ -110,18 +114,18 @@ public final class Constants {
     public static final double L4 = -2;
   }
 
-  public static final class FunnelWristSetpoints{
+  public static final class FunnelWristSetpoints {
     public static final double FeederStation = -2;
     public static final double Climb = 12;
   }
 
-  public static final class FunnelIntakeSetpoints{
+  public static final class FunnelIntakeSetpoints {
     public static final double kForward = 0.5;
     public static final double kReverse = 0.65;
     public static final double kHold = 0.0;
   }
 
-  public static final class IntakeSetpoints{
+  public static final class IntakeSetpoints {
     public static final double kForward = -.6;
     public static final double kReverse = .6;
     public static final double kHold = .25;
@@ -154,4 +158,20 @@ public final class Constants {
   public static final class NeoMotorConstants {
     public static final double kFreeSpeedRpm = 5676;
   }
+
+  public static final class VisionConstants {
+    // Camera's
+    public static final String limelightAprilTagCamera = "Arducam_OV9782_USB_Camera";
+
+    public static final double targetDistanceMeters = 1.0; // Default: 1 meter away from target
+    public static final double distance_tolerance = 0.05; // 5cm
+    public static final double leftOffsetMeters = 0.0; // Adjust how far left to align
+    public static final double rightOffsetMeters = 0.0; // Adjust how far right to align
+    public static final double maxYawError = 2.0; // Allowed yaw error before correction
+
+    // PID Gains for vision-based corrections
+    public static final double VISION_TURN_kP = 0.02; // Rotation correction factor
+    public static final double VISION_DRIVE_kP = 0.2; // Forward/backward correction factor
+  }
+
 }
