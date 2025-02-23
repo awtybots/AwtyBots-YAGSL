@@ -17,7 +17,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 
 public class VisionSubsystem extends SubsystemBase {
-    private final PhotonCamera camera = new PhotonCamera(Constants.VisionConstants.limelightAprilTagCamera);
+    private final PhotonCamera camera = new PhotonCamera(Constants.VisionConstants.Coral.limelightAprilTagCamera);
     private SwerveSubsystem swerve;
 
     private final AprilTagFieldLayout fieldLayout; // AprilTag field layout
@@ -36,11 +36,16 @@ public class VisionSubsystem extends SubsystemBase {
 
         // Initialize the pose estimator using the camera and tag layout
         photonPoseEstimator = new PhotonPoseEstimator(fieldLayout, PoseStrategy.LOWEST_AMBIGUITY, robotToCamera);
-
     }
 
     public Optional<PhotonTrackedTarget> getBestTarget() {
-        PhotonPipelineResult result = camera.getLatestResult();
+        var results = camera.getAllUnreadResults();
+        if (results.isEmpty()) {
+            return Optional.empty(); // Prevents crash if no frames exist
+        }
+
+        // Use the latest result from the list
+        PhotonPipelineResult result = results.get(results.size() - 1);
         if (result.hasTargets()) {
             return Optional.of(result.getBestTarget());
         }
@@ -60,30 +65,37 @@ public class VisionSubsystem extends SubsystemBase {
         });
     }
 
-    public Optional<double[]> getAlignmentErrors() {
+    public Optional<double[]> getAlignmentErrors(boolean alignLeft) {
         return getBestTarget().map(target -> {
             double yawError = target.getYaw(); // Angle error (rotation)
 
             // Compute Distance to Target
             double targetRange = PhotonUtils.calculateDistanceToTargetMeters(
-                    0.5, // Camera height in meters (adjust for your robot)
-                    1.435, // AprilTag height in meters (2024 field values)
+                    0.5, // Camera height in meters (adjust for the robot)
+                    1.435, // AprilTag height in meters (2025 field values)
                     Units.degreesToRadians(-30.0), // Camera mount angle (adjust based on actual)
                     Units.degreesToRadians(target.getPitch()));
 
             // Distance error (difference from desired target distance)
-            double distanceError = targetRange - Constants.VisionConstants.targetDistanceMeters;
+            double distanceError = targetRange - Constants.VisionConstants.Coral.targetDistanceMeters;
 
             // Left/Right Offset Adjustment
-            double lateralOffset = Constants.VisionConstants.leftOffsetMeters
-                    - Constants.VisionConstants.rightOffsetMeters;
+            double lateralOffset = alignLeft ? Constants.VisionConstants.Coral.leftOffsetMeters
+                    : Constants.VisionConstants.Coral.rightOffsetMeters;
 
             return new double[] { yawError, distanceError, lateralOffset };
         });
     }
 
     public void updatePoseEstimation() {
-        PhotonPipelineResult result = camera.getLatestResult();
+        var results = camera.getAllUnreadResults();
+        if (results.isEmpty()) {
+            return; // Prevents crash if no frames exist
+        }
+
+        // Use the latest result from the list
+        PhotonPipelineResult result = results.get(results.size() - 1);
+
         if (!result.hasTargets()) {
             return; // No targets detected, do nothing
         }
@@ -106,5 +118,4 @@ public class VisionSubsystem extends SubsystemBase {
         logAprilTagData();
         updatePoseEstimation();
     }
-
 }
