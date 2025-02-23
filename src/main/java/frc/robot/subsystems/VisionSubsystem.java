@@ -1,6 +1,8 @@
 package frc.robot.subsystems;
 
 import org.photonvision.PhotonCamera;
+import org.photonvision.PhotonPoseEstimator;
+import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.PhotonUtils;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
@@ -9,11 +11,32 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import edu.wpi.first.math.util.Units;
 import java.util.Optional;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 
 public class VisionSubsystem extends SubsystemBase {
     private final PhotonCamera camera = new PhotonCamera(Constants.VisionConstants.limelightAprilTagCamera);
+    private SwerveSubsystem swerve;
 
-    public VisionSubsystem() {
+    private final AprilTagFieldLayout fieldLayout; // AprilTag field layout
+    private final Transform3d robotToCamera; // Camera position relative to the robot
+    private final PhotonPoseEstimator photonPoseEstimator; // Vision-based pose estimator
+
+    public VisionSubsystem(SwerveSubsystem swerve) {
+        this.swerve = swerve;
+
+        // Load the AprilTag field layout (2025 game)
+        fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
+
+        // Define the camera's position relative to the robot (adjust values based on
+        // actual setup)
+        robotToCamera = new Transform3d(0.2, 0.0, 0.5, new Rotation3d(0, 0, 0));
+
+        // Initialize the pose estimator using the camera and tag layout
+        photonPoseEstimator = new PhotonPoseEstimator(fieldLayout, PoseStrategy.LOWEST_AMBIGUITY, robotToCamera);
+
     }
 
     public Optional<PhotonTrackedTarget> getBestTarget() {
@@ -59,14 +82,29 @@ public class VisionSubsystem extends SubsystemBase {
         });
     }
 
+    public void updatePoseEstimation() {
+        PhotonPipelineResult result = camera.getLatestResult();
+        if (!result.hasTargets()) {
+            return; // No targets detected, do nothing
+        }
+
+        var poseEstimate = photonPoseEstimator.update(result);
+        if (poseEstimate.isPresent()) {
+            var poseEst = poseEstimate.get();
+            swerve.addVisionMeasurement(poseEst.estimatedPose.toPose2d(), poseEst.timestampSeconds);
+        }
+    }
+
     @Override
     public void periodic() {
+        updatePoseEstimation();
         logAprilTagData();
     }
 
     @Override
     public void simulationPeriodic() {
         logAprilTagData();
+        updatePoseEstimation();
     }
 
 }

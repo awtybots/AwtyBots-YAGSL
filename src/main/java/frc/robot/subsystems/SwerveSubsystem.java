@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Meter;
 
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -38,6 +39,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
   File directory = new File(Filesystem.getDeployDirectory(), "swerve");
   private final SwerveDrive swerveDrive;
+  private final SwerveDrivePoseEstimator poseEstimator;
 
   public SwerveSubsystem(File directory) {
     try {
@@ -53,6 +55,12 @@ public class SwerveSubsystem extends SubsystemBase {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+
+    poseEstimator = new SwerveDrivePoseEstimator(
+        getKinematics(),
+        Rotation2d.fromDegrees(getGyroYaw()),
+        swerveDrive.getModulePositions(),
+        new Pose2d(0.0, 0.0, new Rotation2d()));
 
     setupPathPlanner();
   }
@@ -197,8 +205,22 @@ public class SwerveSubsystem extends SubsystemBase {
     swerveDrive.zeroGyro();
   }
 
+  public void addVisionMeasurement(Pose2d visionPose, double timestamp) {
+    poseEstimator.addVisionMeasurement(visionPose, timestamp);
+  }
+
   @Override
   public void periodic() {
+
+    poseEstimator.update(
+        Rotation2d.fromDegrees(getGyroYaw()),
+        swerveDrive.getModulePositions());
+
+    Pose2d estimatedPose = poseEstimator.getEstimatedPosition();
+    SmartDashboard.putNumber("Estimated X", estimatedPose.getX());
+    SmartDashboard.putNumber("Estimated Y", estimatedPose.getY());
+    SmartDashboard.putNumber("Estimated Heading", estimatedPose.getRotation().getDegrees());
+
     var positions = swerveDrive.getModulePositions();
     for (int i = 0; i < 4; i++) {
       SmartDashboard.putNumber("module " + i, positions[i].angle.getDegrees());

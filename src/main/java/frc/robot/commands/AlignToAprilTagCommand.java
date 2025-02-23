@@ -7,6 +7,7 @@ package frc.robot.commands;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.Constants.VisionConstants;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -44,6 +45,7 @@ public class AlignToAprilTagCommand extends Command {
     @Override
     public void execute() {
         Optional<double[]> errors = vision.getAlignmentErrors();
+        Pose2d currentPose = swerve.getPose(); // Get robot's estimated pose
 
         if (errors.isPresent()) {
             // ✅ We have a valid target!
@@ -59,15 +61,17 @@ public class AlignToAprilTagCommand extends Command {
             hasValidTarget = true; // ✅ We now have a valid target!
 
             // Use **latest** camera values for alignment
-            useVisionForAlignment(targetYaw, distanceError, lateralOffset);
+            useVisionForAlignment(targetYaw, distanceError, lateralOffset, currentPose);
 
         } else if (hasValidTarget) {
             // No new AprilTag, but we have last known values → Use gyro for stability
-            useGyroForAlignment();
+            swerve.drive(
+                    new ChassisSpeeds(lastKnownDistanceError * 0.1, lastKnownLateralOffset * 0.1, lastKnownYaw * 0.01));
 
         } else {
             // No valid target, no previous values → Stop the robot
             swerve.drive(new ChassisSpeeds(0, 0, 0));
+            hasValidTarget = false;
         }
     }
 
@@ -94,12 +98,17 @@ public class AlignToAprilTagCommand extends Command {
         return false;
     }
 
-    private void useVisionForAlignment(double targetYaw, double distanceError, double lateralOffset) {
+    private void useVisionForAlignment(double targetYaw, double distanceError, double lateralOffset,
+            Pose2d currentPose) {
         // Get the current heading from the gyro
         double currentGyroYaw = swerve.getGyroYaw();
 
         // Compute the corrected yaw error using both the camera and gyro
         double yawCorrection = targetYaw - currentGyroYaw;
+
+        // Pose-based correction (field-centric)
+        double poseErrorX = VisionConstants.targetDistanceMeters - currentPose.getX();
+        double poseErrorY = lateralOffset;
 
         // Apply rotation correction using gyro + camera yaw
         double rotationSpeed = (Math.abs(yawCorrection) > VisionConstants.maxYawError)
@@ -111,8 +120,8 @@ public class AlignToAprilTagCommand extends Command {
                 ? distanceError * VisionConstants.VISION_DRIVE_kP
                 : 0; // Stops forward/backward movement when close enough
 
-        // Move left/right based on offsets
-        double strafeSpeed = lateralOffset * 0.5;
+        // Move left/right based on offsets & pose error
+        double strafeSpeed = lateralOffset * 0.5 + poseErrorY * 0.2; // Fine-tune strafe speed
 
         // Convert to ChassisSpeeds (correct format for swerve)
         ChassisSpeeds speeds = new ChassisSpeeds(forwardSpeed, strafeSpeed, rotationSpeed);
@@ -121,8 +130,9 @@ public class AlignToAprilTagCommand extends Command {
         swerve.drive(speeds);
     }
 
-    private void useGyroForAlignment() {
-        double holdRotation = -swerve.getGyroYaw() * 0.01; // Small correction to hold steady
-        swerve.drive(new ChassisSpeeds(0, 0, holdRotation));
-    }
+    // private void useGyroForAlignment() {
+    // double holdRotation = -swerve.getGyroYaw() * 0.01; // Small correction to
+    // hold steady
+    // swerve.drive(new ChassisSpeeds(0, 0, holdRotation));
+    // }
 }
