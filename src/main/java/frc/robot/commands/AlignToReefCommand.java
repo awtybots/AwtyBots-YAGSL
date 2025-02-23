@@ -54,7 +54,7 @@ public class AlignToReefCommand extends Command {
     /** Called every time the scheduler runs while the command is scheduled. */
     @Override
     public void execute() {
-        Optional<double[]> errors = vision.getAlignmentErrors();
+        Optional<double[]> errors = vision.getAlignmentErrors(alignLeft);
         Pose2d currentPose = swerve.getPose(); // Get robot's estimated pose
 
         if (errors.isPresent()) {
