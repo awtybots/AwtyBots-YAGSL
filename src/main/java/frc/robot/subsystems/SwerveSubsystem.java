@@ -193,8 +193,13 @@ public class SwerveSubsystem extends SubsystemBase {
     swerveDrive.zeroGyro();
   }
 
+  public double getGyroYaw() {
+    return gyro.getYaw();
+  }
+
   @Override
   public void periodic() {
+    SmartDashboard.putNumber("Gyro Angle", getGyroYaw());
     var positions = swerveDrive.getModulePositions();
     for (int i = 0; i < 4; i++) {
       SmartDashboard.putNumber("module " + i, positions[i].angle.getDegrees());
