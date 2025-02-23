@@ -10,6 +10,7 @@ import frc.robot.subsystems.CoralSubsystem;
 import frc.robot.subsystems.CoralSubsystem.Setpoint;
 import frc.robot.subsystems.FunnelIntake;
 import frc.robot.subsystems.SwerveSubsystem;
+import frc.robot.subsystems.VisionSubsystem;
 import swervelib.SwerveInputStream;
 
 import java.io.File;
@@ -41,7 +42,7 @@ public class RobotContainer {
   private final CoralSubsystem m_coralSubsystem = new CoralSubsystem();
   private final FunnelIntake m_funnelIntakeSubsystem = new FunnelIntake();
   private final SendableChooser<Command> autoChooser;
-
+  private final VisionSubsystem vision = new VisionSubsystem();
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController = new CommandXboxController(OIConstants.kDriverControllerPort);
   private final CommandXboxController m_operatorController = new CommandXboxController(
@@ -51,6 +52,24 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
+    // Default to 0° (assuming forward should be field-oriented default)
+    double startingAngle = 0;
+
+    var alliance = DriverStation.getAlliance();
+
+    if (alliance.isPresent() && alliance.get() == DriverStation.Alliance.Red) {
+      // If on Red Alliance, adjust heading to 180°
+      startingAngle = 180;
+    } else if (!DriverStation.isFMSAttached() && !DriverStation.isDSAttached()) {
+      // If NOT connected to FMS or Driver Station (testing mode), allow manual
+      // setting
+      startingAngle = 0;
+      System.out.println("Practice Mode: Setting starting heading to " + startingAngle);
+    }
+
+    // Set the correct initial heading for field-oriented driving
+    drivebase.setInitialHeading(startingAngle);
+
     // Configure the trigger bindings
     drivebase.setDefaultCommand(driveFieldOrientedAngluarVelocity);
     NamedCommands.registerCommand("test", Commands.print("Hello World"));
