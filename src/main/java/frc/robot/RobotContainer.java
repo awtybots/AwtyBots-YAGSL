@@ -52,19 +52,19 @@ public class RobotContainer {
    */
   public RobotContainer() {
     // Default to 0° (assuming forward should be field-oriented default)
-    double startingAngle = 0;
+    double startingAngle = 180;
 
-    var alliance = DriverStation.getAlliance();
+    // var alliance = DriverStation.getAlliance();
 
-    if (alliance.isPresent() && alliance.get() == DriverStation.Alliance.Red) {
-      // If on Red Alliance, adjust heading to 180°
-      startingAngle = 180;
-    } else if (!DriverStation.isFMSAttached() && !DriverStation.isDSAttached()) {
-      // If NOT connected to FMS or Driver Station (testing mode), allow manual
-      // setting
-      startingAngle = 0;
-      System.out.println("Practice Mode: Setting starting heading to " + startingAngle);
-    }
+    // if (alliance.isPresent() && alliance.get() == DriverStation.Alliance.Red) {
+    //   // If on Red Alliance, adjust heading to 180°
+    //   startingAngle = 180;
+    // } else if (!DriverStation.isFMSAttached() && !DriverStation.isDSAttached()) {
+    //   // If NOT connected to FMS or Driver Station (testing mode), allow manual
+    //   // setting
+    //   startingAngle = 0;
+    //   System.out.println("Practice Mode: Setting starting heading to " + startingAngle);
+    // }
 
     // Set the correct initial heading for field-oriented driving
     drivebase.setInitialHeading(startingAngle);
