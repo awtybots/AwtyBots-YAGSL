@@ -145,7 +145,7 @@ public class RobotContainer {
     // Left Bumper -> Run tube intake
     m_operatorController.leftBumper().whileTrue(m_coralSubsystem.reverseIntakeCommand());
 
-    m_operatorController.start().whileTrue(m_coralSubsystem.manualElevatorDown());
+    //m_operatorController.start().whileTrue(m_coralSubsystem.manualElevatorDown());
     // Right Bumper -> Run tube intake in reverse
 
     m_operatorController.rightBumper().whileTrue(
@@ -162,7 +162,7 @@ public class RobotContainer {
                 ),
                 () -> CoralSubsystem.runFunnelIntake // Condition for Funnel Intake
             ),
-            Commands.none(), // Do nothing
+            m_funnelIntakeSubsystem.runIntakeCommand(), // Do nothing
             () -> CoralSubsystem.runFunnelIntake || CoralSubsystem.ElevatorAtL4));
 
     m_operatorController.rightStick().onTrue(m_coralSubsystem.resetElevatorEncoder());
