@@ -126,6 +126,9 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
+    //////////////////////////////////////////////
+    /// driver controller bindings ////////////
+    ////////////////////////////////////////////
     // enable slow mode
     m_driverController
         .rightTrigger(OIConstants.kTriggerThreshold)
@@ -138,6 +141,16 @@ public class RobotContainer {
               driveAngulareVelocity.scaleTranslation(.8);
             }));
 
+    // m_driverController.a().onTrue(Commands.runOnce(drivebase::zeroGyro));
+    m_driverController.start().onTrue(Commands.runOnce(drivebase::zeroGyro));
+
+    // vision buttons
+    m_driverController.a().whileTrue(new AlignToAprilTagCommand(drivebase, visionSubsystem, true)); // Align left
+    m_driverController.b().whileTrue(new AlignToAprilTagCommand(drivebase, visionSubsystem, false)); // Align right
+
+    //////////////////////////////////////////////
+    /// operator controller bindings ////////////
+    ////////////////////////////////////////////
     // Left Bumper -> Run tube intake
     m_operatorController.leftBumper().whileTrue(m_coralSubsystem.reverseIntakeCommand());
 
@@ -184,11 +197,6 @@ public class RobotContainer {
 
     // D-Pad Down -> Elevator to 1st Algae pickup position
     m_operatorController.povDown().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeLow));
-
-    // m_driverController.a().onTrue(Commands.runOnce(drivebase::zeroGyro));
-    m_driverController.start().onTrue(Commands.runOnce(drivebase::zeroGyro));
-
-    m_driverController.a().whileTrue(new AlignToAprilTagCommand(drivebase, visionSubsystem));
 
   }
 

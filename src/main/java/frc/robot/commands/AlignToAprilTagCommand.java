@@ -17,6 +17,7 @@ import java.util.Optional;
 public class AlignToAprilTagCommand extends Command {
     private final SwerveSubsystem swerve;
     private final VisionSubsystem vision;
+    private final boolean alignLeft; // New parameter to decide which reef bar to align with
 
     private double lastKnownYaw = 0.0;
     private double lastKnownDistanceError = 0.0;
@@ -26,19 +27,22 @@ public class AlignToAprilTagCommand extends Command {
     /**
      * Creates a new AlignToAprilTagCommand.
      *
-     * @param swerve The drivetrain subsystem.
-     * @param vision The vision subsystem.
+     * @param swerve    The drivetrain subsystem.
+     * @param vision    The vision subsystem.
+     * @param alignLeft `true` to align with the left reef bar, `false` for the
+     *                  right.
      */
-    public AlignToAprilTagCommand(SwerveSubsystem swerve, VisionSubsystem vision) {
+    public AlignToAprilTagCommand(SwerveSubsystem swerve, VisionSubsystem vision, boolean alignLeft) {
         this.swerve = swerve;
         this.vision = vision;
+        this.alignLeft = alignLeft; // Store alignment preference
         addRequirements(swerve, vision);
     }
 
     /** Called when the command is initially scheduled. */
     @Override
     public void initialize() {
-        System.out.println("AlignToAprilTagCommand started");
+        System.out.println("AlignToAprilTagCommand started - Aligning to " + (alignLeft ? "Left" : "Right") + " Reef");
     }
 
     /** Called every time the scheduler runs while the command is scheduled. */
@@ -52,7 +56,9 @@ public class AlignToAprilTagCommand extends Command {
             double[] errorArray = errors.get();
             double targetYaw = errorArray[0]; // Yaw error from AprilTag
             double distanceError = errorArray[1]; // Distance to target in meters
-            double lateralOffset = errorArray[2]; // Left/right offset
+
+            // Select the appropriate lateral offset based on the chosen reef bar
+            double lateralOffset = alignLeft ? VisionConstants.leftOffsetMeters : VisionConstants.rightOffsetMeters;
 
             // Store last known valid values (so we can use them later if we lose the tag)
             lastKnownYaw = targetYaw;
@@ -64,7 +70,8 @@ public class AlignToAprilTagCommand extends Command {
             useVisionForAlignment(targetYaw, distanceError, lateralOffset, currentPose);
 
         } else if (hasValidTarget) {
-            // No new AprilTag, but we have last known values → Use gyro for stability
+            // No new AprilTag, but we have last known values → Use last valid movement
+            // values
             swerve.drive(
                     new ChassisSpeeds(lastKnownDistanceError * 0.1, lastKnownLateralOffset * 0.1, lastKnownYaw * 0.01));
 
@@ -107,7 +114,7 @@ public class AlignToAprilTagCommand extends Command {
         double yawCorrection = targetYaw - currentGyroYaw;
 
         // Pose-based correction (field-centric)
-        double poseErrorX = VisionConstants.targetDistanceMeters - currentPose.getX();
+        double poseErrorX = VisionConstants.targetDistanceMeters - currentPose.getX(); // ✅ Now used!
         double poseErrorY = lateralOffset;
 
         // Apply rotation correction using gyro + camera yaw
@@ -115,9 +122,9 @@ public class AlignToAprilTagCommand extends Command {
                 ? -yawCorrection * VisionConstants.VISION_TURN_kP
                 : 0;
 
-        // Stop Forward Movement if within the Target Range
-        double forwardSpeed = Math.abs(distanceError) > VisionConstants.distance_tolerance
-                ? distanceError * VisionConstants.VISION_DRIVE_kP
+        // ✅ Now using poseErrorX for stopping at the target distance!
+        double forwardSpeed = Math.abs(poseErrorX) > VisionConstants.distance_tolerance
+                ? poseErrorX * VisionConstants.VISION_DRIVE_kP
                 : 0; // Stops forward/backward movement when close enough
 
         // Move left/right based on offsets & pose error
