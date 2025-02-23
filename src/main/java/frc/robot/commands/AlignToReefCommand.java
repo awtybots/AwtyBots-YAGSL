@@ -14,10 +14,11 @@ import edu.wpi.first.wpilibj2.command.Command;
 import java.util.Optional;
 
 /** Aligns the robot to an AprilTag while the button is held */
-public class AlignToAprilTagCommand extends Command {
+public class AlignToReefCommand extends Command {
     private final SwerveSubsystem swerve;
     private final VisionSubsystem vision;
-    private final boolean alignLeft; // New parameter to decide which reef bar to align with
+    private final boolean alignLeft;
+    private final double targetDistanceMeters;
 
     private double lastKnownYaw = 0.0;
     private double lastKnownDistanceError = 0.0;
@@ -27,22 +28,27 @@ public class AlignToAprilTagCommand extends Command {
     /**
      * Creates a new AlignToAprilTagCommand.
      *
-     * @param swerve    The drivetrain subsystem.
-     * @param vision    The vision subsystem.
-     * @param alignLeft `true` to align with the left reef bar, `false` for the
-     *                  right.
+     * @param swerve               The drivetrain subsystem.
+     * @param vision               The vision subsystem.
+     * @param alignLeft            `true` to align to left reef bar, `false` for the
+     *                             right.
+     * @param targetDistanceMeters Defines how close you want the robot to target
+     * 
      */
-    public AlignToAprilTagCommand(SwerveSubsystem swerve, VisionSubsystem vision, boolean alignLeft) {
+    public AlignToReefCommand(SwerveSubsystem swerve, VisionSubsystem vision, boolean alignLeft,
+            double targetDistanceMeters) {
         this.swerve = swerve;
         this.vision = vision;
         this.alignLeft = alignLeft; // Store alignment preference
+        this.targetDistanceMeters = targetDistanceMeters;
         addRequirements(swerve, vision);
     }
 
     /** Called when the command is initially scheduled. */
     @Override
     public void initialize() {
-        System.out.println("AlignToAprilTagCommand started - Aligning to " + (alignLeft ? "Left" : "Right") + " Reef");
+        System.out.println("AlignToReefCommand started - Aligning to " + (alignLeft ? "Left" : "Right")
+                + " Reef. Target Distance: " + targetDistanceMeters + " meters");
     }
 
     /** Called every time the scheduler runs while the command is scheduled. */
@@ -58,7 +64,8 @@ public class AlignToAprilTagCommand extends Command {
             double distanceError = errorArray[1]; // Distance to target in meters
 
             // Select the appropriate lateral offset based on the chosen reef bar
-            double lateralOffset = alignLeft ? VisionConstants.leftOffsetMeters : VisionConstants.rightOffsetMeters;
+            double lateralOffset = alignLeft ? VisionConstants.Coral.leftOffsetMeters
+                    : VisionConstants.Coral.rightOffsetMeters;
 
             // Store last known valid values (so we can use them later if we lose the tag)
             lastKnownYaw = targetYaw;
@@ -114,17 +121,17 @@ public class AlignToAprilTagCommand extends Command {
         double yawCorrection = targetYaw - currentGyroYaw;
 
         // Pose-based correction (field-centric)
-        double poseErrorX = VisionConstants.targetDistanceMeters - currentPose.getX(); // ✅ Now used!
+        double poseErrorX = targetDistanceMeters - currentPose.getX(); // ✅ Now used!
         double poseErrorY = lateralOffset;
 
         // Apply rotation correction using gyro + camera yaw
-        double rotationSpeed = (Math.abs(yawCorrection) > VisionConstants.maxYawError)
-                ? -yawCorrection * VisionConstants.VISION_TURN_kP
+        double rotationSpeed = (Math.abs(yawCorrection) > VisionConstants.Coral.maxYawError)
+                ? -yawCorrection * VisionConstants.Coral.VISION_TURN_kP
                 : 0;
 
         // ✅ Now using poseErrorX for stopping at the target distance!
-        double forwardSpeed = Math.abs(poseErrorX) > VisionConstants.distance_tolerance
-                ? poseErrorX * VisionConstants.VISION_DRIVE_kP
+        double forwardSpeed = Math.abs(poseErrorX) > VisionConstants.Coral.distance_tolerance
+                ? poseErrorX * VisionConstants.Coral.VISION_DRIVE_kP
                 : 0; // Stops forward/backward movement when close enough
 
         // Move left/right based on offsets & pose error

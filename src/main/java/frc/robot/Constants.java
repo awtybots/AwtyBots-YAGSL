@@ -160,18 +160,52 @@ public final class Constants {
   }
 
   public static final class VisionConstants {
-    // Camera's
-    public static final String limelightAprilTagCamera = "Arducam_OV9782_USB_Camera";
+    public static final class Coral {
+      // Camera's
+      public static final String limelightAprilTagCamera = "Arducam_OV9782_USB_Camera";
 
-    public static final double targetDistanceMeters = 1.0; // Default: 1 meter away from target
-    public static final double distance_tolerance = 0.05; // 5cm
-    public static final double leftOffsetMeters = 0.0; // Adjust how far left to align
-    public static final double rightOffsetMeters = 0.0; // Adjust how far right to align
-    public static final double maxYawError = 2.0; // Allowed yaw error before correction
+      public static final double targetDistanceMeters = 2.0; // Default: 1 meter away from target
+      public static final double targetDistanceMetersLevel4 = 1.0; // Target distance level 4
+      public static final double distance_tolerance = 0.05; // How off are we willing to tolerate
+      public static final double leftOffsetMeters = 0.0; // Adjust how far left to align
+      public static final double rightOffsetMeters = 0.0; // Adjust how far right to align
+      public static final double maxYawError = 2.0; // Allowed yaw error before correction
 
-    // PID Gains for vision-based corrections
-    public static final double VISION_TURN_kP = 0.02; // Rotation correction factor
-    public static final double VISION_DRIVE_kP = 0.2; // Forward/backward correction factor
+      // PID Gains for vision-based corrections
+      public static final double VISION_TURN_kP = 0.02; // Rotation correction factor
+      public static final double VISION_DRIVE_kP = 0.2; // Forward/backward correction factor
+    }
+
+    public static final class Algae {
+      // Camera's
+      public static final String limelightAprilTagCamera = "Arducam_OV9782_USB_Camera";
+
+      public static final double targetDistanceMeters = 1.0; // Default: 1 meter away from target
+      public static final double distance_tolerance = 0.05; // 5cm
+      public static final double leftOffsetMeters = 0.0; // Adjust how far left to align
+      public static final double rightOffsetMeters = 0.0; // Adjust how far right to align
+      public static final double maxYawError = 2.0; // Allowed yaw error before correction
+
+      // PID Gains for vision-based corrections
+      public static final double VISION_TURN_kP = 0.02; // Rotation correction factor
+      public static final double VISION_DRIVE_kP = 0.2; // Forward/backward correction factor
+    }
+
+    public static final class FeederStation {
+      // Camera's
+      public static final String limelightAprilTagCamera = "Arducam_OV9782_USB_Camera";
+
+      public static final double targetDistanceMeters = 1.0; // Default: 1 meter away from target
+      public static final double distance_tolerance = 0.05; // 5cm
+      public static final double leftOffsetMeters = 0.0; // Adjust how far left to align
+      public static final double rightOffsetMeters = 0.0; // Adjust how far right to align
+      public static final double maxYawError = 2.0; // Allowed yaw error before correction
+
+      // PID Gains for vision-based corrections
+      public static final double VISION_TURN_kP = 0.02; // Rotation correction factor
+      public static final double VISION_DRIVE_kP = 0.2; // Forward/backward correction factor
+    }
+
   }
 
 }

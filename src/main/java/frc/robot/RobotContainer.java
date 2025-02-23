@@ -5,7 +5,7 @@
 package frc.robot;
 
 import frc.robot.Constants.OIConstants;
-import frc.robot.commands.AlignToAprilTagCommand;
+import frc.robot.commands.AlignToReefCommand;
 import frc.robot.commands.Autos;
 import frc.robot.subsystems.CoralSubsystem;
 import frc.robot.subsystems.CoralSubsystem.Setpoint;
@@ -145,8 +145,19 @@ public class RobotContainer {
     m_driverController.start().onTrue(Commands.runOnce(drivebase::zeroGyro));
 
     // vision buttons
-    m_driverController.a().whileTrue(new AlignToAprilTagCommand(drivebase, visionSubsystem, true)); // Align left
-    m_driverController.b().whileTrue(new AlignToAprilTagCommand(drivebase, visionSubsystem, false)); // Align right
+    // align left levels 1-3
+    m_driverController.a().whileTrue(
+        new AlignToReefCommand(drivebase, visionSubsystem, true, Constants.VisionConstants.Coral.targetDistanceMeters));
+    // align right levels 1-3
+    m_driverController.b().whileTrue(new AlignToReefCommand(drivebase, visionSubsystem, false,
+        Constants.VisionConstants.Coral.targetDistanceMeters));
+    // align left levels 4
+    m_driverController.x().whileTrue(
+        new AlignToReefCommand(drivebase, visionSubsystem, true,
+            Constants.VisionConstants.Coral.targetDistanceMetersLevel4));
+    // align right levels 4
+    m_driverController.y().whileTrue(new AlignToReefCommand(drivebase, visionSubsystem, false,
+        Constants.VisionConstants.Coral.targetDistanceMetersLevel4));
 
     //////////////////////////////////////////////
     /// operator controller bindings ////////////
