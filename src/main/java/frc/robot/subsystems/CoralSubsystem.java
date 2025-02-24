@@ -68,7 +68,7 @@ public class CoralSubsystem extends SubsystemBase {
 
     public CoralSubsystem() {
         ElevatorAtL4 = false;
-        runFunnelIntake = true;
+        runFunnelIntake = false;
 
         l_elevatorMotor.configure(
                 Configs.CoralSubsystem.l_elevatorMotorConfig,
@@ -113,17 +113,17 @@ public class CoralSubsystem extends SubsystemBase {
         r_elevatorController.setReference(elevatorCurrentTarget, ControlType.kMAXMotionPositionControl);
     }
 
-    public Command manualElevatorDown() {
-        return Commands.startEnd(
-                () -> {
-                    l_elevatorMotor.set(-0.5);
-                    r_elevatorMotor.set(-0.5);
-                },
-                () -> {
-                    l_elevatorMotor.set(0);
-                    r_elevatorMotor.set(0);
-                });
-    }
+    // public Command manualElevatorDown() {
+    //     return Commands.startEnd(
+    //             () -> {
+    //                 l_elevatorMotor.set(0.5);
+    //                 r_elevatorMotor.set(-0.5);
+    //             },
+    //             () -> {
+    //                 l_elevatorMotor.set(0);
+    //                 r_elevatorMotor.set(0);
+    //             });
+    // }
 
     /** Zero the arm encoder when the user button is pressed on the roboRIO */
     private void zeroOnUserButton() {
