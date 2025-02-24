@@ -211,7 +211,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-
+    SmartDashboard.putNumber("Gyro Angle", getGyroYaw());
     poseEstimator.update(
         Rotation2d.fromDegrees(getGyroYaw()),
         swerveDrive.getModulePositions());
