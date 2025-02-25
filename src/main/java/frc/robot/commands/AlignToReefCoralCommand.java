@@ -5,7 +5,7 @@
 package frc.robot.commands;
 
 import frc.robot.subsystems.SwerveSubsystem;
-import frc.robot.subsystems.VisionSubsystem;
+import frc.robot.subsystems.CoralToReefVisionSubsystem;
 import frc.robot.Constants.VisionConstants;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -14,9 +14,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import java.util.Optional;
 
 /** Aligns the robot to an AprilTag while the button is held */
-public class AlignToReefCommand extends Command {
+public class AlignToReefCoralCommand extends Command {
     private final SwerveSubsystem swerve;
-    private final VisionSubsystem vision;
+    private final CoralToReefVisionSubsystem vision;
     private final boolean alignLeft;
     private final double targetDistanceMeters;
 
@@ -35,7 +35,7 @@ public class AlignToReefCommand extends Command {
      * @param targetDistanceMeters Defines how close you want the robot to target
      * 
      */
-    public AlignToReefCommand(SwerveSubsystem swerve, VisionSubsystem vision, boolean alignLeft,
+    public AlignToReefCoralCommand(SwerveSubsystem swerve, CoralToReefVisionSubsystem vision, boolean alignLeft,
             double targetDistanceMeters) {
         this.swerve = swerve;
         this.vision = vision;

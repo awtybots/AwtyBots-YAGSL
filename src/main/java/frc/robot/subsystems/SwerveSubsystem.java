@@ -171,13 +171,13 @@ public class SwerveSubsystem extends SubsystemBase {
     return new PathPlannerAuto(TestAuto);
   }
 
+  public void drive(ChassisSpeeds velocity) {
+    swerveDrive.drive(velocity);
+  }
+
   public void setInitialHeading(double angleDegrees) {
     gyro.setAngleAdjustment(angleDegrees);
     swerveDrive.resetOdometry(new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(angleDegrees)));
-  }
-
-  public void drive(ChassisSpeeds velocity) {
-    swerveDrive.drive(velocity);
   }
 
   /**
@@ -197,10 +197,6 @@ public class SwerveSubsystem extends SubsystemBase {
     return this.runOnce(() -> gyro.reset());
   }
 
-  public double getGyroYaw() {
-    return gyro.getRotation2d().getDegrees();
-  }
-
   public void zeroGyro() {
     swerveDrive.zeroGyro();
   }
@@ -209,9 +205,13 @@ public class SwerveSubsystem extends SubsystemBase {
     poseEstimator.addVisionMeasurement(visionPose, timestamp);
   }
 
+  public double getGyroYaw() {
+    return gyro.getYaw();
+  }
+
   @Override
   public void periodic() {
-
+    SmartDashboard.putNumber("Gyro Angle", getGyroYaw());
     poseEstimator.update(
         Rotation2d.fromDegrees(getGyroYaw()),
         swerveDrive.getModulePositions());

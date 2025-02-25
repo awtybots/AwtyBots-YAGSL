@@ -178,7 +178,7 @@ public final class Constants {
 
     public static final class Algae {
       // Camera's
-      public static final String limelightAprilTagCamera = "Arducam_OV9782_USB_Camera";
+      public static final String orangePIAlgaeCamera = "Arducam_OV9782_USB_Camera";
 
       public static final double targetDistanceMeters = 1.0; // Default: 1 meter away from target
       public static final double distance_tolerance = 0.05; // 5cm
@@ -193,7 +193,7 @@ public final class Constants {
 
     public static final class FeederStation {
       // Camera's
-      public static final String limelightAprilTagCamera = "Arducam_OV9782_USB_Camera";
+      public static final String FeederSationLimelightAprilTagCamera = "Arducam_OV9782_USB_Camera";
 
       public static final double targetDistanceMeters = 1.0; // Default: 1 meter away from target
       public static final double distance_tolerance = 0.05; // 5cm
