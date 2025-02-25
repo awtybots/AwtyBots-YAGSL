@@ -133,19 +133,15 @@ public class RobotContainer {
     // enable slow mode
     m_driverController
         .rightTrigger(OIConstants.kTriggerThreshold)
-        .onTrue(
-            Commands.runOnce(() -> {
-              driveAngulareVelocity.scaleTranslation(0.2); // Scale translation speed
-              driveAngulareVelocity.withControllerRotationAxis(() -> m_driverController.getRightX() * 0.2); // Scale
-                                                                                                            // rotation
-
+        .whileTrue(
+            Commands.run(() -> {
+              driveAngulareVelocity.scaleTranslation(0.2)
+                  .withControllerRotationAxis(() -> m_driverController.getRightX() * 0.2); // Ensure rotation applies
             }))
         .onFalse(
-            Commands.runOnce(() -> {
-              driveAngulareVelocity.scaleTranslation(1.0); // Restore normal translation speed
-              driveAngulareVelocity.withControllerRotationAxis(m_driverController::getRightX); // Restore normal
-                                                                                               // rotation speed
-
+            Commands.run(() -> {
+              driveAngulareVelocity.scaleTranslation(1.0)
+                  .withControllerRotationAxis(m_driverController::getRightX); // Restore normal rotation
             }));
 
     // m_driverController.a().onTrue(Commands.runOnce(drivebase::zeroGyro));
