@@ -16,7 +16,7 @@ import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 
-public class VisionSubsystem extends SubsystemBase {
+public class CoralToReefVisionSubsystem extends SubsystemBase {
     private final PhotonCamera camera = new PhotonCamera(Constants.VisionConstants.Coral.limelightAprilTagCamera);
     private SwerveSubsystem swerve;
 
@@ -24,7 +24,7 @@ public class VisionSubsystem extends SubsystemBase {
     private final Transform3d robotToCamera; // Camera position relative to the robot
     private final PhotonPoseEstimator photonPoseEstimator; // Vision-based pose estimator
 
-    public VisionSubsystem(SwerveSubsystem swerve) {
+    public CoralToReefVisionSubsystem(SwerveSubsystem swerve) {
         this.swerve = swerve;
 
         // Load the AprilTag field layout (2025 game)
@@ -53,16 +53,25 @@ public class VisionSubsystem extends SubsystemBase {
     }
 
     public void logAprilTagData() {
-        getBestTarget().ifPresentOrElse(target -> {
+        PhotonPipelineResult result = camera.getLatestResult(); // Always get latest
+
+        // System.out.println("Logging latest AprilTag data...");
+
+        if (result.hasTargets()) {
+            PhotonTrackedTarget target = result.getBestTarget();
+
             SmartDashboard.putBoolean("AprilTag Found", true);
             SmartDashboard.putNumber("AprilTag ID", target.getFiducialId());
             SmartDashboard.putNumber("AprilTag Yaw", target.getYaw());
             SmartDashboard.putNumber("AprilTag Pitch", target.getPitch());
             SmartDashboard.putNumber("AprilTag Skew", target.getSkew());
             SmartDashboard.putNumber("AprilTag Area", target.getArea());
-        }, () -> {
+
+            // System.out.println("AprilTag Detected - ID: " + target.getFiducialId());
+        } else {
             SmartDashboard.putBoolean("AprilTag Found", false);
-        });
+        }
+
     }
 
     public Optional<double[]> getAlignmentErrors(boolean alignLeft) {

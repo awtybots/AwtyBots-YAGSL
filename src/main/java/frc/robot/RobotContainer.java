@@ -5,13 +5,13 @@
 package frc.robot;
 
 import frc.robot.Constants.OIConstants;
-import frc.robot.commands.AlignToReefCommand;
+import frc.robot.commands.AlignToReefCoralCommand;
 import frc.robot.commands.Autos;
 import frc.robot.subsystems.CoralSubsystem;
 import frc.robot.subsystems.CoralSubsystem.Setpoint;
 import frc.robot.subsystems.FunnelIntake;
 import frc.robot.subsystems.SwerveSubsystem;
-import frc.robot.subsystems.VisionSubsystem;
+import frc.robot.subsystems.CoralToReefVisionSubsystem;
 import swervelib.SwerveInputStream;
 
 import java.io.File;
@@ -40,7 +40,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final SwerveSubsystem drivebase = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(), "swerve"));
-  private final VisionSubsystem visionSubsystem = new VisionSubsystem(drivebase);
+  private final CoralToReefVisionSubsystem visionSubsystem = new CoralToReefVisionSubsystem(drivebase);
   private final CoralSubsystem m_coralSubsystem = new CoralSubsystem();
   private final FunnelIntake m_funnelIntakeSubsystem = new FunnelIntake();
   private final SendableChooser<Command> autoChooser;
@@ -150,16 +150,17 @@ public class RobotContainer {
     // vision buttons
     // align left levels 1-3
     m_driverController.a().whileTrue(
-        new AlignToReefCommand(drivebase, visionSubsystem, true, Constants.VisionConstants.Coral.targetDistanceMeters));
+        new AlignToReefCoralCommand(drivebase, visionSubsystem, true,
+            Constants.VisionConstants.Coral.targetDistanceMeters));
     // align right levels 1-3
-    m_driverController.b().whileTrue(new AlignToReefCommand(drivebase, visionSubsystem, false,
+    m_driverController.b().whileTrue(new AlignToReefCoralCommand(drivebase, visionSubsystem, false,
         Constants.VisionConstants.Coral.targetDistanceMeters));
     // align left levels 4
     m_driverController.x().whileTrue(
-        new AlignToReefCommand(drivebase, visionSubsystem, true,
+        new AlignToReefCoralCommand(drivebase, visionSubsystem, true,
             Constants.VisionConstants.Coral.targetDistanceMetersLevel4));
     // align right levels 4
-    m_driverController.y().whileTrue(new AlignToReefCommand(drivebase, visionSubsystem, false,
+    m_driverController.y().whileTrue(new AlignToReefCoralCommand(drivebase, visionSubsystem, false,
         Constants.VisionConstants.Coral.targetDistanceMetersLevel4));
 
     //////////////////////////////////////////////
