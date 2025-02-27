@@ -9,6 +9,7 @@ import frc.robot.subsystems.CoralToReefVisionSubsystem;
 import frc.robot.Constants.VisionConstants;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 
 import java.util.Optional;
@@ -73,6 +74,11 @@ public class AlignToReefCoralCommand extends Command {
             lastKnownLateralOffset = lateralOffset;
             hasValidTarget = true; // ✅ We now have a valid target!
 
+            SmartDashboard.putBoolean("Vision/Has Valid Target", true);
+            SmartDashboard.putNumber("Vision/Target Yaw", targetYaw);
+            SmartDashboard.putNumber("Vision/Distance Error", distanceError);
+            SmartDashboard.putNumber("Vision/Lateral Offset", lateralOffset);
+
             // Use **latest** camera values for alignment
             useVisionForAlignment(targetYaw, distanceError, lateralOffset, currentPose);
 
@@ -87,6 +93,11 @@ public class AlignToReefCoralCommand extends Command {
             swerve.drive(new ChassisSpeeds(0, 0, 0));
             hasValidTarget = false;
         }
+
+        // Log current movement
+        SmartDashboard.putNumber("Robot/Current Forward Speed", lastKnownDistanceError * 0.1);
+        SmartDashboard.putNumber("Robot/Current Strafe Speed", lastKnownLateralOffset * 0.1);
+        SmartDashboard.putNumber("Robot/Current Rotation Speed", lastKnownYaw * 0.01);
     }
 
     /** Called once the command ends or is interrupted. */
