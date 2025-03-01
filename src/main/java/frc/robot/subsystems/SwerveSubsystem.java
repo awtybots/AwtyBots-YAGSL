@@ -25,6 +25,7 @@ import com.studica.frc.AHRS.NavXComType;
 import java.io.File;
 import java.util.function.Supplier;
 
+import com.ctre.phoenix6.swerve.SwerveModule;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.commands.PathfindingCommand;
@@ -42,7 +43,7 @@ public class SwerveSubsystem extends SubsystemBase {
   File directory = new File(Filesystem.getDeployDirectory(), "swerve");
   private final SwerveDrive swerveDrive;
   private final SwerveDrivePoseEstimator poseEstimator;
-
+  private final double headingBias = -2; // set this if there is alot of drift on pathplanner
   public SwerveSubsystem(File directory) {
     try {
       swerveDrive = new SwerveParser(directory)
@@ -94,7 +95,6 @@ public class SwerveSubsystem extends SubsystemBase {
    * @param initialHolonomicPose The pose to set the odometry to
    */
   public void resetOdometry(Pose2d initialHolonomicPose) {
-    double headingBias = -5;
 
     double fieldOrientedOffset = 180.0;
 
@@ -135,13 +135,21 @@ public class SwerveSubsystem extends SubsystemBase {
           swerveDrive::getRobotVelocity,
           // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
           (speedsRobotRelative, moduleFeedForwards) -> {
+            double flippedOmega = -speedsRobotRelative.omegaRadiansPerSecond;
+
+            ChassisSpeeds correctedSpeeds = new ChassisSpeeds(
+              speedsRobotRelative.vxMetersPerSecond,
+              speedsRobotRelative.vyMetersPerSecond,
+              flippedOmega
+            );
+
             if (enableFeedforward) {
               swerveDrive.drive(
-                  speedsRobotRelative,
-                  swerveDrive.kinematics.toSwerveModuleStates(speedsRobotRelative),
+                  correctedSpeeds,
+                  swerveDrive.kinematics.toSwerveModuleStates(correctedSpeeds),
                   moduleFeedForwards.linearForces());
             } else {
-              swerveDrive.setChassisSpeeds(speedsRobotRelative);
+              swerveDrive.setChassisSpeeds(correctedSpeeds);
             }
           },
           // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also
@@ -151,7 +159,7 @@ public class SwerveSubsystem extends SubsystemBase {
               // drive trains
               new PIDConstants(1.2, 0.0, 0.0),
               // Translation PID constants
-              new PIDConstants(0.1, 0.0, 0.0)
+              new PIDConstants(1, 0.0, 0.0)
           // Rotation PID constants
           ),
           config,
@@ -221,7 +229,6 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   public Pose2d getPose() {
-    double headingBias = -5.0;
     Pose2d rawPose = swerveDrive.getPose();
     Pose2d baisedPose = new Pose2d(
       rawPose.getTranslation(),
