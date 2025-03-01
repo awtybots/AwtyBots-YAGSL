@@ -159,7 +159,7 @@ public class SwerveSubsystem extends SubsystemBase {
               // drive trains
               new PIDConstants(1.2, 0.0, 0.0),
               // Translation PID constants
-              new PIDConstants(1, 0.0, 0.0)
+              new PIDConstants(0.9, 0.0, 0.0)
           // Rotation PID constants
           ),
           config,
