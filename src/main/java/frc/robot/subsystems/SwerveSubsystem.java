@@ -5,7 +5,10 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Meter;
+import static edu.wpi.first.units.Units.Rotation;
 
+import edu.wpi.first.math.estimator.PoseEstimator;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -38,6 +41,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
   File directory = new File(Filesystem.getDeployDirectory(), "swerve");
   private final SwerveDrive swerveDrive;
+  private final SwerveDrivePoseEstimator poseEstimator;
 
   public SwerveSubsystem(File directory) {
     try {
@@ -55,6 +59,12 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     setupPathPlanner();
+    poseEstimator = new SwerveDrivePoseEstimator(
+      getKinematics(), 
+      Rotation2d.fromDegrees(getGyroYaw()), 
+      swerveDrive.getModulePositions(), 
+      new Pose2d(0.0,0.0, new Rotation2d())
+      );
   }
 
   public SwerveDrive getSwerveDrive() {
@@ -84,7 +94,24 @@ public class SwerveSubsystem extends SubsystemBase {
    * @param initialHolonomicPose The pose to set the odometry to
    */
   public void resetOdometry(Pose2d initialHolonomicPose) {
-    swerveDrive.resetOdometry(initialHolonomicPose);
+    double headingBias = -5;
+
+    double fieldOrientedOffset = 180.0;
+
+    Rotation2d correctionHeading = Rotation2d.fromDegrees(getGyroYaw() - fieldOrientedOffset + headingBias);
+
+    Pose2d biasedPose = new Pose2d(
+      initialHolonomicPose.getTranslation(),
+      correctionHeading
+    );
+
+    swerveDrive.resetOdometry(biasedPose);
+    poseEstimator.resetPosition(
+      correctionHeading,
+      swerveDrive.getModulePositions(),
+      biasedPose
+    );
+    System.out.println("Odometry Reset to: " + biasedPose);
   }
 
   public void setupPathPlanner() {
@@ -97,7 +124,11 @@ public class SwerveSubsystem extends SubsystemBase {
       final boolean enableFeedforward = true;
       // Configure AutoBuilder last
       AutoBuilder.configure(
-          swerveDrive::getPose,
+          () -> {
+            Pose2d currentPose = getPose();
+            System.out.println("Using Pose in AutoBuilder: " + currentPose);
+            return currentPose;
+          },
           // Robot pose supplier
           swerveDrive::resetOdometry,
           // Method to reset odometry (will be called if your auto has a starting pose)
@@ -118,9 +149,9 @@ public class SwerveSubsystem extends SubsystemBase {
           new PPHolonomicDriveController(
               // PPHolonomicController is the built in path following controller for holonomic
               // drive trains
-              new PIDConstants(1, 0.0, 0.0),
+              new PIDConstants(1.2, 0.0, 0.0),
               // Translation PID constants
-              new PIDConstants(1, 0.0, 0.0)
+              new PIDConstants(0.1, 0.0, 0.0)
           // Rotation PID constants
           ),
           config,
@@ -172,6 +203,14 @@ public class SwerveSubsystem extends SubsystemBase {
     swerveDrive.resetOdometry(new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(angleDegrees)));
   }
 
+  public void stop() {
+    drive(new ChassisSpeeds(0,0,0));
+
+    swerveDrive.setModuleStates(
+      swerveDrive.kinematics.toSwerveModuleStates(new ChassisSpeeds(0,0,0)), true
+      );
+  }
+
   /**
    * Get the swerve drive kinematics object.
    *
@@ -182,11 +221,23 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   public Pose2d getPose() {
-    return swerveDrive.getPose();
+    double headingBias = -5.0;
+    Pose2d rawPose = swerveDrive.getPose();
+    Pose2d baisedPose = new Pose2d(
+      rawPose.getTranslation(),
+      rawPose.getRotation().plus(Rotation2d.fromDegrees(headingBias))
+    );
+    //return swerveDrive.getPose();
+    return baisedPose;
   }
 
   public Command zeroHeadingCommand() {
     return this.runOnce(() -> gyro.reset());
+  }
+
+  public void zeroNavxGyroAuto() {
+    gyro.reset();
+    gyro.zeroYaw();
   }
 
   public void zeroGyro() {
@@ -197,9 +248,29 @@ public class SwerveSubsystem extends SubsystemBase {
     return gyro.getYaw();
   }
 
+  public double getGyroAngle() {
+    return gyro.getAngle();
+  }
+
   @Override
   public void periodic() {
-    SmartDashboard.putNumber("Gyro Angle", getGyroYaw());
+    poseEstimator.update(
+      Rotation2d.fromDegrees(getGyroYaw()),
+      swerveDrive.getModulePositions() 
+      );
+
+    SmartDashboard.putNumber("Gyro Yaw", getGyroYaw());
+    SmartDashboard.putNumber("Gyro Angle", getGyroAngle());
+
+    Pose2d estimatedPose = poseEstimator.getEstimatedPosition();
+    SmartDashboard.putNumber("Odometry X", estimatedPose.getX());
+    SmartDashboard.putNumber("Odometry Y", estimatedPose.getY());
+    SmartDashboard.putNumber("Odometry Heading", estimatedPose.getRotation().getDegrees());
+    SmartDashboard.putString("Odometry Pose: ", estimatedPose.toString());
+    SmartDashboard.putString("PathPlanner Pose ", getPose().toString());
+
+
+
     var positions = swerveDrive.getModulePositions();
     for (int i = 0; i < 4; i++) {
       SmartDashboard.putNumber("module " + i, positions[i].angle.getDegrees());
