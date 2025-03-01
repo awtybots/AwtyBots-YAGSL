@@ -9,12 +9,6 @@
           "data": {
             "pathName": "Straight"
           }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Stop"
-          }
         }
       ]
     }
