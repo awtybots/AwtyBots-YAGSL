@@ -6,8 +6,9 @@ package frc.robot.commands;
 
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.CoralToReefVisionSubsystem;
+import frc.robot.Constants;
 import frc.robot.Constants.VisionConstants;
-import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -21,9 +22,11 @@ public class AlignToReefCoralCommand extends Command {
     private final boolean alignLeft;
     private final double targetDistanceMeters;
 
-    private double lastKnownYaw = 0.0;
-    private double lastKnownDistanceError = 0.0;
-    private double lastKnownLateralOffset = 0.0;
+    // PID Controllers
+    private final PIDController distancePID;
+    private final PIDController strafePID;
+    private final PIDController rotationPID;
+
     private boolean hasValidTarget = false;
 
     /**
@@ -40,124 +43,121 @@ public class AlignToReefCoralCommand extends Command {
             double targetDistanceMeters) {
         this.swerve = swerve;
         this.vision = vision;
-        this.alignLeft = alignLeft; // Store alignment preference
+        this.alignLeft = alignLeft;
         this.targetDistanceMeters = targetDistanceMeters;
         addRequirements(swerve, vision);
+
+        // ✅ Initialize PID Constants on SmartDashboard
+        SmartDashboard.putNumber("PID/Distance kP", Constants.VisionConstants.Coral.DistancekP);
+        SmartDashboard.putNumber("PID/Distance kI", Constants.VisionConstants.Coral.DistancekI);
+        SmartDashboard.putNumber("PID/Distance kD", Constants.VisionConstants.Coral.DistancekD);
+
+        SmartDashboard.putNumber("PID/Strafe kP", Constants.VisionConstants.Coral.StrafekP);
+        SmartDashboard.putNumber("PID/Strafe kI", Constants.VisionConstants.Coral.StrafekI);
+        SmartDashboard.putNumber("PID/Strafe kD", Constants.VisionConstants.Coral.StrafekD);
+
+        SmartDashboard.putNumber("PID/Rotation kP", Constants.VisionConstants.Coral.RotationkP);
+        SmartDashboard.putNumber("PID/Rotation kI", Constants.VisionConstants.Coral.RotationkI);
+        SmartDashboard.putNumber("PID/Rotation kD", Constants.VisionConstants.Coral.RotationkD);
+
+        // ✅ Initialize PID Controllers (will be updated dynamically in execute())
+        distancePID = new PIDController(Constants.VisionConstants.Coral.DistancekP,
+                Constants.VisionConstants.Coral.DistancekI, Constants.VisionConstants.Coral.DistancekD);
+        strafePID = new PIDController(Constants.VisionConstants.Coral.StrafekP,
+                Constants.VisionConstants.Coral.StrafekI, Constants.VisionConstants.Coral.StrafekD);
+        rotationPID = new PIDController(Constants.VisionConstants.Coral.RotationkP,
+                Constants.VisionConstants.Coral.RotationkI, Constants.VisionConstants.Coral.RotationkD);
+
+        // ✅ Set Tolerances
+        distancePID.setTolerance(Constants.VisionConstants.Coral.distance_tolerance);
+        strafePID.setTolerance(Constants.VisionConstants.Coral.strafe_tolerance);
+        rotationPID.setTolerance(Constants.VisionConstants.Coral.rotation_tolerance);
+
+        distancePID.setSetpoint(targetDistanceMeters);
+        strafePID.setSetpoint(0.0);
+        rotationPID.setSetpoint(0.0);
     }
 
-    /** Called when the command is initially scheduled. */
     @Override
     public void initialize() {
         System.out.println("AlignToReefCommand started - Aligning to " + (alignLeft ? "Left" : "Right")
                 + " Reef. Target Distance: " + targetDistanceMeters + " meters");
     }
 
-    /** Called every time the scheduler runs while the command is scheduled. */
     @Override
     public void execute() {
+        // ✅ Update PID Constants from SmartDashboard
+        distancePID.setP(SmartDashboard.getNumber("PID/Distance kP", distancePID.getP()));
+        distancePID.setI(SmartDashboard.getNumber("PID/Distance kI", distancePID.getI()));
+        distancePID.setD(SmartDashboard.getNumber("PID/Distance kD", distancePID.getD()));
+
+        strafePID.setP(SmartDashboard.getNumber("PID/Strafe kP", strafePID.getP()));
+        strafePID.setI(SmartDashboard.getNumber("PID/Strafe kI", strafePID.getI()));
+        strafePID.setD(SmartDashboard.getNumber("PID/Strafe kD", strafePID.getD()));
+
+        rotationPID.setP(SmartDashboard.getNumber("PID/Rotation kP", rotationPID.getP()));
+        rotationPID.setI(SmartDashboard.getNumber("PID/Rotation kI", rotationPID.getI()));
+        rotationPID.setD(SmartDashboard.getNumber("PID/Rotation kD", rotationPID.getD()));
+
         Optional<double[]> errors = vision.getAlignmentErrors(alignLeft);
-        Pose2d currentPose = swerve.getPose(); // Get robot's estimated pose
 
         if (errors.isPresent()) {
-            // ✅ We have a valid target!
+            hasValidTarget = true;
             double[] errorArray = errors.get();
-            double targetYaw = errorArray[0]; // Yaw error from AprilTag
-            double distanceError = errorArray[1]; // Distance to target in meters
+            double targetYaw = errorArray[0];
+            double distanceError = errorArray[1];
 
-            // Select the appropriate lateral offset based on the chosen reef bar
-            double lateralOffset = alignLeft ? VisionConstants.Coral.leftOffsetMeters
-                    : VisionConstants.Coral.rightOffsetMeters;
+            // ✅ Dynamically select left/right offset
+            double lateralOffset = alignLeft ? Constants.VisionConstants.Coral.leftOffsetMeters
+                    : Constants.VisionConstants.Coral.rightOffsetMeters;
 
-            // Store last known valid values (so we can use them later if we lose the tag)
-            lastKnownYaw = targetYaw;
-            lastKnownDistanceError = distanceError;
-            lastKnownLateralOffset = lateralOffset;
-            hasValidTarget = true; // ✅ We now have a valid target!
+            // ✅ Compute PID outputs
+            double forwardSpeed = distancePID.calculate(distanceError);
+            double strafeSpeed = strafePID.calculate(lateralOffset);
+            double rotationSpeed = rotationPID.calculate(targetYaw);
 
-            SmartDashboard.putBoolean("Vision/Has Valid Target", true);
-            SmartDashboard.putNumber("Vision/Target Yaw", targetYaw);
-            SmartDashboard.putNumber("Vision/Distance Error", distanceError);
-            SmartDashboard.putNumber("Vision/Lateral Offset", lateralOffset);
+            // ✅ Add a deadband to prevent jittering
+            if (Math.abs(forwardSpeed) < 0.02)
+                forwardSpeed = 0;
+            if (Math.abs(strafeSpeed) < 0.02)
+                strafeSpeed = 0;
+            if (Math.abs(rotationSpeed) < 0.02)
+                rotationSpeed = 0;
 
-            // Use **latest** camera values for alignment
-            useVisionForAlignment(targetYaw, distanceError, lateralOffset, currentPose);
+            // ✅ Apply speeds using PID
+            swerve.drive(new ChassisSpeeds(forwardSpeed, strafeSpeed, rotationSpeed));
+
+            // ✅ Send debug info to SmartDashboard
+            SmartDashboard.putBoolean("Reef/Has Valid Target", true);
+            SmartDashboard.putNumber("Reef/Target Yaw", targetYaw);
+            SmartDashboard.putNumber("Reef/Distance Error", distanceError);
+            SmartDashboard.putNumber("Reef/Lateral Offset", lateralOffset);
+            SmartDashboard.putNumber("Reef/PID-Forward Speed", forwardSpeed);
+            SmartDashboard.putNumber("Reef/PID-Strafe Speed", strafeSpeed);
+            SmartDashboard.putNumber("Reef/PID-Rotation Speed", rotationSpeed);
 
         } else if (hasValidTarget) {
-            // No new AprilTag, but we have last known values → Use last valid movement
-            // values
-            swerve.drive(
-                    new ChassisSpeeds(lastKnownDistanceError * 0.1, lastKnownLateralOffset * 0.1, lastKnownYaw * 0.01));
-
+            // Maintain last valid movement (small corrections)
+            swerve.drive(new ChassisSpeeds(
+                    distancePID.calculate(0),
+                    strafePID.calculate(0),
+                    rotationPID.calculate(0)));
         } else {
-            // No valid target, no previous values → Stop the robot
+            // No valid target → Stop the robot
             swerve.drive(new ChassisSpeeds(0, 0, 0));
             hasValidTarget = false;
         }
-
-        // Log current movement
-        SmartDashboard.putNumber("Robot/Current Forward Speed", lastKnownDistanceError * 0.1);
-        SmartDashboard.putNumber("Robot/Current Strafe Speed", lastKnownLateralOffset * 0.1);
-        SmartDashboard.putNumber("Robot/Current Rotation Speed", lastKnownYaw * 0.01);
     }
 
-    /** Called once the command ends or is interrupted. */
     @Override
     public void end(boolean interrupted) {
-        // Reset stored AprilTag data
         hasValidTarget = false;
-        lastKnownYaw = 0.0;
-        lastKnownDistanceError = 0.0;
-        lastKnownLateralOffset = 0.0;
-
-        // Stop the robot
         swerve.drive(new ChassisSpeeds(0, 0, 0));
-
-        System.out.println("AlignToAprilTagCommand ended - Resetting data");
+        System.out.println("AlignToReefCommand ended.");
     }
 
-    /**
-     * Returns true when the command should end (never ends while button is held).
-     */
     @Override
     public boolean isFinished() {
-        return false;
+        return distancePID.atSetpoint() && strafePID.atSetpoint() && rotationPID.atSetpoint();
     }
-
-    private void useVisionForAlignment(double targetYaw, double distanceError, double lateralOffset,
-            Pose2d currentPose) {
-        // Get the current heading from the gyro
-        double currentGyroYaw = swerve.getGyroYaw();
-
-        // Compute the corrected yaw error using both the camera and gyro
-        double yawCorrection = targetYaw - currentGyroYaw;
-
-        // Pose-based correction (field-centric)
-        double poseErrorX = targetDistanceMeters - currentPose.getX(); // ✅ Now used!
-        double poseErrorY = lateralOffset;
-
-        // Apply rotation correction using gyro + camera yaw
-        double rotationSpeed = (Math.abs(yawCorrection) > VisionConstants.Coral.maxYawError)
-                ? -yawCorrection * VisionConstants.Coral.VISION_TURN_kP
-                : 0;
-
-        // ✅ Now using poseErrorX for stopping at the target distance!
-        double forwardSpeed = Math.abs(poseErrorX) > VisionConstants.Coral.distance_tolerance
-                ? poseErrorX * VisionConstants.Coral.VISION_DRIVE_kP
-                : 0; // Stops forward/backward movement when close enough
-
-        // Move left/right based on offsets & pose error
-        double strafeSpeed = lateralOffset * 0.5 + poseErrorY * 0.2; // Fine-tune strafe speed
-
-        // Convert to ChassisSpeeds (correct format for swerve)
-        ChassisSpeeds speeds = new ChassisSpeeds(forwardSpeed, strafeSpeed, rotationSpeed);
-
-        // Apply calculated movement
-        swerve.drive(speeds);
-    }
-
-    // private void useGyroForAlignment() {
-    // double holdRotation = -swerve.getGyroYaw() * 0.01; // Small correction to
-    // hold steady
-    // swerve.drive(new ChassisSpeeds(0, 0, holdRotation));
-    // }
 }

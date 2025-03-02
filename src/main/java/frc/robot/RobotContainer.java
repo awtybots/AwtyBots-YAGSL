@@ -148,12 +148,13 @@ public class RobotContainer {
 
                 // vision buttons
                 // align left levels 1-3
-                m_driverController.a().whileTrue(
+                m_driverController.leftBumper().whileTrue(
                                 new AlignToReefCoralCommand(drivebase, visionSubsystem, true,
                                                 Constants.VisionConstants.Coral.targetDistanceMeters));
                 // align right levels 1-3
-                m_driverController.b().whileTrue(new AlignToReefCoralCommand(drivebase, visionSubsystem, false,
-                                Constants.VisionConstants.Coral.targetDistanceMeters));
+                m_driverController.rightBumper()
+                                .whileTrue(new AlignToReefCoralCommand(drivebase, visionSubsystem, false,
+                                                Constants.VisionConstants.Coral.targetDistanceMeters));
                 // align left levels 4
                 m_driverController.x().whileTrue(
                                 new AlignToReefCoralCommand(drivebase, visionSubsystem, true,
