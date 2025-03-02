@@ -114,7 +114,8 @@ public class AlignToReefCoralCommand extends Command {
             // ✅ Compute PID outputs
             double forwardSpeed = distancePID.calculate(distanceError);
             double strafeSpeed = strafePID.calculate(lateralOffset);
-            double rotationSpeed = rotationPID.calculate(targetYaw);
+            double rotationSpeed = -rotationPID.calculate(targetYaw); // Reversing rotation power, I matched what I did
+                                                                      // in pathplanner.
 
             // ✅ Add a deadband to prevent jittering
             if (Math.abs(forwardSpeed) < 0.02)
