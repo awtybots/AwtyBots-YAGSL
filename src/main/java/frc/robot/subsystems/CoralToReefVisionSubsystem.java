@@ -41,17 +41,23 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
     }
 
     public Optional<PhotonTrackedTarget> getBestTarget() {
-        var results = camera.getAllUnreadResults();
-        if (results.isEmpty()) {
-            return Optional.empty(); // Prevents crash if no frames exist
+        PhotonPipelineResult result = camera.getLatestResult(); // Always get the latest frame
+
+        if (!result.hasTargets()) {
+            if (Constants.DebugMode) {
+                System.out.println("[Vision] No AprilTag targets found.");
+            }
+            return Optional.empty();
         }
 
-        // Use the latest result from the list
-        PhotonPipelineResult result = results.get(results.size() - 1);
-        if (result.hasTargets()) {
-            return Optional.of(result.getBestTarget());
+        PhotonTrackedTarget target = result.getBestTarget();
+        if (Constants.DebugMode) {
+            System.out.println("[Vision] Found AprilTag - ID: " + target.getFiducialId() +
+                    " | Yaw: " + target.getYaw() +
+                    " | Pitch: " + target.getPitch() +
+                    " | Area: " + target.getArea());
         }
-        return Optional.empty();
+        return Optional.of(target);
     }
 
     public void logAprilTagData() {
@@ -86,6 +92,12 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
                     0.17, // AprilTag height in meters (2025 field values)
                     Units.degreesToRadians(0), // Camera mount angle (adjusted correctly)
                     Units.degreesToRadians(target.getPitch()));
+
+            if (Constants.DebugMode) {
+                System.out.println("[Vision] Calculating Alignment Errors:");
+                System.out.println(" - Yaw Error: " + yawError);
+                System.out.println(" - Distance to Tag: " + targetRange);
+            }
 
             return new double[] { yawError, targetRange };
         });

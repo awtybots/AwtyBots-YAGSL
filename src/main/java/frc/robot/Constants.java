@@ -22,7 +22,7 @@ import java.lang.String;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-
+  public static final boolean DebugMode = false;
   public static final double maxSpeed = Units.feetToMeters(15.76);
 
   public static class OperatorConstants {
@@ -179,7 +179,7 @@ public final class Constants {
       public static final double RotationkP = 0.8;
       public static final double RotationkI = 0.0;
       public static final double RotationkD = 0.02;
-      public static final double targetDistanceMeters = 2.0; // Default: 2 meter away from target
+      public static final double targetDistanceMeters = 0.1; // Default: 0.1 meter away from target
       public static final double targetDistanceMetersLevel4 = 1.0; // Target distance level 4
       public static final double distance_tolerance = 0.02; // How off are we willing to tolerate
       public static final double strafe_tolerance = 0.05; // 5 cm tolerance

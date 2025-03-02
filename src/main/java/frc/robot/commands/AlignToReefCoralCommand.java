@@ -80,8 +80,9 @@ public class AlignToReefCoralCommand extends Command {
 
     @Override
     public void initialize() {
-        System.out.println("AlignToReefCommand started - Aligning to " + (alignLeft ? "Left" : "Right")
-                + " Reef. Target Distance: " + targetDistanceMeters + " meters");
+        System.out.println("[AlignToReefCoralCommand] STARTED");
+        System.out.println(" - Aligning to: " + (alignLeft ? "LEFT" : "RIGHT") + " Reef");
+        System.out.println(" - Target Distance: " + targetDistanceMeters + " meters");
     }
 
     @Override
@@ -131,6 +132,17 @@ public class AlignToReefCoralCommand extends Command {
             if (Math.abs(rotationSpeed) < 0.02)
                 rotationSpeed = 0;
 
+            // ✅ Print Debugging Info
+            if (Constants.DebugMode) {
+                System.out.println("[AlignToReefCoralCommand] Vision Target Found:");
+                System.out.println(" - Target Yaw: " + targetYaw);
+                System.out.println(" - Distance Error: " + distanceError);
+                System.out.println(" - Lateral Offset: " + lateralOffset);
+                System.out.println(" - PID Forward Speed: " + forwardSpeed);
+                System.out.println(" - PID Strafe Speed: " + strafeSpeed);
+                System.out.println(" - PID Rotation Speed: " + rotationSpeed);
+            }
+
             // ✅ Apply speeds using PID
             swerve.drive(new ChassisSpeeds(forwardSpeed, strafeSpeed, rotationSpeed));
 
@@ -145,12 +157,19 @@ public class AlignToReefCoralCommand extends Command {
 
         } else if (hasValidTarget) {
             // Maintain last valid movement (small corrections)
+            if (Constants.DebugMode) {
+                System.out.println("[AlignToReefCoralCommand] Lost Target - Holding Position");
+            }
+
             swerve.drive(new ChassisSpeeds(
                     distancePID.calculate(0),
                     strafePID.calculate(0),
                     rotationPID.calculate(0)));
         } else {
             // No valid target → Stop the robot
+            if (Constants.DebugMode) {
+                System.out.println("[AlignToReefCoralCommand] No Valid Target - Stopping Robot");
+            }
             swerve.drive(new ChassisSpeeds(0, 0, 0));
             hasValidTarget = false;
         }
