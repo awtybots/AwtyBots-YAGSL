@@ -67,11 +67,6 @@ public class SwerveSubsystem extends SubsystemBase {
         new Pose2d(0.0, 0.0, new Rotation2d()));
 
     setupPathPlanner();
-    poseEstimator = new SwerveDrivePoseEstimator(
-        getKinematics(),
-        Rotation2d.fromDegrees(getGyroYaw()),
-        swerveDrive.getModulePositions(),
-        new Pose2d(0.0, 0.0, new Rotation2d()));
   }
 
   public SwerveDrive getSwerveDrive() {
