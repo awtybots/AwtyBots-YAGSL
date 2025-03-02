@@ -83,7 +83,7 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
             // Compute Distance to Target
             double targetRange = PhotonUtils.calculateDistanceToTargetMeters(
                     0.5, // Camera height in meters (adjust for the robot)
-                    1.435, // AprilTag height in meters (2025 field values)
+                    0.17, // AprilTag height in meters (2025 field values)
                     Units.degreesToRadians(0), // Camera mount angle (adjusted correctly)
                     Units.degreesToRadians(target.getPitch()));
 
