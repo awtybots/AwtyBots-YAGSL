@@ -112,10 +112,17 @@ public class AlignToReefCoralCommand extends Command {
                     : Constants.VisionConstants.Coral.rightOffsetMeters;
 
             // ✅ Compute PID outputs
-            double forwardSpeed = distancePID.calculate(distanceError);
-            double strafeSpeed = strafePID.calculate(lateralOffset);
-            double rotationSpeed = -rotationPID.calculate(targetYaw); // Reversing rotation power, I matched what I did
-                                                                      // in pathplanner.
+            double forwardSpeed = Math.max(-Constants.VisionConstants.Coral.maxForwardSpeed,
+                    Math.min(Constants.VisionConstants.Coral.maxForwardSpeed, distancePID.calculate(distanceError)));
+            double strafeSpeed = Math.max(-Constants.VisionConstants.Coral.maxStrafeSpeed,
+                    Math.min(Constants.VisionConstants.Coral.maxStrafeSpeed, strafePID.calculate(lateralOffset)));
+            double rotationSpeed = Math.max(-Constants.VisionConstants.Coral.maxRotationSpeed,
+                    Math.min(Constants.VisionConstants.Coral.maxRotationSpeed, -rotationPID.calculate(targetYaw))); // Reversing
+                                                                                                                    // rotation
+                                                                                                                    // power,
+                                                                                                                    // I
+            // matched what I did
+            // in pathplanner.
 
             // ✅ Add a deadband to prevent jittering
             if (Math.abs(forwardSpeed) < 0.02)
