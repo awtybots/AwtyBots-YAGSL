@@ -105,8 +105,7 @@ public class AlignToReefCoralCommand extends Command {
             hasValidTarget = true;
             double[] errorArray = errors.get();
             double targetYaw = errorArray[0];
-            double distanceError = errorArray[1];
-
+            double distanceError = errorArray[1] - targetDistanceMeters;
             // ✅ Dynamically select left/right offset
             double lateralOffset = alignLeft ? Constants.VisionConstants.Coral.leftOffsetMeters
                     : Constants.VisionConstants.Coral.rightOffsetMeters;

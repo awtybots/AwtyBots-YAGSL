@@ -82,17 +82,10 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
             double targetRange = PhotonUtils.calculateDistanceToTargetMeters(
                     0.5, // Camera height in meters (adjust for the robot)
                     1.435, // AprilTag height in meters (2025 field values)
-                    Units.degreesToRadians(-30.0), // Camera mount angle (adjust based on actual)
+                    Units.degreesToRadians(0), // Camera mount angle (adjusted correctly)
                     Units.degreesToRadians(target.getPitch()));
 
-            // Distance error (difference from desired target distance)
-            double distanceError = targetRange - Constants.VisionConstants.Coral.targetDistanceMeters;
-
-            // Left/Right Offset Adjustment
-            double lateralOffset = alignLeft ? Constants.VisionConstants.Coral.leftOffsetMeters
-                    : Constants.VisionConstants.Coral.rightOffsetMeters;
-
-            return new double[] { yawError, distanceError, lateralOffset };
+            return new double[] { yawError, targetRange };
         });
     }
 
