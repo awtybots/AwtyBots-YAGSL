@@ -94,7 +94,7 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
             }
 
             double aprilTagHeight = tagPose.get().getZ(); // Get the AprilTag's height (Z-axis)
-            
+            double aprilTagY = tagPose.get().getY(); // Get the AprilTag's lateral offset (Y-axis)
 
             // Compute Distance to Target
             double targetRange = PhotonUtils.calculateDistanceToTargetMeters(
@@ -106,9 +106,12 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
             // Compute distance error
             double distanceError = targetRange - Constants.VisionConstants.Coral.targetDistanceMeters;
 
+            // Compute Y offset adjustment based on camera mount
+            double yOffsetError = aprilTagY - Constants.VisionConstants.Coral.cameraMountY;
+
             // Left/Right Offset Adjustment
-            double lateralOffset = alignLeft ? Constants.VisionConstants.Coral.leftOffsetMeters
-                    : Constants.VisionConstants.Coral.rightOffsetMeters;
+            double lateralOffset = (alignLeft ? Constants.VisionConstants.Coral.leftOffsetMeters
+                    : Constants.VisionConstants.Coral.rightOffsetMeters) + yOffsetError;
 
             return Optional.of(new double[] { target.getYaw(), distanceError, lateralOffset, tagID });
         });
