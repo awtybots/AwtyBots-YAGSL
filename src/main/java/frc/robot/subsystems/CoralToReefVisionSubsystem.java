@@ -94,8 +94,7 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
             }
 
             double aprilTagHeight = tagPose.get().getZ(); // Get the AprilTag's height (Z-axis)
-            System.out.println(
-                    "[Vision] Using dynamic AprilTag height for ID " + tagID + ": " + aprilTagHeight + " meters");
+            
 
             // Compute Distance to Target
             double targetRange = PhotonUtils.calculateDistanceToTargetMeters(

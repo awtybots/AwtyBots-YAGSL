@@ -135,11 +135,11 @@ public class AlignToReefCoralCommand extends Command {
                                     -rotationPID.calculate(targetYaw)))
                     : 0; // If within threshold, do not rotate
 
-            double slowZone = 0.3; // Start slowing down within 30cm
-            if (Math.abs(distanceError) < slowZone) {
+            // ✅ Adjust speeds based on proximity to target
+            if (Math.abs(distanceError) < Constants.VisionConstants.Coral.slowZone) {
                 forwardSpeed *= 0.5; // Reduce speed by 50% when close
             }
-            if (Math.abs(lateralOffset) < slowZone) {
+            if (Math.abs(lateralOffset) < Constants.VisionConstants.Coral.slowZone) {
                 strafeSpeed *= 0.5; // Reduce strafe speed when close
             }
             if (Math.abs(targetYaw) < 5.0) {
