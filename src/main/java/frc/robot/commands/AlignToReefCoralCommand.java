@@ -29,7 +29,7 @@ public class AlignToReefCoralCommand extends Command {
     private final PIDController rotationPID;
 
     private boolean hasValidTarget = false;
-    private static final Set<Integer> VALID_APRILTAG_IDS = Set.of(1,6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22);
+    private static final Set<Integer> VALID_APRILTAG_IDS = Set.of(1, 6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22);
 
     /**
      * Creates a new AlignToAprilTagCommand.
@@ -123,18 +123,28 @@ public class AlignToReefCoralCommand extends Command {
             // ✅ Compute PID outputs
             double forwardSpeed = Math.max(-Constants.VisionConstants.Coral.maxForwardSpeed,
                     Math.min(Constants.VisionConstants.Coral.maxForwardSpeed, distancePID.calculate(distanceError)));
-            double strafeSpeed = Math.max(-Constants.VisionConstants.Coral.maxStrafeSpeed,
-                    Math.min(Constants.VisionConstants.Coral.maxStrafeSpeed, strafePID.calculate(lateralOffset)));
-            double rotationSpeed = Math.max(-Constants.VisionConstants.Coral.maxRotationSpeed,
-                    Math.min(Constants.VisionConstants.Coral.maxRotationSpeed, -rotationPID.calculate(targetYaw)));
+            double strafeSpeed = Math.abs(lateralOffset) > Constants.VisionConstants.Coral.strafeThreshold
+                    ? Math.max(-Constants.VisionConstants.Coral.maxStrafeSpeed,
+                            Math.min(Constants.VisionConstants.Coral.maxStrafeSpeed,
+                                    strafePID.calculate(lateralOffset)))
+                    : 0; // If already centered, stop strafing
 
-            // ✅ Add a deadband to prevent jittering
-            if (Math.abs(forwardSpeed) < 0.02)
-                forwardSpeed = 0;
-            if (Math.abs(strafeSpeed) < 0.02)
-                strafeSpeed = 0;
-            if (Math.abs(rotationSpeed) < 0.02)
-                rotationSpeed = 0;
+            double rotationSpeed = Math.abs(targetYaw) > Constants.VisionConstants.Coral.yawThreshold
+                    ? Math.max(-Constants.VisionConstants.Coral.maxRotationSpeed,
+                            Math.min(Constants.VisionConstants.Coral.maxRotationSpeed,
+                                    -rotationPID.calculate(targetYaw)))
+                    : 0; // If within threshold, do not rotate
+
+            double slowZone = 0.3; // Start slowing down within 30cm
+            if (Math.abs(distanceError) < slowZone) {
+                forwardSpeed *= 0.5; // Reduce speed by 50% when close
+            }
+            if (Math.abs(lateralOffset) < slowZone) {
+                strafeSpeed *= 0.5; // Reduce strafe speed when close
+            }
+            if (Math.abs(targetYaw) < 5.0) {
+                rotationSpeed *= 0.5; // Reduce rotation power when nearly aligned
+            }
 
             // ✅ Debugging Info
             if (Constants.DebugMode) {

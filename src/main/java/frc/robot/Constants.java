@@ -183,7 +183,9 @@ public final class Constants {
       public static final double targetDistanceMetersLevel4 = 1.0; // Target distance level 4
       public static final double distance_tolerance = 0.02; // How off are we willing to tolerate
       public static final double strafe_tolerance = 0.05; // 5 cm tolerance
+      public static final double strafeThreshold = 0.1; // Don't strafe if within 10cm of lateral offset
       public static final double rotation_tolerance = 2.0; // 2 degrees for turning left and right
+      public static final double yawThreshold = 3.0; // Only rotate if yaw error is larger than 3 degrees
       public static final double leftOffsetMeters = 0.2; // Adjust how far left to align
       public static final double rightOffsetMeters = 0.2; // Adjust how far right to align
     }
