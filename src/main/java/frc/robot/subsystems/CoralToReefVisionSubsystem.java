@@ -13,6 +13,7 @@ import edu.wpi.first.math.util.Units;
 import java.util.Optional;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 
@@ -83,23 +84,34 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
     }
 
     public Optional<double[]> getAlignmentErrors(boolean alignLeft) {
-        return getBestTarget().map(target -> {
-            double yawError = target.getYaw(); // Angle error (rotation)
+        return getBestTarget().flatMap(target -> {
+            int tagID = target.getFiducialId(); // Get detected AprilTag ID
+            Optional<Pose3d> tagPose = fieldLayout.getTagPose(tagID); // Get tag pose from field layout
+
+            if (tagPose.isEmpty()) {
+                System.out.println("[Vision] AprilTag ID " + tagID + " has no known pose in the field layout!");
+                return Optional.empty();
+            }
+
+            double aprilTagHeight = tagPose.get().getZ(); // Get the AprilTag's height (Z-axis)
+            System.out.println(
+                    "[Vision] Using dynamic AprilTag height for ID " + tagID + ": " + aprilTagHeight + " meters");
 
             // Compute Distance to Target
             double targetRange = PhotonUtils.calculateDistanceToTargetMeters(
-                    0.5, // Camera height in meters (adjust for the robot)
-                    0.17, // AprilTag height in meters (2025 field values)
-                    Units.degreesToRadians(0), // Camera mount angle (adjusted correctly)
+                    Constants.VisionConstants.Coral.cameraMountZ, // Camera height in meters
+                    aprilTagHeight, // Dynamic AprilTag height
+                    Units.degreesToRadians(Constants.VisionConstants.Coral.cameraMountAngle), // Camera mount angle
                     Units.degreesToRadians(target.getPitch()));
 
-            if (Constants.DebugMode) {
-                System.out.println("[Vision] Calculating Alignment Errors:");
-                System.out.println(" - Yaw Error: " + yawError);
-                System.out.println(" - Distance to Tag: " + targetRange);
-            }
+            // Compute distance error
+            double distanceError = targetRange - Constants.VisionConstants.Coral.targetDistanceMeters;
 
-            return new double[] { yawError, targetRange };
+            // Left/Right Offset Adjustment
+            double lateralOffset = alignLeft ? Constants.VisionConstants.Coral.leftOffsetMeters
+                    : Constants.VisionConstants.Coral.rightOffsetMeters;
+
+            return Optional.of(new double[] { target.getYaw(), distanceError, lateralOffset, tagID });
         });
     }
 

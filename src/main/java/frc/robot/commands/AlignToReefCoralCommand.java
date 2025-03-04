@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 
 import java.util.Optional;
+import java.util.Set;
 
 /** Aligns the robot to an AprilTag while the button is held */
 public class AlignToReefCoralCommand extends Command {
@@ -28,6 +29,7 @@ public class AlignToReefCoralCommand extends Command {
     private final PIDController rotationPID;
 
     private boolean hasValidTarget = false;
+    private static final Set<Integer> VALID_APRILTAG_IDS = Set.of(6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22);
 
     /**
      * Creates a new AlignToAprilTagCommand.
@@ -100,6 +102,7 @@ public class AlignToReefCoralCommand extends Command {
         rotationPID.setI(SmartDashboard.getNumber("PID/Rotation kI", rotationPID.getI()));
         rotationPID.setD(SmartDashboard.getNumber("PID/Rotation kD", rotationPID.getD()));
 
+        // ✅ Get AprilTag alignment errors
         Optional<double[]> errors = vision.getAlignmentErrors(alignLeft);
 
         if (errors.isPresent()) {
@@ -107,9 +110,15 @@ public class AlignToReefCoralCommand extends Command {
             double[] errorArray = errors.get();
             double targetYaw = errorArray[0];
             double distanceError = errorArray[1] - targetDistanceMeters;
-            // ✅ Dynamically select left/right offset
-            double lateralOffset = alignLeft ? Constants.VisionConstants.Coral.leftOffsetMeters
-                    : Constants.VisionConstants.Coral.rightOffsetMeters;
+            double lateralOffset = errorArray[2];
+            int detectedTagId = (int) errorArray[3]; // ✅ Extract ID properly
+
+            // ✅ Ensure the detected AprilTag is in our valid list
+            if (!VALID_APRILTAG_IDS.contains(detectedTagId)) {
+                System.out.println("[AlignToReefCoralCommand] Invalid AprilTag ID: " + detectedTagId + " - Ignoring.");
+                swerve.drive(new ChassisSpeeds(0, 0, 0)); // Stop movement
+                return;
+            }
 
             // ✅ Compute PID outputs
             double forwardSpeed = Math.max(-Constants.VisionConstants.Coral.maxForwardSpeed,
@@ -117,12 +126,7 @@ public class AlignToReefCoralCommand extends Command {
             double strafeSpeed = Math.max(-Constants.VisionConstants.Coral.maxStrafeSpeed,
                     Math.min(Constants.VisionConstants.Coral.maxStrafeSpeed, strafePID.calculate(lateralOffset)));
             double rotationSpeed = Math.max(-Constants.VisionConstants.Coral.maxRotationSpeed,
-                    Math.min(Constants.VisionConstants.Coral.maxRotationSpeed, -rotationPID.calculate(targetYaw))); // Reversing
-                                                                                                                    // rotation
-                                                                                                                    // power,
-                                                                                                                    // I
-            // matched what I did
-            // in pathplanner.
+                    Math.min(Constants.VisionConstants.Coral.maxRotationSpeed, -rotationPID.calculate(targetYaw)));
 
             // ✅ Add a deadband to prevent jittering
             if (Math.abs(forwardSpeed) < 0.02)
@@ -132,9 +136,9 @@ public class AlignToReefCoralCommand extends Command {
             if (Math.abs(rotationSpeed) < 0.02)
                 rotationSpeed = 0;
 
-            // ✅ Print Debugging Info
+            // ✅ Debugging Info
             if (Constants.DebugMode) {
-                System.out.println("[AlignToReefCoralCommand] Vision Target Found:");
+                System.out.println("[AlignToReefCoralCommand] Aligning to AprilTag ID: " + detectedTagId);
                 System.out.println(" - Target Yaw: " + targetYaw);
                 System.out.println(" - Distance Error: " + distanceError);
                 System.out.println(" - Lateral Offset: " + lateralOffset);
@@ -146,7 +150,7 @@ public class AlignToReefCoralCommand extends Command {
             // ✅ Apply speeds using PID
             swerve.drive(new ChassisSpeeds(forwardSpeed, strafeSpeed, rotationSpeed));
 
-            // ✅ Send debug info to SmartDashboard
+            // ✅ Update SmartDashboard
             SmartDashboard.putBoolean("Reef/Has Valid Target", true);
             SmartDashboard.putNumber("Reef/Target Yaw", targetYaw);
             SmartDashboard.putNumber("Reef/Distance Error", distanceError);
