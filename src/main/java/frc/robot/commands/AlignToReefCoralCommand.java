@@ -29,7 +29,7 @@ public class AlignToReefCoralCommand extends Command {
     private final PIDController rotationPID;
 
     private boolean hasValidTarget = false;
-    private static final Set<Integer> VALID_APRILTAG_IDS = Set.of(6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22);
+    private static final Set<Integer> VALID_APRILTAG_IDS = Set.of(1,6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22);
 
     /**
      * Creates a new AlignToAprilTagCommand.
@@ -109,7 +109,7 @@ public class AlignToReefCoralCommand extends Command {
             hasValidTarget = true;
             double[] errorArray = errors.get();
             double targetYaw = errorArray[0];
-            double distanceError = errorArray[1] - targetDistanceMeters;
+            double distanceError = targetDistanceMeters - errorArray[1];
             double lateralOffset = errorArray[2];
             int detectedTagId = (int) errorArray[3]; // ✅ Extract ID properly
 

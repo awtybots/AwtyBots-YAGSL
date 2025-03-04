@@ -167,8 +167,8 @@ public final class Constants {
       public static final double cameraMountY = 0.2667; // How far left/right is the camera mounted from center
       public static final double cameraMountZ = 0.381; // This is in meters
       public static final double cameraMountAngle = 0.0; // This is in degrees
-      public static final double maxForwardSpeed = 2; // Max forward/backward speed (m/s)
-      public static final double maxStrafeSpeed = 3; // Max strafe speed (m/s)
+      public static final double maxForwardSpeed = 0.5; // Max forward/backward speed (m/s)
+      public static final double maxStrafeSpeed = 0.5; // Max strafe speed (m/s)
       public static final double maxRotationSpeed = 1; // Max rotation speed (rad/s)
       public static final double DistancekP = 1;
       public static final double DistancekI = 0.0;
@@ -184,8 +184,8 @@ public final class Constants {
       public static final double distance_tolerance = 0.02; // How off are we willing to tolerate
       public static final double strafe_tolerance = 0.05; // 5 cm tolerance
       public static final double rotation_tolerance = 2.0; // 2 degrees for turning left and right
-      public static final double leftOffsetMeters = 1.0; // Adjust how far left to align
-      public static final double rightOffsetMeters = 1.0; // Adjust how far right to align
+      public static final double leftOffsetMeters = 0.2; // Adjust how far left to align
+      public static final double rightOffsetMeters = 0.2; // Adjust how far right to align
     }
 
     public static final class FeederStation {

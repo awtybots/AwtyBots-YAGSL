@@ -34,7 +34,7 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
         // Define the camera's position relative to the robot (adjust values based on
         // actual setup)
         robotToCamera = new Transform3d(Constants.VisionConstants.Coral.cameraMountX,
-                Constants.VisionConstants.Coral.cameraMountY, Constants.VisionConstants.Coral.cameraMountHeight,
+                Constants.VisionConstants.Coral.cameraMountY, Constants.VisionConstants.Coral.cameraMountX,
                 new Rotation3d(0, 0, 0));
 
         // Initialize the pose estimator using the camera and tag layout
