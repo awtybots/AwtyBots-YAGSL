@@ -25,7 +25,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 /**
  * This class is where the bulk of the robot should be declared. Since
  * Command-based is a
@@ -52,7 +52,7 @@ public class RobotContainer {
    */
   public RobotContainer() {
     // Default to 0° (assuming forward should be field-oriented default)
-    double startingAngle = 180;
+    double startingAngle = 0;
 
     // var alliance = DriverStation.getAlliance();
 
@@ -82,6 +82,8 @@ public class RobotContainer {
     NamedCommands.registerCommand("ElevatorLiftL4", m_coralSubsystem.setSetpointCommand(Setpoint.L4));
     NamedCommands.registerCommand("AlgaeLow", m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeLow));
     NamedCommands.registerCommand("AlgaeHigh", m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeHigh));
+    NamedCommands.registerCommand("Gyroreset", new InstantCommand(() -> drivebase.setInitialHeading(180), drivebase)
+);
 
     autoChooser = AutoBuilder.buildAutoChooser();
 

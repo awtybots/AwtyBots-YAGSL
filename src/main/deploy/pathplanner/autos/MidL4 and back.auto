@@ -17,7 +17,7 @@
               {
                 "type": "wait",
                 "data": {
-                  "waitTime": 1.0
+                  "waitTime": 0.5
                 }
               },
               {
@@ -39,6 +39,24 @@
           "type": "named",
           "data": {
             "name": "outtake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "back from l4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ElevatorLiftL1"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "FeederStation"
           }
         },
         {
