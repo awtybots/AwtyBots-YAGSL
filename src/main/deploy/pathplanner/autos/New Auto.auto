@@ -5,19 +5,19 @@
     "data": {
       "commands": [
         {
-          "type": "parallel",
+          "type": "sequential",
           "data": {
             "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "New Path"
-                }
-              },
               {
                 "type": "named",
                 "data": {
                   "name": "ElevatorLiftL4"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "New Path"
                 }
               },
               {

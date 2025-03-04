@@ -162,10 +162,10 @@ public final class Constants {
   public static final class VisionConstants {
     public static final class Coral {
       // Camera's
-      public static final String limelightAprilTagCamera = "Arducam_OV9782_USB_Camera";
-      public static final double cameraMountX = 0.5; // How far forwards/backwards is the camera mounted from center
-      public static final double cameraMountY = 0.3; // How far left/right is the camera mounted from center
-      public static final double cameraMountHeight = 0.02; // This is in meters
+      public static final String limelightAprilTagCamera = "OV9281";
+      public static final double cameraMountX = 0.2667; // How far forwards/backwards is the camera mounted from center
+      public static final double cameraMountY = 0.2667; // How far left/right is the camera mounted from center
+      public static final double cameraMountHeight = 0.381; // This is in meters
       public static final double cameraMountAngle = 0.0; // This is in degrees
       public static final double maxForwardSpeed = 2; // Max forward/backward speed (m/s)
       public static final double maxStrafeSpeed = 3; // Max strafe speed (m/s)
@@ -179,7 +179,7 @@ public final class Constants {
       public static final double RotationkP = 0.8;
       public static final double RotationkI = 0.0;
       public static final double RotationkD = 0.02;
-      public static final double targetDistanceMeters = 0.1; // Default: 0.1 meter away from target
+      public static final double targetDistanceMeters = 1; // Default: 0.1 meter away from target
       public static final double targetDistanceMetersLevel4 = 1.0; // Target distance level 4
       public static final double distance_tolerance = 0.02; // How off are we willing to tolerate
       public static final double strafe_tolerance = 0.05; // 5 cm tolerance
