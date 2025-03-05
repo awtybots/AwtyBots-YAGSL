@@ -201,6 +201,7 @@ public class CoralSubsystem extends SubsystemBase {
                             wristCurrentTarget = WristSetpoints.L4;
                             elevatorCurrentTarget = ElevatorSetpoints.L4;
                             break;
+
                     }
                 });
     }
@@ -213,6 +214,10 @@ public class CoralSubsystem extends SubsystemBase {
     public Command reverseIntakeCommand() {
         return this.startEnd(
                 () -> this.setIntakePower(IntakeSetpoints.kReverse), () -> this.setIntakePower(0.0));
+    }
+    public Command stopIntakeCommand() {
+        return Commands.startEnd(
+                () -> this.setIntakePower(IntakeSetpoints.kStop), () -> this.setIntakePower(0.0));
     }
 
     public void periodic() {

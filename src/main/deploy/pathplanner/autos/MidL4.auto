@@ -42,6 +42,18 @@
           }
         },
         {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.7
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Sintake"
+          }
+        },
+        {
           "type": "named",
           "data": {
             "name": "Gyroreset"

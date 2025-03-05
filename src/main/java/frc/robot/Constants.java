@@ -124,6 +124,7 @@ public final class Constants {
   public static final class IntakeSetpoints{
     public static final double kForward = -.6;
     public static final double kReverse = .6;
+    public static final double kStop = 0.0;
     public static final double kHold = .25;
   }
 
