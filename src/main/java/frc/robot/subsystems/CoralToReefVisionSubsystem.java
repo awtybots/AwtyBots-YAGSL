@@ -64,9 +64,11 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
 
         return Optional.empty();
     }
+
     public void resetLastKnownTarget() {
         lastKnownTarget = null;
     }
+
     public void logAprilTagData() {
         PhotonPipelineResult result = camera.getLatestResult(); // Always get latest
 
@@ -101,21 +103,27 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
 
             double aprilTagHeight = tagPose.get().getZ(); // AprilTag's height (Z-axis)
             double aprilTagY = tagPose.get().getY(); // AprilTag's lateral offset (Y-axis)
+            double aprilTagX = tagPose.get().getX(); // AprilTag's forward offset (X-axis)
 
-            // Compute Distance to Target
+            // Compute distance to target, considering camera position
             double targetRange = PhotonUtils.calculateDistanceToTargetMeters(
                     Constants.VisionConstants.Coral.cameraMountZ, // Camera height in meters
                     aprilTagHeight, // Dynamic AprilTag height
                     Units.degreesToRadians(Constants.VisionConstants.Coral.cameraMountAngle), // Camera mount angle
                     Units.degreesToRadians(target.getPitch()));
 
-            // Compute distance error
-            double distanceError = targetRange - Constants.VisionConstants.Coral.targetDistanceMeters;
+            // **Offset Target Distance**
+            // Since the camera is front-right, adjust the stop distance
+            double adjustedTargetDistance = Constants.VisionConstants.Coral.targetDistanceMeters +
+                    Constants.VisionConstants.Coral.cameraMountX;
 
-            // Compute lateral offset adjustment based on camera mount
+            // Compute distance error with the adjusted stopping point
+            double distanceError = targetRange - adjustedTargetDistance;
+
+            // **Account for Lateral Offset**
             double yOffsetError = aprilTagY - Constants.VisionConstants.Coral.cameraMountY;
 
-            // Adjust alignment based on whether we are aligning left or right
+            // Adjust alignment based on left/right target selection
             double lateralOffset = (alignLeft ? Constants.VisionConstants.Coral.leftOffsetMeters
                     : Constants.VisionConstants.Coral.rightOffsetMeters) + yOffsetError;
 
