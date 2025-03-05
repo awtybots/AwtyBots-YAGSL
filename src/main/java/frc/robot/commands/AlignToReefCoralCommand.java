@@ -194,6 +194,7 @@ public class AlignToReefCoralCommand extends Command {
         hasValidTarget = false;
         swerve.drive(new ChassisSpeeds(0, 0, 0));
         System.out.println("AlignToReefCommand ended.");
+        vision.resetLastKnownTarget();
     }
 
     @Override

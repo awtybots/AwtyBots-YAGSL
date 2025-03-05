@@ -64,7 +64,9 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
 
         return Optional.empty();
     }
-
+    public void resetLastKnownTarget() {
+        lastKnownTarget = null;
+    }
     public void logAprilTagData() {
         PhotonPipelineResult result = camera.getLatestResult(); // Always get latest
 
