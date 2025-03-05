@@ -163,7 +163,7 @@ public final class Constants {
     public static final class Coral {
       // Camera's
       public static final String limelightAprilTagCamera = "OV9281";
-      public static final double cameraMountX = 0; // How far forwards/backwards is the camera mounted from center
+      public static final double cameraMountX = 2; // How far forwards/backwards is the camera mounted from center
       public static final double cameraMountY = 0.5; //0.2667; // How far left/right is the camera mounted from center
       public static final double cameraMountZ = 0.381; // This is in meters
       public static final double cameraMountAngle = 0.0; // This is in degrees
