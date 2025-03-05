@@ -123,29 +123,28 @@ public class AlignToReefCoralCommand extends Command {
             // ✅ Compute PID outputs
             double forwardSpeed = Math.max(-Constants.VisionConstants.Coral.maxForwardSpeed,
                     Math.min(Constants.VisionConstants.Coral.maxForwardSpeed, distancePID.calculate(distanceError)));
-            double strafeSpeed = Math.max(-Constants.VisionConstants.Coral.maxStrafeSpeed * 1.5,
-                    Math.min(Constants.VisionConstants.Coral.maxStrafeSpeed * 1.5, strafePID.calculate(lateralOffset)));
-
-            // If already centered, stop strafing
+            double strafeSpeed = Math.abs(lateralOffset) > Constants.VisionConstants.Coral.strafeThreshold
+                    ? Math.max(-Constants.VisionConstants.Coral.maxStrafeSpeed,
+                            Math.min(Constants.VisionConstants.Coral.maxStrafeSpeed,
+                                    strafePID.calculate(lateralOffset)))
+                    : 0; // If already centered, stop strafing
 
             double rotationSpeed = Math.abs(targetYaw) > Constants.VisionConstants.Coral.yawThreshold
-                    ? Math.max(-Constants.VisionConstants.Coral.maxRotationSpeed * 0.75,
-                            Math.min(Constants.VisionConstants.Coral.maxRotationSpeed * 0.75,
+                    ? Math.max(-Constants.VisionConstants.Coral.maxRotationSpeed,
+                            Math.min(Constants.VisionConstants.Coral.maxRotationSpeed,
                                     -rotationPID.calculate(targetYaw)))
                     : 0; // If within threshold, do not rotate
-            if (Math.abs(lateralOffset) > 0.3) {
-                rotationSpeed = 0; // reduce roatiom influence when far off cemter
-            }
+
             // ✅ Adjust speeds based on proximity to target
-            // if (Math.abs(distanceError) < Constants.VisionConstants.Coral.slowZone) {
-            // forwardSpeed *= 0.5; // Reduce speed by 50% when close
-            // }
-            // if (Math.abs(lateralOffset) < Constants.VisionConstants.Coral.slowZone) {
-            // strafeSpeed *= 0.5; // Reduce strafe speed when close
-            // }
-            // if (Math.abs(targetYaw) < 5.0) {
-            // rotationSpeed *= 0.5; // Reduce rotation power when nearly aligned
-            // }
+            if (Math.abs(distanceError) < Constants.VisionConstants.Coral.slowZone) {
+                forwardSpeed *= 0.5; // Reduce speed by 50% when close
+            }
+            if (Math.abs(lateralOffset) < Constants.VisionConstants.Coral.slowZone) {
+                strafeSpeed *= 0.5; // Reduce strafe speed when close
+            }
+            if (Math.abs(targetYaw) < 5.0) {
+                rotationSpeed *= 0.5; // Reduce rotation power when nearly aligned
+            }
 
             // ✅ Debugging Info
             if (Constants.DebugMode) {

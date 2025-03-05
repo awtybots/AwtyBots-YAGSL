@@ -90,7 +90,7 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
         }
 
     }
-
+    double lateralOffset = 0.0;
     public Optional<double[]> getAlignmentErrors(boolean alignLeft) {
         return getBestTarget().flatMap(target -> {
             int tagID = target.getFiducialId();
@@ -124,10 +124,10 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
             double yOffsetError = aprilTagY - Constants.VisionConstants.Coral.cameraMountY;
 
             // Adjust alignment based on left/right target selection
-            double lateralOffset = (alignLeft ? Constants.VisionConstants.Coral.leftOffsetMeters
+            lateralOffset = (alignLeft ? Constants.VisionConstants.Coral.leftOffsetMeters
                     : Constants.VisionConstants.Coral.rightOffsetMeters) + yOffsetError;
 
-            return Optional.of(new double[] { target.getYaw(), distanceError, lateralOffset, tagID });
+            return Optional.of(new double[] { target.getYaw(), distanceError, -lateralOffset, tagID });
         });
     }
 
@@ -155,7 +155,8 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
     public void periodic() {
         updatePoseEstimation();
         logAprilTagData();
-
+        // Update the vision status on the dashboard
+        SmartDashboard.putNumber("Vision/lateralOffset", lateralOffset);
         // If we lost the target, continue aligning using the last known good pose
         if (lastKnownTarget != null && !camera.getLatestResult().hasTargets()) {
             SmartDashboard.putString("Vision Status", "Using Last Known Target");

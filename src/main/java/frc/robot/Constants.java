@@ -163,8 +163,8 @@ public final class Constants {
     public static final class Coral {
       // Camera's
       public static final String limelightAprilTagCamera = "OV9281";
-      public static final double cameraMountX = 2; // How far forwards/backwards is the camera mounted from center
-      public static final double cameraMountY = 0.5; //0.2667; // How far left/right is the camera mounted from center
+      public static final double cameraMountX = 0.35; // How far forwards/backwards is the camera mounted from center
+      public static final double cameraMountY = 0.35; //0.2667; // How far left/right is the camera mounted from center
       public static final double cameraMountZ = 0.381; // This is in meters
       public static final double cameraMountAngle = 0.0; // This is in degrees
       public static final double maxForwardSpeed = 0.5; // Max forward/backward speed (m/s)
@@ -194,7 +194,7 @@ public final class Constants {
     public static final class FeederStation {
       // Camera's
       public static final String FeederSationLimelightAprilTagCamera = "Arducam_OV9782_USB_Camera";
-      public static final double cameraMountX = 0.5; // How far forwards/backwards is the camera mounted from center
+      public static final double cameraMountX = 1; // How far forwards/backwards is the camera mounted from center
       public static final double cameraMountY = 0.3; // How far left/right is the camera mounted from center
       public static final double cameraMountHeight = 0.02; // This is in meters
       public static final double cameraMountAngle = 0.0; // This is in degrees
