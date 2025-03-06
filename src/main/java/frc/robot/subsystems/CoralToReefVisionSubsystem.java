@@ -14,30 +14,27 @@ import java.util.Optional;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Rotation3d;
 
 public class CoralToReefVisionSubsystem extends SubsystemBase {
     private final PhotonCamera camera = new PhotonCamera(Constants.VisionConstants.Coral.limelightAprilTagCamera);
-    private SwerveSubsystem swerve;
+    private final AprilTagFieldLayout fieldLayout;
+    private final Transform3d robotToCamera;
+    private final PhotonPoseEstimator photonPoseEstimator;
 
-    private final AprilTagFieldLayout fieldLayout; // AprilTag field layout
-    private final Transform3d robotToCamera; // Camera position relative to the robot
-    private final PhotonPoseEstimator photonPoseEstimator; // Vision-based pose estimator
-
-    public CoralToReefVisionSubsystem(SwerveSubsystem swerve) {
-        this.swerve = swerve;
-
-        // Load the AprilTag field layout (2025 game)
+    public CoralToReefVisionSubsystem() {
+        // Load the 2025 AprilTag field layout
         fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
 
-        // Define the camera's position relative to the robot (adjust values based on
-        // actual setup)
-        robotToCamera = new Transform3d(Constants.VisionConstants.Coral.cameraMountX,
-                Constants.VisionConstants.Coral.cameraMountY, Constants.VisionConstants.Coral.cameraMountX,
+        // Camera position relative to the robot
+        robotToCamera = new Transform3d(
+                Constants.VisionConstants.Coral.cameraMountX,
+                Constants.VisionConstants.Coral.cameraMountY,
+                Constants.VisionConstants.Coral.cameraMountZ,
                 new Rotation3d(0, 0, 0));
 
-        // Initialize the pose estimator using the camera and tag layout
+        // Initialize pose estimator
         photonPoseEstimator = new PhotonPoseEstimator(fieldLayout, PoseStrategy.LOWEST_AMBIGUITY, robotToCamera);
     }
 
@@ -47,117 +44,49 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
         PhotonPipelineResult result = camera.getLatestResult();
 
         if (result.hasTargets()) {
-            lastKnownTarget = result.getBestTarget(); // Store the best target
-            if (Constants.DebugMode) {
-                System.out.println("[Vision] Found AprilTag - ID: " + lastKnownTarget.getFiducialId() +
-                        " | Yaw: " + lastKnownTarget.getYaw() +
-                        " | Pitch: " + lastKnownTarget.getPitch() +
-                        " | Area: " + lastKnownTarget.getArea());
-            }
+            lastKnownTarget = result.getBestTarget();
             return Optional.of(lastKnownTarget);
         }
 
-        // Return last known target if we lost sight of it
-        if (lastKnownTarget != null) {
-            return Optional.of(lastKnownTarget);
-        }
-
+        // Instead of returning the last known target, return an empty optional if no
+        // valid target
         return Optional.empty();
     }
 
-    public void resetLastKnownTarget() {
-        lastKnownTarget = null;
-    }
+    private double smoothedDistance = 0.0;
+    private final double SMOOTHING_FACTOR = 0.8;
 
-    public void logAprilTagData() {
-        PhotonPipelineResult result = camera.getLatestResult(); // Always get latest
+    public void logVisionData() {
+        var targetOpt = getBestTarget();
 
-        // System.out.println("Logging latest AprilTag data...");
+        if (targetOpt.isPresent()) {
+            PhotonTrackedTarget target = targetOpt.get();
+            Optional<Pose3d> tagPoseOpt = fieldLayout.getTagPose(target.getFiducialId());
 
-        if (result.hasTargets()) {
-            PhotonTrackedTarget target = result.getBestTarget();
+            if (tagPoseOpt.isPresent()) {
+                Transform3d cameraToTarget = target.getBestCameraToTarget(); // Use PhotonVision's 3D transform
 
-            SmartDashboard.putBoolean("AprilTag Found", true);
-            SmartDashboard.putNumber("AprilTag ID", target.getFiducialId());
-            SmartDashboard.putNumber("AprilTag Yaw", target.getYaw());
-            SmartDashboard.putNumber("AprilTag Pitch", target.getPitch());
-            SmartDashboard.putNumber("AprilTag Skew", target.getSkew());
-            SmartDashboard.putNumber("AprilTag Area", target.getArea());
+                double rawDistance = cameraToTarget.getTranslation().getNorm(); // Accurate distance
+                smoothedDistance = (SMOOTHING_FACTOR * rawDistance) + ((1 - SMOOTHING_FACTOR) * smoothedDistance);
 
-            // System.out.println("AprilTag Detected - ID: " + target.getFiducialId());
-        } else {
-            SmartDashboard.putBoolean("AprilTag Found", false);
-        }
-
-    }
-
-    double lateralOffset = 0.0;
-
-    public Optional<double[]> getAlignmentErrors(boolean alignLeft) {
-        return getBestTarget().flatMap(target -> {
-            int tagID = target.getFiducialId();
-            Optional<Pose3d> tagPose = fieldLayout.getTagPose(tagID);
-
-            if (tagPose.isEmpty() || target.getArea() < 0.2 || Math.abs(target.getYaw()) > 30) {
-                System.out.println("[Vision] Rejecting AprilTag ID " + tagID + " due to bad pose estimate.");
-                return Optional.empty();
+                SmartDashboard.putBoolean("Vision/AprilTag Found", true);
+                SmartDashboard.putNumber("Vision/AprilTag ID", target.getFiducialId());
+                SmartDashboard.putNumber("Vision/Yaw (degrees)", target.getYaw());
+                SmartDashboard.putNumber("Vision/Distance (m)", smoothedDistance); // Use smoothed distance!
+                SmartDashboard.putNumber("Vision/Lateral Offset (m)", cameraToTarget.getY());
             }
-
-            // ✅ Correct Distance Calculation (From PhotonVision Docs)
-            double targetRange = PhotonUtils.calculateDistanceToTargetMeters(
-                    Constants.VisionConstants.Coral.cameraMountZ, // Camera height in meters
-                    tagPose.get().getZ(), // AprilTag height
-                    Units.degreesToRadians(Constants.VisionConstants.Coral.cameraMountAngle), // Camera mount angle
-                    Units.degreesToRadians(target.getPitch())); // Use pitch from target
-
-            // ✅ Correct Lateral Offset Calculation
-            double lateralOffset = tagPose.get().getY() - Constants.VisionConstants.Coral.cameraMountY;
-
-            // Adjust lateral offset based on left/right alignment
-            lateralOffset += (alignLeft ? Constants.VisionConstants.Coral.leftOffsetMeters
-                    : Constants.VisionConstants.Coral.rightOffsetMeters);
-
-            return Optional.of(new double[] { target.getYaw(), targetRange, -lateralOffset, tagID });
-        });
-    }
-
-    public void updatePoseEstimation() {
-        var results = camera.getAllUnreadResults();
-        if (results.isEmpty()) {
-            return; // Prevents crash if no frames exist
-        }
-
-        // Use the latest result from the list
-        PhotonPipelineResult result = results.get(results.size() - 1);
-
-        if (!result.hasTargets()) {
-            return; // No targets detected, do nothing
-        }
-
-        var poseEstimate = photonPoseEstimator.update(result);
-        if (poseEstimate.isPresent()) {
-            var poseEst = poseEstimate.get();
-            swerve.addVisionMeasurement(poseEst.estimatedPose.toPose2d(), poseEst.timestampSeconds);
+        } else {
+            SmartDashboard.putBoolean("Vision/AprilTag Found", false);
         }
     }
 
     @Override
     public void periodic() {
-        updatePoseEstimation();
-        logAprilTagData();
-        // Update the vision status on the dashboard
-        SmartDashboard.putNumber("Vision/lateralOffset", lateralOffset);
-        // If we lost the target, continue aligning using the last known good pose
-        if (lastKnownTarget != null && !camera.getLatestResult().hasTargets()) {
-            SmartDashboard.putString("Vision Status", "Using Last Known Target");
-        } else {
-            SmartDashboard.putString("Vision Status", "Tracking New Target");
-        }
+        logVisionData();
     }
 
     @Override
     public void simulationPeriodic() {
-        logAprilTagData();
-        updatePoseEstimation();
+        logVisionData();
     }
 }
