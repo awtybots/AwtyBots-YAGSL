@@ -7,19 +7,24 @@ package frc.robot;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
+import java.lang.String;
 
 /**
- * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
- * constants. This class should not be used for any other purpose. All constants should be declared
+ * The Constants class provides a convenient place for teams to hold robot-wide
+ * numerical or boolean
+ * constants. This class should not be used for any other purpose. All constants
+ * should be declared
  * globally (i.e. public static). Do not put anything functional in this class.
  *
- * <p>It is advised to statically import this class (or one of its inner classes) wherever the
+ * <p>
+ * It is advised to statically import this class (or one of its inner classes)
+ * wherever the
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-
+  public static final boolean DebugMode = false;
   public static final double maxSpeed = Units.feetToMeters(15.76);
-  
+
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
   }
@@ -35,12 +40,11 @@ public final class Constants {
     // Distance between centers of right and left wheels on robot
     public static final double kWheelBase = Units.inchesToMeters(28);
     // Distance between front and back wheels on robot
-    public static final SwerveDriveKinematics kDriveKinematics =
-        new SwerveDriveKinematics(
-            new Translation2d(kWheelBase / 2, kTrackWidth / 2),
-            new Translation2d(kWheelBase / 2, -kTrackWidth / 2),
-            new Translation2d(-kWheelBase / 2, kTrackWidth / 2),
-            new Translation2d(-kWheelBase / 2, -kTrackWidth / 2));
+    public static final SwerveDriveKinematics kDriveKinematics = new SwerveDriveKinematics(
+        new Translation2d(kWheelBase / 2, kTrackWidth / 2),
+        new Translation2d(kWheelBase / 2, -kTrackWidth / 2),
+        new Translation2d(-kWheelBase / 2, kTrackWidth / 2),
+        new Translation2d(-kWheelBase / 2, -kTrackWidth / 2));
 
     // Angular offsets of the modules relative to the chassis in radians
     public static final double kFrontLeftChassisAngularOffset = -Math.PI / 2;
@@ -60,27 +64,27 @@ public final class Constants {
     public static final int kRearRightTurningCanId = 8;
 
     public static final boolean kGyroReversed = false;
-  } 
+  }
 
-  public static final class ElevatorConstants{
+  public static final class ElevatorConstants {
     public static final int LeftElevatorCanID = 10;
     public static final int RightElevatorCanID = 11;
   }
 
-  public static final class ArmConstants{
+  public static final class ArmConstants {
     public static final int ArmLeftCanID = 12;
     public static final int ArmRightCanID = 13;
     public static final int WristCanID = 17;
     public static final int IntakeCanID = 18;
   }
 
-  public static final class FunnelConstants{
+  public static final class FunnelConstants {
     public static final int FunnelWrist = 9;
     public static final int FunnelLIntake = 15;
     public static final int FunnelRIntake = 16;
   }
 
-  public static final class ElevatorSetpoints{
+  public static final class ElevatorSetpoints {
     public static final int FeederStation = 0;
     public static final int L1 = 15;
     public static final int AlgaeLow = 0;
@@ -90,7 +94,7 @@ public final class Constants {
     public static final int L4 = 72;
   }
 
-  public static final class ArmSetpoints{
+  public static final class ArmSetpoints {
     public static final double FeederStation = 0;
     public static final double L1 = -3;
     public static final double AlgaeLow = -9;
@@ -100,7 +104,7 @@ public final class Constants {
     public static final double L4 = -15;
   }
 
-  public static final class WristSetpoints{
+  public static final class WristSetpoints {
     public static final double FeederStation = -1;
     public static final double L1 = 3;
     public static final double AlgaeLow = -3;
@@ -110,18 +114,18 @@ public final class Constants {
     public static final double L4 = -2;
   }
 
-  public static final class FunnelWristSetpoints{
+  public static final class FunnelWristSetpoints {
     public static final double FeederStation = -2;
     public static final double Climb = 12;
   }
 
-  public static final class FunnelIntakeSetpoints{
+  public static final class FunnelIntakeSetpoints {
     public static final double kForward = 0.5;
     public static final double kReverse = 0.65;
     public static final double kHold = 0.0;
   }
 
-  public static final class IntakeSetpoints{
+  public static final class IntakeSetpoints {
     public static final double kForward = -.6;
     public static final double kReverse = .6;
     public static final double kHold = .25;
@@ -154,4 +158,97 @@ public final class Constants {
   public static final class NeoMotorConstants {
     public static final double kFreeSpeedRpm = 5676;
   }
+
+  public static final class VisionConstants {
+    public static final class Coral {
+      // Camera's
+      public static final String limelightAprilTagCamera = "OV9281";
+      public static final double cameraMountX = 0.35; // How far forwards/backwards is the camera mounted from center
+      public static final double cameraMountY = 0.35; // 0.2667; // How far left/right is the camera mounted from center
+      public static final double cameraMountZ = 0.381; // This is in meters
+      public static final double cameraMountAngle = 0.0; // This is in degrees
+      public static final double maxForwardSpeed = 0.5; // Max forward/backward speed (m/s)
+      public static final double maxStrafeSpeed = 0.5; // Max strafe speed (m/s)
+      public static final double maxRotationSpeed = 1; // Max rotation speed (rad/s)
+      public static final double DistancekP = 0.8;
+      public static final double DistancekI = 0.08;
+      public static final double DistancekD = 0.05;
+      public static final double StrafekP = 1.2;
+      public static final double StrafekI = 0.0;
+      public static final double StrafekD = 0.03;
+      public static final double RotationkP = 0.8;
+      public static final double RotationkI = 0.0;
+      public static final double RotationkD = 0.02;
+      public static final double targetDistanceMeters = 1.5; // Default: 0.1 meter away from target
+      public static final double targetDistanceMetersLevel4 = 1.0; // Target distance level 4
+      public static final double distance_tolerance = 0.05; // How off are we willing to tolerate
+      public static final double slowZone = 0.4; // Slow down speed of robot if within 40cm of target
+      public static final double strafe_tolerance = 0.05; // 5 cm tolerance
+      public static final double strafeThreshold = 0.1; // Don't strafe if within 10cm of lateral offset
+      public static final double rotation_tolerance = 2.0; // 2 degrees for turning left and right
+      public static final double yawThreshold = 3.0; // Only rotate if yaw error is larger than 3 degrees
+      public static final double leftOffsetMeters = 0; // Adjust how far left to align
+      public static final double rightOffsetMeters = 0; // Adjust how far right to align
+    }
+
+    public static final class FeederStation {
+      // Camera's
+      public static final String FeederSationLimelightAprilTagCamera = "Arducam_OV9782_USB_Camera";
+      public static final double cameraMountX = 1; // How far forwards/backwards is the camera mounted from center
+      public static final double cameraMountY = 0.3; // How far left/right is the camera mounted from center
+      public static final double cameraMountHeight = 0.02; // This is in meters
+      public static final double cameraMountAngle = 0.0; // This is in degrees
+      public static final double maxForwardSpeed = 2; // Max forward/backward speed (m/s)
+      public static final double maxStrafeSpeed = 3; // Max strafe speed (m/s)
+      public static final double maxRotationSpeed = 1; // Max rotation speed (rad/s)
+      public static final double DistancekP = 1;
+      public static final double DistancekI = 0.0;
+      public static final double DistancekD = 0.05;
+      public static final double StrafekP = 0.9;
+      public static final double StrafekI = 0.0;
+      public static final double StrafekD = 0.03;
+      public static final double RotationkP = 0.8;
+      public static final double RotationkI = 0.0;
+      public static final double RotationkD = 0.02;
+      public static final double targetDistanceMeters = 2.0; // Default: 2 meter away from target
+      public static final double targetDistanceMetersLevel4 = 1.0; // Target distance level 4
+      public static final double distance_tolerance = 0.02; // How off are we willing to tolerate
+      public static final double strafe_tolerance = 0.05; // 5 cm tolerance
+      public static final double rotation_tolerance = 2.0; // 2 degrees for turning left and right
+      public static final double leftOffsetMeters = 1.0; // Adjust how far left to align
+      public static final double rightOffsetMeters = 1.0; // Adjust how far right to align
+
+    }
+
+    public static final class Algae {
+      // Camera's
+      public static final String orangePIAlgaeCamera = "Arducam_OV9782_USB_Camera";
+      public static final double cameraMountX = 0.5; // How far forwards/backwards is the camera mounted from center
+      public static final double cameraMountY = 0.3; // How far left/right is the camera mounted from center
+      public static final double cameraMountHeight = 0.02; // This is in meters
+      public static final double cameraMountAngle = 0.0; // This is in degrees
+      public static final double maxForwardSpeed = 2; // Max forward/backward speed (m/s)
+      public static final double maxStrafeSpeed = 3; // Max strafe speed (m/s)
+      public static final double maxRotationSpeed = 1; // Max rotation speed (rad/s)
+      public static final double DistancekP = 1;
+      public static final double DistancekI = 0.0;
+      public static final double DistancekD = 0.05;
+      public static final double StrafekP = 0.9;
+      public static final double StrafekI = 0.0;
+      public static final double StrafekD = 0.03;
+      public static final double RotationkP = 0.8;
+      public static final double RotationkI = 0.0;
+      public static final double RotationkD = 0.02;
+      public static final double targetDistanceMeters = 2.0; // Default: 2 meter away from target
+      public static final double targetDistanceMetersLevel4 = 1.0; // Target distance level 4
+      public static final double distance_tolerance = 0.02; // How off are we willing to tolerate
+      public static final double strafe_tolerance = 0.05; // 5 cm tolerance
+      public static final double rotation_tolerance = 2.0; // 2 degrees for turning left and right
+      public static final double leftOffsetMeters = 1.0; // Adjust how far left to align
+      public static final double rightOffsetMeters = 1.0; // Adjust how far right to align
+
+    }
+
+  }
+
 }
