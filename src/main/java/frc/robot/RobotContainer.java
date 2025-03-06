@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -52,18 +53,19 @@ public class RobotContainer {
    */
   public RobotContainer() {
     // Default to 0° (assuming forward should be field-oriented default)
-    double startingAngle = 180;
+    double startingAngle = 0;
 
     // var alliance = DriverStation.getAlliance();
 
     // if (alliance.isPresent() && alliance.get() == DriverStation.Alliance.Red) {
-    //   // If on Red Alliance, adjust heading to 180°
-    //   startingAngle = 180;
+    // // If on Red Alliance, adjust heading to 180°
+    // startingAngle = 180;
     // } else if (!DriverStation.isFMSAttached() && !DriverStation.isDSAttached()) {
-    //   // If NOT connected to FMS or Driver Station (testing mode), allow manual
-    //   // setting
-    //   startingAngle = 0;
-    //   System.out.println("Practice Mode: Setting starting heading to " + startingAngle);
+    // // If NOT connected to FMS or Driver Station (testing mode), allow manual
+    // // setting
+    // startingAngle = 0;
+    // System.out.println("Practice Mode: Setting starting heading to " +
+    // startingAngle);
     // }
 
     // Set the correct initial heading for field-oriented driving
@@ -73,7 +75,7 @@ public class RobotContainer {
     drivebase.setDefaultCommand(driveFieldOrientedAngluarVelocity);
     NamedCommands.registerCommand("Stop", Commands.runOnce(() -> drivebase.stop()));
     NamedCommands.registerCommand("test", Commands.print("Hello World"));
-    NamedCommands.registerCommand("outtake", m_coralSubsystem.reverseIntakeCommand());
+    NamedCommands.registerCommand("outtake", m_coralSubsystem.reverseIntakeCommand().withTimeout(1));
     NamedCommands.registerCommand("intake", m_funnelIntakeSubsystem.runIntakeCommand());
     NamedCommands.registerCommand("FeederStation", m_coralSubsystem.setSetpointCommand(Setpoint.FeederStation));
     NamedCommands.registerCommand("ElevatorLiftL1", m_coralSubsystem.setSetpointCommand(Setpoint.L1));
@@ -82,6 +84,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("ElevatorLiftL4", m_coralSubsystem.setSetpointCommand(Setpoint.L4));
     NamedCommands.registerCommand("AlgaeLow", m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeLow));
     NamedCommands.registerCommand("AlgaeHigh", m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeHigh));
+    NamedCommands.registerCommand("Gyroreset", new InstantCommand(() -> drivebase.setInitialHeading(0), drivebase));
 
     autoChooser = AutoBuilder.buildAutoChooser();
 
@@ -131,8 +134,14 @@ public class RobotContainer {
         .onTrue(
             Commands.runOnce(() -> {
               driveAngulareVelocity.scaleTranslation(0.2); // Scale translation speed
-              driveAngulareVelocity.withControllerRotationAxis(() -> m_driverController.getRightX() * 0.2); // Scale
-                                                                                                            // rotation
+              driveAngulareVelocity.withControllerRotationAxis(() -> {
+                double rotationValue = m_driverController.getRightX();
+                if (Math.abs(rotationValue) >= 0.5) {
+                  return 0.5 * Math.signum(rotationValue); // Cap at 50% power
+                } else {
+                  return rotationValue; // Send actual value if under 50%
+                }
+              });
 
             }))
         .onFalse(
@@ -145,12 +154,12 @@ public class RobotContainer {
 
     // Left Bumper -> Run tube intake
     m_operatorController.leftBumper().whileTrue(Commands.either(
-          m_coralSubsystem.runIntakeCommand(), // If ElevatorAtL4 is true, run Reverse Intake
-          m_coralSubsystem.reverseIntakeCommand(), // Otherwise, run normal intake
-          () -> CoralSubsystem.ElevatorAtL4 // Condition for reverse intake
+        m_coralSubsystem.runIntakeCommand(), // If ElevatorAtL4 is true, run Reverse Intake
+        m_coralSubsystem.reverseIntakeCommand(), // Otherwise, run normal intake
+        () -> CoralSubsystem.ElevatorAtL4 // Condition for reverse intake
     ));
 
-    //m_operatorController.start().whileTrue(m_coralSubsystem.manualElevatorDown());
+    // m_operatorController.start().whileTrue(m_coralSubsystem.manualElevatorDown());
     // Right Bumper -> Run tube intake in reverse
 
     m_operatorController.rightBumper().whileTrue(
@@ -195,7 +204,7 @@ public class RobotContainer {
     m_operatorController.povDown().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeLow));
 
     // m_driverController.a().onTrue(Commands.runOnce(drivebase::zeroGyro));
-    m_driverController.start().onTrue(Commands.runOnce(drivebase::zeroGyro));
+    m_driverController.start().onTrue(new InstantCommand(() -> drivebase.setInitialHeading(180), drivebase));
 
   }
 
