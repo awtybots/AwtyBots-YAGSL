@@ -5,19 +5,31 @@
     "data": {
       "commands": [
         {
-          "type": "parallel",
+          "type": "sequential",
           "data": {
             "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "MidL4Path"
-                }
-              },
               {
                 "type": "named",
                 "data": {
                   "name": "ElevatorLiftL4"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 1.0
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "actual mid l4 path"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 0.5
                 }
               }
             ]
@@ -27,6 +39,12 @@
           "type": "named",
           "data": {
             "name": "outtake"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Gyroreset"
           }
         }
       ]

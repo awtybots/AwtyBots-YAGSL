@@ -23,7 +23,19 @@
               {
                 "type": "wait",
                 "data": {
-                  "waitTime": 2.0
+                  "waitTime": 0.5
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "actual mid l4 path"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 0.5
                 }
               }
             ]
@@ -33,6 +45,30 @@
           "type": "named",
           "data": {
             "name": "outtake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "back from l4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ElevatorLiftL1"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "FeederStation"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Gyroreset"
           }
         }
       ]
