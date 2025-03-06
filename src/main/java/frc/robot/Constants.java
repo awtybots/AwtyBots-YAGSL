@@ -164,7 +164,7 @@ public final class Constants {
       // Camera's
       public static final String limelightAprilTagCamera = "OV9281";
       public static final double cameraMountX = 0.35; // How far forwards/backwards is the camera mounted from center
-      public static final double cameraMountY = 0.35; //0.2667; // How far left/right is the camera mounted from center
+      public static final double cameraMountY = 0.35; // 0.2667; // How far left/right is the camera mounted from center
       public static final double cameraMountZ = 0.381; // This is in meters
       public static final double cameraMountAngle = 0.0; // This is in degrees
       public static final double maxForwardSpeed = 0.5; // Max forward/backward speed (m/s)
@@ -173,7 +173,7 @@ public final class Constants {
       public static final double DistancekP = 0.8;
       public static final double DistancekI = 0.08;
       public static final double DistancekD = 0.05;
-      public static final double StrafekP = 0.9;
+      public static final double StrafekP = 1.2;
       public static final double StrafekI = 0.0;
       public static final double StrafekD = 0.03;
       public static final double RotationkP = 0.8;

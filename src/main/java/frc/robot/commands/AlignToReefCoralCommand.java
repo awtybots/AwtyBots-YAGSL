@@ -89,101 +89,75 @@ public class AlignToReefCoralCommand extends Command {
 
     @Override
     public void execute() {
-        // ✅ Update PID Constants from SmartDashboard
-        distancePID.setP(SmartDashboard.getNumber("PID/Distance kP", distancePID.getP()));
-        distancePID.setI(SmartDashboard.getNumber("PID/Distance kI", distancePID.getI()));
-        distancePID.setD(SmartDashboard.getNumber("PID/Distance kD", distancePID.getD()));
-
-        strafePID.setP(SmartDashboard.getNumber("PID/Strafe kP", strafePID.getP()));
-        strafePID.setI(SmartDashboard.getNumber("PID/Strafe kI", strafePID.getI()));
-        strafePID.setD(SmartDashboard.getNumber("PID/Strafe kD", strafePID.getD()));
-
-        rotationPID.setP(SmartDashboard.getNumber("PID/Rotation kP", rotationPID.getP()));
-        rotationPID.setI(SmartDashboard.getNumber("PID/Rotation kI", rotationPID.getI()));
-        rotationPID.setD(SmartDashboard.getNumber("PID/Rotation kD", rotationPID.getD()));
-
-        // ✅ Get AprilTag alignment errors
         Optional<double[]> errors = vision.getAlignmentErrors(alignLeft);
 
         if (errors.isPresent()) {
             hasValidTarget = true;
             double[] errorArray = errors.get();
-            double targetYaw = errorArray[0];
-            double distanceError = targetDistanceMeters - errorArray[1];
-            double lateralOffset = errorArray[2];
-            int detectedTagId = (int) errorArray[3]; // ✅ Extract ID properly
+            double targetYaw = errorArray[0]; // Yaw error
+            double targetRange = Math.abs(errorArray[1]); // ✅ Ensure distance is positive
+            double lateralOffset = errorArray[2]; // ✅ Side-to-side offset
+            int detectedTagId = (int) errorArray[3];
 
-            // ✅ Ensure the detected AprilTag is in our valid list
+            // ✅ Ensure valid AprilTag ID
             if (!VALID_APRILTAG_IDS.contains(detectedTagId)) {
-                System.out.println("[AlignToReefCoralCommand] Invalid AprilTag ID: " + detectedTagId + " - Ignoring.");
                 swerve.drive(new ChassisSpeeds(0, 0, 0)); // Stop movement
                 return;
             }
 
-            // ✅ Compute PID outputs
-            double forwardSpeed = Math.max(-Constants.VisionConstants.Coral.maxForwardSpeed,
-                    Math.min(Constants.VisionConstants.Coral.maxForwardSpeed, distancePID.calculate(distanceError)));
+            // ✅ Fix Yaw: Stop turning when close to aligned
+            double rotationSpeed = targetYaw * Constants.VisionConstants.Coral.RotationkP;
+            if (Math.abs(targetYaw) < Constants.VisionConstants.Coral.rotation_tolerance) {
+                rotationSpeed = 0; // 🔄 Stop rotating if within 2 degrees
+            }
+
+            // ✅ Fix Distance: Stop moving when close
+            double distanceError = Constants.VisionConstants.Coral.targetDistanceMeters - targetRange;
+            double forwardSpeed = distanceError * Constants.VisionConstants.Coral.DistancekP;
+            if (Math.abs(distanceError) < Constants.VisionConstants.Coral.distance_tolerance) {
+                forwardSpeed = 0; // 🔄 Stop moving if within 0.05m
+            }
+
+            // ✅ Fix Strafe: Keep the same logic
             double strafeSpeed = Math.abs(lateralOffset) > Constants.VisionConstants.Coral.strafeThreshold
-                    ? Math.max(-Constants.VisionConstants.Coral.maxStrafeSpeed,
-                            Math.min(Constants.VisionConstants.Coral.maxStrafeSpeed,
-                                    strafePID.calculate(lateralOffset)))
-                    : 0; // If already centered, stop strafing
+                    ? -lateralOffset * Constants.VisionConstants.Coral.StrafekP
+                    : 0;
 
-            double rotationSpeed = Math.abs(targetYaw) > Constants.VisionConstants.Coral.yawThreshold
-                    ? Math.max(-Constants.VisionConstants.Coral.maxRotationSpeed,
-                            Math.min(Constants.VisionConstants.Coral.maxRotationSpeed,
-                                    -rotationPID.calculate(targetYaw)))
-                    : 0; // If within threshold, do not rotate
+            // ✅ Enforce max speed limits
+            forwardSpeed = Math.max(-Constants.VisionConstants.Coral.maxForwardSpeed,
+                    Math.min(Constants.VisionConstants.Coral.maxForwardSpeed, forwardSpeed));
 
-            // ✅ Adjust speeds based on proximity to target
-            if (Math.abs(distanceError) < Constants.VisionConstants.Coral.slowZone) {
-                forwardSpeed *= 0.5; // Reduce speed by 50% when close
-            }
-            if (Math.abs(lateralOffset) < Constants.VisionConstants.Coral.slowZone) {
-                strafeSpeed *= 0.5; // Reduce strafe speed when close
-            }
-            if (Math.abs(targetYaw) < 5.0) {
-                rotationSpeed *= 0.5; // Reduce rotation power when nearly aligned
-            }
+            strafeSpeed = Math.max(-Constants.VisionConstants.Coral.maxStrafeSpeed,
+                    Math.min(Constants.VisionConstants.Coral.maxStrafeSpeed, strafeSpeed));
 
-            // ✅ Debugging Info
-            if (Constants.DebugMode) {
-                System.out.println("[AlignToReefCoralCommand] Aligning to AprilTag ID: " + detectedTagId);
-                System.out.println(" - Target Yaw: " + targetYaw);
-                System.out.println(" - Distance Error: " + distanceError);
-                System.out.println(" - Lateral Offset: " + lateralOffset);
-                System.out.println(" - PID Forward Speed: " + forwardSpeed);
-                System.out.println(" - PID Strafe Speed: " + strafeSpeed);
-                System.out.println(" - PID Rotation Speed: " + rotationSpeed);
-            }
+            rotationSpeed = Math.max(-Constants.VisionConstants.Coral.maxRotationSpeed,
+                    Math.min(Constants.VisionConstants.Coral.maxRotationSpeed, rotationSpeed));
 
-            // ✅ Apply speeds using PID
+            // ✅ Debug output
+            System.out.println("[AlignToReefCoralCommand] Movement Outputs:");
+            System.out.println(" - Target Yaw: " + targetYaw);
+            System.out.println(" - Target Range: " + targetRange);
+            System.out.println(" - Distance Error: " + distanceError);
+            System.out.println(" - Lateral Offset: " + lateralOffset);
+            System.out.println(" - PID Forward Speed: " + forwardSpeed);
+            System.out.println(" - PID Strafe Speed: " + strafeSpeed);
+            System.out.println(" - PID Rotation Speed: " + rotationSpeed);
+            System.out.println(" - Expected Strafe Direction: " + (lateralOffset > 0 ? "Left" : "Right"));
+
+            // ✅ Apply corrected movement values
             swerve.drive(new ChassisSpeeds(forwardSpeed, strafeSpeed, rotationSpeed));
 
-            // ✅ Update SmartDashboard
+            // ✅ Update Shuffleboard
             SmartDashboard.putBoolean("Reef/Has Valid Target", true);
             SmartDashboard.putNumber("Reef/Target Yaw", targetYaw);
+            SmartDashboard.putNumber("Reef/Target Range", targetRange);
             SmartDashboard.putNumber("Reef/Distance Error", distanceError);
             SmartDashboard.putNumber("Reef/Lateral Offset", lateralOffset);
             SmartDashboard.putNumber("Reef/PID-Forward Speed", forwardSpeed);
             SmartDashboard.putNumber("Reef/PID-Strafe Speed", strafeSpeed);
             SmartDashboard.putNumber("Reef/PID-Rotation Speed", rotationSpeed);
-
-        } else if (hasValidTarget) {
-            // Maintain last valid movement (small corrections)
-            if (Constants.DebugMode) {
-                System.out.println("[AlignToReefCoralCommand] Lost Target - Holding Position");
-            }
-
-            swerve.drive(new ChassisSpeeds(
-                    distancePID.calculate(0),
-                    strafePID.calculate(0),
-                    rotationPID.calculate(0)));
         } else {
             // No valid target → Stop the robot
-            if (Constants.DebugMode) {
-                System.out.println("[AlignToReefCoralCommand] No Valid Target - Stopping Robot");
-            }
             swerve.drive(new ChassisSpeeds(0, 0, 0));
             hasValidTarget = false;
         }
