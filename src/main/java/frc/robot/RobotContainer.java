@@ -198,7 +198,7 @@ public class RobotContainer {
     m_operatorController.povDown().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeLow));
 
     // m_driverController.a().onTrue(Commands.runOnce(drivebase::zeroGyro));
-    m_driverController.start().onTrue(Commands.runOnce(drivebase::zeroGyro));
+    m_driverController.start().onTrue(new InstantCommand(() -> drivebase.setInitialHeading(180), drivebase));
 
   }
 
