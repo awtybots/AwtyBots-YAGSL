@@ -4,24 +4,38 @@
     {
       "anchor": {
         "x": 7.108709016393442,
-        "y": 3.7792520491803274
+        "y": 3.85
       },
       "prevControl": null,
       "nextControl": {
+<<<<<<< Updated upstream
         "x": 7.358709016393442,
         "y": 3.7792520491803274
+=======
+        "x": 7.527817362986166,
+        "y": 3.85
+>>>>>>> Stashed changes
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
+<<<<<<< Updated upstream
         "x": 5.478381147540984,
         "y": 3.7792520491803274
       },
       "prevControl": {
         "x": 5.228381147540984,
         "y": 3.7792520491803274
+=======
+        "x": 5.454,
+        "y": 3.85
+      },
+      "prevControl": {
+        "x": 5.203999999999796,
+        "y": 3.85
+>>>>>>> Stashed changes
       },
       "nextControl": null,
       "isLocked": false,
@@ -30,7 +44,18 @@
   ],
   "rotationTargets": [],
   "constraintZones": [],
-  "pointTowardsZones": [],
+  "pointTowardsZones": [
+    {
+      "fieldPosition": {
+        "x": 4.5,
+        "y": 3.85
+      },
+      "rotationOffset": 0.0,
+      "minWaypointRelativePos": 0.0,
+      "maxWaypointRelativePos": 0.0,
+      "name": "PointToReefBackLeft"
+    }
+  ],
   "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 1.0,
