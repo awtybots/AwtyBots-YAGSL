@@ -134,8 +134,14 @@ public class RobotContainer {
         .onTrue(
             Commands.runOnce(() -> {
               driveAngulareVelocity.scaleTranslation(0.2); // Scale translation speed
-              driveAngulareVelocity.withControllerRotationAxis(() -> m_driverController.getRightX() * 0.2); // Scale
-                                                                                                            // rotation
+              driveAngulareVelocity.withControllerRotationAxis(() -> {
+                double rotationValue = m_driverController.getRightX();
+                if (Math.abs(rotationValue) >= 0.5) {
+                  return 0.5 * Math.signum(rotationValue); // Cap at 50% power
+                } else {
+                  return rotationValue; // Send actual value if under 50%
+                }
+              });
 
             }))
         .onFalse(
