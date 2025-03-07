@@ -79,7 +79,7 @@ public class AlignToReefCoralCommand extends Command {
         strafePID.setTolerance(Constants.VisionConstants.Coral.strafe_tolerance);
         rotationPID.setTolerance(Constants.VisionConstants.Coral.rotation_tolerance);
 
-        distancePID.setSetpoint(targetDistanceMeters);
+        distancePID.setSetpoint(0.0);
         strafePID.setSetpoint(0.0);
         rotationPID.setSetpoint(0.0);
     }
@@ -113,11 +113,19 @@ public class AlignToReefCoralCommand extends Command {
 
             // ✅ Use PID controllers for smoother movement
             double rotationSpeed = rotationPID.calculate(targetYaw, 0);
-            double forwardSpeed = distancePID.calculate(targetDistanceMeters - targetRange, 0);
+            if (rotationPID.atSetpoint()) {
+                rotationSpeed = 0;
+            }
+            double forwardSpeed = distancePID.calculate(targetRange, 0);
+            if (distancePID.atSetpoint()) {
+                forwardSpeed = 0;
+            }
             double strafeSpeed = (Math.abs(lateralOffset) > Constants.VisionConstants.Coral.strafeThreshold)
                     ? strafePID.calculate(lateralOffset, 0)
                     : 0;
-
+            if (strafePID.atSetpoint()) {
+                rotationSpeed = 0;
+            }
             // ✅ Enforce max speed limits
             forwardSpeed = Math.max(-Constants.VisionConstants.Coral.maxForwardSpeed,
                     Math.min(Constants.VisionConstants.Coral.maxForwardSpeed, forwardSpeed));
