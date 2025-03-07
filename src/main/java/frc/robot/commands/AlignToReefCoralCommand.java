@@ -28,7 +28,7 @@ public class AlignToReefCoralCommand extends Command {
 
     private boolean hasValidTarget = false;
 
-    // ✅ Define allowed AprilTag IDs
+    // Define allowed AprilTag IDs
     private static final Set<Integer> VALID_APRILTAG_IDS = Set.of(1, 6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22);
 
     /**
@@ -50,7 +50,7 @@ public class AlignToReefCoralCommand extends Command {
         this.targetDistanceMeters = targetDistanceMeters;
         addRequirements(swerve, vision);
 
-        // ✅ Initialize PID Constants on SmartDashboard
+        // Initialize PID Constants on SmartDashboard
         SmartDashboard.putNumber("PID-Vision/01 Distance kP", Constants.VisionConstants.Coral.DistancekP);
         SmartDashboard.putNumber("PID-Vision/02 Distance kI", Constants.VisionConstants.Coral.DistancekI);
         SmartDashboard.putNumber("PID-Vision/03 Distance kD", Constants.VisionConstants.Coral.DistancekD);
@@ -63,7 +63,7 @@ public class AlignToReefCoralCommand extends Command {
         SmartDashboard.putNumber("PID-Vision/08 Rotation kI", Constants.VisionConstants.Coral.RotationkI);
         SmartDashboard.putNumber("PID-Vision/09 Rotation kD", Constants.VisionConstants.Coral.RotationkD);
 
-        // ✅ Initialize PID Controllers (will be updated dynamically in execute())
+        // Initialize PID Controllers (will be updated dynamically in execute())
         distancePID = new PIDController(Constants.VisionConstants.Coral.DistancekP,
                 Constants.VisionConstants.Coral.DistancekI,
                 Constants.VisionConstants.Coral.DistancekD);
@@ -74,12 +74,12 @@ public class AlignToReefCoralCommand extends Command {
                 Constants.VisionConstants.Coral.RotationkI,
                 Constants.VisionConstants.Coral.RotationkD);
 
-        // ✅ Set Tolerances
+        // Set Tolerances
         distancePID.setTolerance(Constants.VisionConstants.Coral.distance_tolerance);
         strafePID.setTolerance(Constants.VisionConstants.Coral.strafe_tolerance);
         rotationPID.setTolerance(Constants.VisionConstants.Coral.rotation_tolerance);
 
-        distancePID.setSetpoint(0.0);
+        distancePID.setSetpoint(targetDistanceMeters);
         strafePID.setSetpoint(0.0);
         rotationPID.setSetpoint(0.0);
     }
@@ -95,11 +95,11 @@ public class AlignToReefCoralCommand extends Command {
     public void execute() {
         int detectedTagId = vision.getBestTargetTagID();
 
-        // ✅ Ensure detected tag is in the valid set
+        // Ensure detected tag is in the valid set
         if (!VALID_APRILTAG_IDS.contains(detectedTagId)) {
             swerve.drive(new ChassisSpeeds(0, 0, 0)); // Stop movement if tag is not valid
             hasValidTarget = false;
-            SmartDashboard.putBoolean("Vision/Valid-Target", hasValidTarget);
+            SmartDashboard.putBoolean("Vision/03 Valid-Target", hasValidTarget);
             return;
         }
 
@@ -111,14 +111,28 @@ public class AlignToReefCoralCommand extends Command {
             double targetRange = Math.abs(errorArray[1]);
             double lateralOffset = errorArray[2];
 
-            // ✅ Use PID controllers for smoother movement
+            // Use PID controllers for smoother movement
             double rotationSpeed = rotationPID.calculate(targetYaw, 0);
             if (rotationPID.atSetpoint()) {
                 rotationSpeed = 0;
             }
-            double forwardSpeed = distancePID.calculate(targetRange, 0);
+            // Check if we are close enough (within target distance)
+            boolean distanceError = targetRange < targetDistanceMeters;
+
+            // Check if we are inside the allowed tolerance range
+            boolean withinTolerance = Math
+                    .abs(targetRange - targetDistanceMeters) < Constants.VisionConstants.Coral.distance_tolerance;
+            System.out.println("distanceError: " + distanceError);
+            System.out.println("targetRange: " + targetRange);
+            System.out.println("targetDistanceMeters: " + targetDistanceMeters);
+            System.out
+                    .println("targetRange - targetDistanceMeters < Constants.VisionConstants.Coral.distance_tolerance: "
+                            + Math.abs(targetRange - targetDistanceMeters) + " < "
+                            + Constants.VisionConstants.Coral.distance_tolerance);
+            System.out.println("withinTolerance: " + withinTolerance);
+            double forwardSpeed = distancePID.calculate(targetRange);
             if (distancePID.atSetpoint()) {
-                forwardSpeed = 0;
+                forwardSpeed = 0; // Stops movement when within tolerance
             }
             double strafeSpeed = (Math.abs(lateralOffset) > Constants.VisionConstants.Coral.strafeThreshold)
                     ? strafePID.calculate(lateralOffset, 0)
@@ -126,7 +140,7 @@ public class AlignToReefCoralCommand extends Command {
             if (strafePID.atSetpoint()) {
                 rotationSpeed = 0;
             }
-            // ✅ Enforce max speed limits
+            // Enforce max speed limits
             forwardSpeed = Math.max(-Constants.VisionConstants.Coral.maxForwardSpeed,
                     Math.min(Constants.VisionConstants.Coral.maxForwardSpeed, forwardSpeed));
             strafeSpeed = Math.max(-Constants.VisionConstants.Coral.maxStrafeSpeed,
@@ -134,20 +148,21 @@ public class AlignToReefCoralCommand extends Command {
             rotationSpeed = Math.max(-Constants.VisionConstants.Coral.maxRotationSpeed,
                     Math.min(Constants.VisionConstants.Coral.maxRotationSpeed, rotationSpeed));
 
-            // ✅ Apply corrected movement values
+            // Apply corrected movement values
             swerve.drive(new ChassisSpeeds(forwardSpeed, strafeSpeed, rotationSpeed));
 
-            // ✅ Log PID values to SmartDashboard
-            SmartDashboard.putBoolean("Vision/Valid-Target", hasValidTarget);
+            // Log PID values to SmartDashboard
+            SmartDashboard.putBoolean("Vision/03 Valid-Target", hasValidTarget);
             SmartDashboard.putNumber("PID-Vision/10 PID-Forward Speed", forwardSpeed);
             SmartDashboard.putNumber("PID-Vision/11 PID-Strafe Speed", strafeSpeed);
             SmartDashboard.putNumber("PID-Vision/12 PID-Rotation Speed", rotationSpeed);
+
         } else {
             // No valid target → Stop the robot
             swerve.drive(new ChassisSpeeds(0, 0, 0));
 
             hasValidTarget = false;
-            SmartDashboard.putBoolean("Vision/Valid-Target", hasValidTarget);
+            SmartDashboard.putBoolean("Vision/03 Valid-Target", hasValidTarget);
         }
     }
 

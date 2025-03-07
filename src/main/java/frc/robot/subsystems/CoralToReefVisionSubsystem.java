@@ -82,11 +82,11 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
             // ✅ Log values to SmartDashboard
             SmartDashboard.putBoolean("Vision/01 AprilTag Found", true);
             SmartDashboard.putNumber("Vision/02 AprilTag ID", target.getFiducialId());
-            SmartDashboard.putNumber("Vision/03 Yaw (degrees)", target.getYaw());
-            SmartDashboard.putNumber("Vision/04 Distance (m)", smoothedDistance); // Use smoothed distance!
-            SmartDashboard.putNumber("Vision/05 Raw Lateral Offset (m)", normalLateralOffset);
-            SmartDashboard.putNumber("Vision/06 Adjusted Lateral Offset (Left Align)", adjustedLateralOffsetLeft);
-            SmartDashboard.putNumber("Vision/07 Adjusted Lateral Offset (Right Align)", adjustedLateralOffsetRight);
+            SmartDashboard.putNumber("Vision/04 Yaw (degrees)", target.getYaw());
+            SmartDashboard.putNumber("Vision/05 Distance (m)", smoothedDistance); // Use smoothed distance!
+            SmartDashboard.putNumber("Vision/06 Raw Lateral Offset (m)", normalLateralOffset);
+            SmartDashboard.putNumber("Vision/07 Adjusted Lateral Offset (Left Align)", adjustedLateralOffsetLeft);
+            SmartDashboard.putNumber("Vision/08 Adjusted Lateral Offset (Right Align)", adjustedLateralOffsetRight);
         } else {
             SmartDashboard.putBoolean("Vision/01 AprilTag Found", false);
         }
