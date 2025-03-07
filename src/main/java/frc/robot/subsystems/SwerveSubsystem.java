@@ -259,21 +259,25 @@ public class SwerveSubsystem extends SubsystemBase {
     return gyro.getAngle();
   }
 
+  private int loopCounter = 0;
+
   @Override
   public void periodic() {
     poseEstimator.update(
         Rotation2d.fromDegrees(getGyroYaw()),
         swerveDrive.getModulePositions());
 
-    SmartDashboard.putNumber("Gyro Yaw", getGyroYaw());
-    SmartDashboard.putNumber("Gyro Angle", getGyroAngle());
-
     Pose2d estimatedPose = poseEstimator.getEstimatedPosition();
-    SmartDashboard.putNumber("Odometry X", estimatedPose.getX());
-    SmartDashboard.putNumber("Odometry Y", estimatedPose.getY());
-    SmartDashboard.putNumber("Odometry Heading", estimatedPose.getRotation().getDegrees());
-    SmartDashboard.putString("Odometry Pose: ", estimatedPose.toString());
-    SmartDashboard.putString("PathPlanner Pose ", getPose().toString());
+    if (loopCounter % 3 == 0) { // Run every 3 cycles (~60ms instead of every 20ms)
+      SmartDashboard.putNumber("Gyro Yaw", getGyroYaw());
+      SmartDashboard.putNumber("Gyro Angle", getGyroAngle());
+      SmartDashboard.putNumber("Odometry X", estimatedPose.getX());
+      SmartDashboard.putNumber("Odometry Y", estimatedPose.getY());
+      SmartDashboard.putNumber("Odometry Heading", estimatedPose.getRotation().getDegrees());
+      SmartDashboard.putString("Odometry Pose: ", estimatedPose.toString());
+      SmartDashboard.putString("PathPlanner Pose ", getPose().toString());
+    }
+    loopCounter++;
 
     var positions = swerveDrive.getModulePositions();
     for (int i = 0; i < 4; i++) {

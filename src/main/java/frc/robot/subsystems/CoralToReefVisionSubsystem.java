@@ -117,13 +117,21 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
         return Optional.empty(); // No valid target found
     }
 
+    private int loopCounter = 0;
+
     @Override
     public void periodic() {
-        logVisionData();
+        if (loopCounter % 3 == 0) { // Run every 3 cycles (~60ms instead of every 20ms)
+            logVisionData();
+        }
+        loopCounter++;
     }
 
     @Override
     public void simulationPeriodic() {
-        logVisionData();
+        if (loopCounter % 3 == 0) { // Run every 3 cycles (~60ms instead of every 20ms)
+            logVisionData();
+        }
+        loopCounter++;
     }
 }
