@@ -12,11 +12,15 @@ import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
+
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Configs;
 import frc.robot.Constants.ClimbConstants;
 import frc.robot.Constants.ClimbSetPoints;
+import frc.robot.Constants.IntakeSetpoints;
 
 public class Climber extends SubsystemBase {
 
@@ -45,7 +49,7 @@ public class Climber extends SubsystemBase {
     climberController.setReference(climberCurrentTarget, ControlType.kMAXMotionPositionControl);
   }
 
-  public Command setSetpointCommand(Setpoint setpoint){
+ /*  public Command setSetpointCommand(Setpoint setpoint){
     return this.runOnce(
       () -> {
       switch(setpoint){
@@ -58,6 +62,23 @@ public class Climber extends SubsystemBase {
       }
     });
   } 
+  */
+
+  public Command runClimberCommand() {
+    return new RunCommand(
+            () -> setClimberPower(ClimbSetPoints.kIn), this)
+            .finallyDo(interrupted -> setClimberPower(0));
+}
+  public Command runReverseClimberCommand() {
+    return new RunCommand(
+      () -> setClimberPower(ClimbSetPoints.kOut), this)
+      .finallyDo(interrupted -> setClimberPower(0));
+  }
+  
+  
+    public void setClimberPower(double power){
+    climberMotor.set(power);
+  }
 
   @Override
   public void periodic() {

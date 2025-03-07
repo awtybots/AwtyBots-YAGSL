@@ -105,8 +105,8 @@ public final class Constants {
   }
 
   public static final class WristSetpoints{
-    public static final double FeederStation = -1;
-    public static final double L1 = 3;
+    public static final double FeederStation = -2;
+    public static final double L1 = 2;
     public static final double AlgaeLow = -3;
     public static final double L2 = 0;
     public static final double AlgaeHigh = -3;
@@ -128,6 +128,8 @@ public final class Constants {
     public static final double kExtend = 0.5;
     public static final double kRetract = -0.5;
     public static final double kHold = 0.0;
+    public static final double kIn = 0.5;
+    public static final double kOut = -0.5;
   }
 
   public static final class FunnelIntakeSetpoints{
