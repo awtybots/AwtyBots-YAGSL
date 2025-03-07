@@ -268,7 +268,7 @@ public class SwerveSubsystem extends SubsystemBase {
         swerveDrive.getModulePositions());
 
     Pose2d estimatedPose = poseEstimator.getEstimatedPosition();
-    if (loopCounter % 3 == 0) { // Run every 3 cycles (~60ms instead of every 20ms)
+    if (loopCounter % 10 == 0) { // Run every 10 cycle, updates every ~200 ms
       SmartDashboard.putNumber("Gyro Yaw", getGyroYaw());
       SmartDashboard.putNumber("Gyro Angle", getGyroAngle());
       SmartDashboard.putNumber("Odometry X", estimatedPose.getX());
