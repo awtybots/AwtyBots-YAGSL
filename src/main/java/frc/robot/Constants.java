@@ -18,7 +18,7 @@ import edu.wpi.first.math.util.Units;
  */
 public final class Constants {
 
-  public static final double maxSpeed = Units.feetToMeters(15.76);
+  public static final double maxSpeed = Units.feetToMeters(18.84);
   
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
@@ -80,6 +80,10 @@ public final class Constants {
     public static final int FunnelRIntake = 16;
   }
 
+  public static final class ClimbConstants{
+    public static final int ClimbMotor = 21;
+  }
+
   public static final class ElevatorSetpoints{
     public static final int FeederStation = 0;
     public static final int L1 = 15;
@@ -113,6 +117,17 @@ public final class Constants {
   public static final class FunnelWristSetpoints{
     public static final double FeederStation = -2;
     public static final double Climb = 12;
+    public static final double kForward = 0.5;
+    public static final double kReverse = -.5;
+    public static final double kHold = 0.0;
+  }
+
+  public static final class ClimbSetPoints{
+    public static final double start = 0;
+    public static final double climb = 30;
+    public static final double kExtend = 0.5;
+    public static final double kRetract = -0.5;
+    public static final double kHold = 0.0;
   }
 
   public static final class FunnelIntakeSetpoints{
@@ -152,6 +167,6 @@ public final class Constants {
   }
 
   public static final class NeoMotorConstants {
-    public static final double kFreeSpeedRpm = 5676;
+    public static final double kFreeSpeedRpm = 6784;
   }
 }

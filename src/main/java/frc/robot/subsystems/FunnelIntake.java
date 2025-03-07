@@ -8,19 +8,12 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkMax;
-import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Configs;
-import frc.robot.Constants.ArmSetpoints;
-import frc.robot.Constants.ElevatorSetpoints;
 import frc.robot.Constants.FunnelConstants;
 import frc.robot.Constants.FunnelIntakeSetpoints;
 import frc.robot.Constants.FunnelWristSetpoints;
-import frc.robot.Constants.WristSetpoints;
-import frc.robot.subsystems.CoralSubsystem.Setpoint;
 
 public class FunnelIntake extends SubsystemBase {
   public enum Setpoint{
@@ -30,7 +23,7 @@ public class FunnelIntake extends SubsystemBase {
  // funnel setup
   private SparkFlex l_funnelMotor = new SparkFlex(FunnelConstants.FunnelLIntake, MotorType.kBrushless);
   private SparkFlex r_funnelMotor = new SparkFlex(FunnelConstants.FunnelRIntake, MotorType.kBrushless);
-  private SparkMax funnelWrist = new SparkMax(FunnelConstants.FunnelWrist, MotorType.kBrushless);
+  private SparkFlex funnelWrist = new SparkFlex(FunnelConstants.FunnelWrist, MotorType.kBrushless);
   private SparkClosedLoopController funnelWristController = funnelWrist.getClosedLoopController();
   private RelativeEncoder funnelWristEncoder = funnelWrist.getEncoder();
   private double funnelWristCurrentTarget;
@@ -87,7 +80,7 @@ public class FunnelIntake extends SubsystemBase {
   
 
   public void periodic() {
-    // This method will be called once per scheduler run
+    moveToSetpoint();
   }
 
 

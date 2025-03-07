@@ -62,8 +62,8 @@ public final class Configs {
     public static final class CoralSubsystem {
         public static final SparkFlexConfig l_elevatorMotorConfig = new SparkFlexConfig();
         public static final SparkFlexConfig r_elevatorMotorConfig = new SparkFlexConfig(); 
-        public static final SparkMaxConfig r_armMotorConfig = new SparkMaxConfig();
-        public static final SparkMaxConfig l_armMotorConfig = new SparkMaxConfig();
+        public static final SparkFlexConfig r_armMotorConfig = new SparkFlexConfig();
+        public static final SparkFlexConfig l_armMotorConfig = new SparkFlexConfig();
         public static final SparkFlexConfig wristMotorConfig = new SparkFlexConfig();
         public static final SparkFlexConfig intakeMotorConfig = new SparkFlexConfig();
 
@@ -140,7 +140,7 @@ public final class Configs {
     public static final class FunnelIntakeSubsystem {
         public static final SparkFlexConfig l_funnelMotorConfig = new SparkFlexConfig();
         public static final SparkFlexConfig r_funnelMotorConfig = new SparkFlexConfig(); 
-        public static final SparkMaxConfig funnelWristMotorConfig = new SparkMaxConfig();
+        public static final SparkFlexConfig funnelWristMotorConfig = new SparkFlexConfig();
 
         static{
 
@@ -157,6 +157,22 @@ public final class Configs {
                 l_funnelMotorConfig.idleMode(IdleMode.kCoast).smartCurrentLimit(50);
                 r_funnelMotorConfig.inverted(true).idleMode(IdleMode.kCoast).smartCurrentLimit(50);
 
+        }
+    };
+
+    public static final class ClimberSubsystem {
+        public static final SparkFlexConfig climberMotorConfig = new SparkFlexConfig();
+
+        static{
+            climberMotorConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(40).voltageCompensation(12);
+            climberMotorConfig.closedLoop.
+            feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+            .p(0.1)
+            .outputRange(-1, 1)
+            .maxMotion
+            .maxVelocity(2000)
+            .maxAcceleration(10000)
+            .allowedClosedLoopError(.25);  
         }
     };
 }
