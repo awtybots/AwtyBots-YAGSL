@@ -80,15 +80,15 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
             double adjustedLateralOffsetRight = normalLateralOffset - Constants.VisionConstants.Coral.rightOffsetMeters;
 
             // ✅ Log values to SmartDashboard
-            SmartDashboard.putBoolean("Vision/AprilTag Found", true);
-            SmartDashboard.putNumber("Vision/AprilTag ID", target.getFiducialId());
-            SmartDashboard.putNumber("Vision/Yaw (degrees)", target.getYaw());
-            SmartDashboard.putNumber("Vision/Distance (m)", smoothedDistance); // Use smoothed distance!
-            SmartDashboard.putNumber("Vision/Raw Lateral Offset (m)", normalLateralOffset);
-            SmartDashboard.putNumber("Vision/Adjusted Lateral Offset (Left Align)", adjustedLateralOffsetLeft);
-            SmartDashboard.putNumber("Vision/Adjusted Lateral Offset (Right Align)", adjustedLateralOffsetRight);
+            SmartDashboard.putBoolean("Vision/01 AprilTag Found", true);
+            SmartDashboard.putNumber("Vision/02 AprilTag ID", target.getFiducialId());
+            SmartDashboard.putNumber("Vision/03 Yaw (degrees)", target.getYaw());
+            SmartDashboard.putNumber("Vision/04 Distance (m)", smoothedDistance); // Use smoothed distance!
+            SmartDashboard.putNumber("Vision/05 Raw Lateral Offset (m)", normalLateralOffset);
+            SmartDashboard.putNumber("Vision/06 Adjusted Lateral Offset (Left Align)", adjustedLateralOffsetLeft);
+            SmartDashboard.putNumber("Vision/07 Adjusted Lateral Offset (Right Align)", adjustedLateralOffsetRight);
         } else {
-            SmartDashboard.putBoolean("Vision/AprilTag Found", false);
+            SmartDashboard.putBoolean("Vision/01 AprilTag Found", false);
         }
     }
 

@@ -51,17 +51,17 @@ public class AlignToReefCoralCommand extends Command {
         addRequirements(swerve, vision);
 
         // ✅ Initialize PID Constants on SmartDashboard
-        SmartDashboard.putNumber("PID/Distance kP", Constants.VisionConstants.Coral.DistancekP);
-        SmartDashboard.putNumber("PID/Distance kI", Constants.VisionConstants.Coral.DistancekI);
-        SmartDashboard.putNumber("PID/Distance kD", Constants.VisionConstants.Coral.DistancekD);
+        SmartDashboard.putNumber("PID-Vision/01 Distance kP", Constants.VisionConstants.Coral.DistancekP);
+        SmartDashboard.putNumber("PID-Vision/02 Distance kI", Constants.VisionConstants.Coral.DistancekI);
+        SmartDashboard.putNumber("PID-Vision/03 Distance kD", Constants.VisionConstants.Coral.DistancekD);
 
-        SmartDashboard.putNumber("PID/Strafe kP", Constants.VisionConstants.Coral.StrafekP);
-        SmartDashboard.putNumber("PID/Strafe kI", Constants.VisionConstants.Coral.StrafekI);
-        SmartDashboard.putNumber("PID/Strafe kD", Constants.VisionConstants.Coral.StrafekD);
+        SmartDashboard.putNumber("PID-Vision/04 Strafe kP", Constants.VisionConstants.Coral.StrafekP);
+        SmartDashboard.putNumber("PID-Vision/05 Strafe kI", Constants.VisionConstants.Coral.StrafekI);
+        SmartDashboard.putNumber("PID-Vision/06 Strafe kD", Constants.VisionConstants.Coral.StrafekD);
 
-        SmartDashboard.putNumber("PID/Rotation kP", Constants.VisionConstants.Coral.RotationkP);
-        SmartDashboard.putNumber("PID/Rotation kI", Constants.VisionConstants.Coral.RotationkI);
-        SmartDashboard.putNumber("PID/Rotation kD", Constants.VisionConstants.Coral.RotationkD);
+        SmartDashboard.putNumber("PID-Vision/07 Rotation kP", Constants.VisionConstants.Coral.RotationkP);
+        SmartDashboard.putNumber("PID-Vision/08 Rotation kI", Constants.VisionConstants.Coral.RotationkI);
+        SmartDashboard.putNumber("PID-Vision/09 Rotation kD", Constants.VisionConstants.Coral.RotationkD);
 
         // ✅ Initialize PID Controllers (will be updated dynamically in execute())
         distancePID = new PIDController(Constants.VisionConstants.Coral.DistancekP,
@@ -99,6 +99,7 @@ public class AlignToReefCoralCommand extends Command {
         if (!VALID_APRILTAG_IDS.contains(detectedTagId)) {
             swerve.drive(new ChassisSpeeds(0, 0, 0)); // Stop movement if tag is not valid
             hasValidTarget = false;
+            SmartDashboard.putBoolean("Vision/Valid-Target", hasValidTarget);
             return;
         }
 
@@ -129,13 +130,16 @@ public class AlignToReefCoralCommand extends Command {
             swerve.drive(new ChassisSpeeds(forwardSpeed, strafeSpeed, rotationSpeed));
 
             // ✅ Log PID values to SmartDashboard
-            SmartDashboard.putNumber("PID-Forward Speed", forwardSpeed);
-            SmartDashboard.putNumber("PID-Strafe Speed", strafeSpeed);
-            SmartDashboard.putNumber("PID-Rotation Speed", rotationSpeed);
+            SmartDashboard.putBoolean("Vision/Valid-Target", hasValidTarget);
+            SmartDashboard.putNumber("PID-Vision/10 PID-Forward Speed", forwardSpeed);
+            SmartDashboard.putNumber("PID-Vision/11 PID-Strafe Speed", strafeSpeed);
+            SmartDashboard.putNumber("PID-Vision/12 PID-Rotation Speed", rotationSpeed);
         } else {
             // No valid target → Stop the robot
             swerve.drive(new ChassisSpeeds(0, 0, 0));
+
             hasValidTarget = false;
+            SmartDashboard.putBoolean("Vision/Valid-Target", hasValidTarget);
         }
     }
 
