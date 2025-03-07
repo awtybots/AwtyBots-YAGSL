@@ -19,7 +19,6 @@ public class AlignToReefCoralCommand extends Command {
     private final SwerveSubsystem swerve;
     private final CoralToReefVisionSubsystem vision;
     private final boolean alignLeft;
-    private final double targetDistanceMeters;
 
     // PID Controllers
     private final PIDController distancePID;
@@ -31,23 +30,22 @@ public class AlignToReefCoralCommand extends Command {
     // Define allowed AprilTag IDs
     private static final Set<Integer> VALID_APRILTAG_IDS = Set.of(1, 6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22);
 
+    private final double targetDistanceMeters = Constants.VisionConstants.Coral.distanceThreshold;
+
     /**
      * Creates a new AlignToAprilTagCommand.
      *
-     * @param swerve               The drivetrain subsystem.
-     * @param vision               The vision subsystem.
-     * @param alignLeft            `true` to align to left reef bar, `false` for the
-     *                             right.
-     * @param targetDistanceMeters Defines how close you want the robot to target
+     * @param swerve    The drivetrain subsystem.
+     * @param vision    The vision subsystem.
+     * @param alignLeft `true` to align to left reef bar, `false` for the
+     *                  right.
      * 
      */
     public AlignToReefCoralCommand(SwerveSubsystem swerve,
-            CoralToReefVisionSubsystem vision, boolean alignLeft,
-            double targetDistanceMeters) {
+            CoralToReefVisionSubsystem vision, boolean alignLeft) {
         this.swerve = swerve;
         this.vision = vision;
         this.alignLeft = alignLeft;
-        this.targetDistanceMeters = targetDistanceMeters;
         addRequirements(swerve, vision);
 
         // Initialize PID Constants on SmartDashboard
@@ -75,13 +73,13 @@ public class AlignToReefCoralCommand extends Command {
                 Constants.VisionConstants.Coral.RotationkD);
 
         // Set Tolerances
-        distancePID.setTolerance(Constants.VisionConstants.Coral.distance_tolerance);
-        strafePID.setTolerance(Constants.VisionConstants.Coral.strafe_tolerance);
-        rotationPID.setTolerance(Constants.VisionConstants.Coral.rotation_tolerance);
+        distancePID.setTolerance(Constants.VisionConstants.Coral.distanceTolerance);
+        strafePID.setTolerance(Constants.VisionConstants.Coral.strafeTolerance);
+        rotationPID.setTolerance(Constants.VisionConstants.Coral.rotationTolerance);
 
-        distancePID.setSetpoint(targetDistanceMeters);
-        strafePID.setSetpoint(0.0);
-        rotationPID.setSetpoint(0.0);
+        distancePID.setSetpoint(Constants.VisionConstants.Coral.distanceThreshold);
+        strafePID.setSetpoint(Constants.VisionConstants.Coral.strafeThreshold);
+        rotationPID.setSetpoint(Constants.VisionConstants.Coral.rotationThreshold);
     }
 
     @Override
@@ -121,32 +119,47 @@ public class AlignToReefCoralCommand extends Command {
 
             // Check if we are inside the allowed tolerance range
             boolean withinTolerance = Math
-                    .abs(targetRange - targetDistanceMeters) < Constants.VisionConstants.Coral.distance_tolerance;
-            System.out.println("distanceError: " + distanceError);
-            System.out.println("targetRange: " + targetRange);
-            System.out.println("targetDistanceMeters: " + targetDistanceMeters);
-            System.out
-                    .println("targetRange - targetDistanceMeters < Constants.VisionConstants.Coral.distance_tolerance: "
-                            + Math.abs(targetRange - targetDistanceMeters) + " < "
-                            + Constants.VisionConstants.Coral.distance_tolerance);
-            System.out.println("withinTolerance: " + withinTolerance);
+                    .abs(targetRange - targetDistanceMeters) < Constants.VisionConstants.Coral.distanceTolerance;
+            if (Constants.DebugMode) {
+                System.out.println("distanceError: " + distanceError);
+                System.out.println("targetRange: " + targetRange);
+                System.out.println("targetDistanceMeters: " + targetDistanceMeters);
+                System.out
+                        .println(
+                                "targetRange - targetDistanceMeters < Constants.VisionConstants.Coral.distanceTolerance: "
+                                        + Math.abs(targetRange - targetDistanceMeters) + " < "
+                                        + Constants.VisionConstants.Coral.distanceTolerance);
+                System.out.println("withinTolerance: " + withinTolerance);
+            }
+
             double forwardSpeed = distancePID.calculate(targetRange);
             if (distancePID.atSetpoint()) {
                 forwardSpeed = 0; // Stops movement when within tolerance
             }
-            double strafeSpeed = (Math.abs(lateralOffset) > Constants.VisionConstants.Coral.strafeThreshold)
-                    ? strafePID.calculate(lateralOffset, 0)
-                    : 0;
+            double strafeSpeed = strafePID.calculate(lateralOffset, 0);
             if (strafePID.atSetpoint()) {
-                rotationSpeed = 0;
+                strafeSpeed = 0;
             }
+
             // Enforce max speed limits
-            forwardSpeed = Math.max(-Constants.VisionConstants.Coral.maxForwardSpeed,
-                    Math.min(Constants.VisionConstants.Coral.maxForwardSpeed, forwardSpeed));
-            strafeSpeed = Math.max(-Constants.VisionConstants.Coral.maxStrafeSpeed,
-                    Math.min(Constants.VisionConstants.Coral.maxStrafeSpeed, strafeSpeed));
-            rotationSpeed = Math.max(-Constants.VisionConstants.Coral.maxRotationSpeed,
-                    Math.min(Constants.VisionConstants.Coral.maxRotationSpeed, rotationSpeed));
+            if (targetRange >= Constants.VisionConstants.Coral.distanceSlowZone) {
+                forwardSpeed = Math.min(forwardSpeed, 1.0); // Allow full power
+            } else {
+                forwardSpeed = Math.max(-Constants.VisionConstants.Coral.maxForwardSpeed,
+                        Math.min(Constants.VisionConstants.Coral.maxForwardSpeed, forwardSpeed));
+            }
+
+            // Full power if far from target laterally, slow down when close
+            if (Math.abs(lateralOffset) < Constants.VisionConstants.Coral.strafeSlowZone) {
+                strafeSpeed = Math.max(-Constants.VisionConstants.Coral.maxStrafeSpeed,
+                        Math.min(Constants.VisionConstants.Coral.maxStrafeSpeed, strafeSpeed));
+            }
+
+            // Full power if far from target yaw, slow down when close
+            if (Math.abs(targetYaw) < Constants.VisionConstants.Coral.rotationSlowZone) {
+                rotationSpeed = Math.max(-Constants.VisionConstants.Coral.maxRotationSpeed,
+                        Math.min(Constants.VisionConstants.Coral.maxRotationSpeed, rotationSpeed));
+            }
 
             // Apply corrected movement values
             swerve.drive(new ChassisSpeeds(forwardSpeed, strafeSpeed, rotationSpeed));

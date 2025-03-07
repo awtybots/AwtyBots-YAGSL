@@ -42,7 +42,7 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   public final SwerveSubsystem drivebase = new SwerveSubsystem(
       new File(Filesystem.getDeployDirectory(), "swerve"));
-  private final CoralToReefVisionSubsystem visionSubsystem = new CoralToReefVisionSubsystem(drivebase);
+  private final CoralToReefVisionSubsystem visionSubsystem = new CoralToReefVisionSubsystem();
   private final CoralSubsystem m_coralSubsystem = new CoralSubsystem();
   private final FunnelIntake m_funnelIntakeSubsystem = new FunnelIntake();
   private final SendableChooser<Command> autoChooser;
@@ -154,19 +154,10 @@ public class RobotContainer {
     // vision buttons
     // align left levels 1-3
     m_driverController.leftBumper().whileTrue(
-        new AlignToReefCoralCommand(drivebase, visionSubsystem, true,
-            Constants.VisionConstants.Coral.targetDistanceMeters));
+        new AlignToReefCoralCommand(drivebase, visionSubsystem, true));
     // align right levels 1-3
     m_driverController.rightBumper()
-        .whileTrue(new AlignToReefCoralCommand(drivebase, visionSubsystem, false,
-            Constants.VisionConstants.Coral.targetDistanceMeters));
-    // align left levels 4
-    m_driverController.x().whileTrue(
-        new AlignToReefCoralCommand(drivebase, visionSubsystem, true,
-            Constants.VisionConstants.Coral.targetDistanceMetersLevel4));
-    // align right levels 4
-    m_driverController.y().whileTrue(new AlignToReefCoralCommand(drivebase, visionSubsystem, false,
-        Constants.VisionConstants.Coral.targetDistanceMetersLevel4));
+        .whileTrue(new AlignToReefCoralCommand(drivebase, visionSubsystem, false));
 
     //////////////////////////////////////////////
     /// operator controller bindings ////////////

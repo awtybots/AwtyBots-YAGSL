@@ -164,12 +164,12 @@ public final class Constants {
       // Camera's
       public static final String limelightAprilTagCamera = "OV9281";
       public static final double cameraMountX = 0.35; // How far forwards/backwards is the camera mounted from center
-      public static final double cameraMountY = 0.35; // 0.2667; // How far left/right is the camera mounted from center
+      public static final double cameraMountY = 0.35; // How far left/right is the camera mounted from center
       public static final double cameraMountZ = 0.381; // This is in meters
       public static final double cameraMountAngle = 0.0; // This is in degrees
       public static final double maxForwardSpeed = 0.5; // Max forward/backward speed (m/s)
       public static final double maxStrafeSpeed = 0.5; // Max strafe speed (m/s)
-      public static final double maxRotationSpeed = 1; // Max rotation speed (rad/s)
+      public static final double maxRotationSpeed = 0.5; // Max rotation speed (rad/s)
       public static final double DistancekP = 0.8;
       public static final double DistancekI = 0.08;
       public static final double DistancekD = 0.05;
@@ -179,16 +179,21 @@ public final class Constants {
       public static final double RotationkP = 0.8;
       public static final double RotationkI = 0.0;
       public static final double RotationkD = 0.02;
-      public static final double targetDistanceMeters = 1.5; // Default: 0.1 meter away from target
-      public static final double targetDistanceMetersLevel4 = 1.0; // Target distance level 4
-      public static final double distance_tolerance = 0.05; // How off are we willing to tolerate
-      public static final double slowZone = 0.4; // Slow down speed of robot if within 40cm of target
-      public static final double strafe_tolerance = 0.05; // 5 cm tolerance
-      public static final double strafeThreshold = 0.1; // Don't strafe if within 10cm of lateral offset
-      public static final double rotation_tolerance = 2.0; // 2 degrees for turning left and right
-      public static final double yawThreshold = 3.0; // Only rotate if yaw error is larger than 3 degrees
-      public static final double leftOffsetMeters = 0; // Adjust how far left to align
-      public static final double rightOffsetMeters = 0; // Adjust how far right to align
+
+      public static final double distanceThreshold = 0.3; // How far away do we want to be from aprilTag
+      public static final double distanceTolerance = 0.1; // How off are we willing to tolerate
+      public static final double distanceSlowZone = 1; // Slow down forward/backward speed of robot if within 1m of
+                                                       // aprilTag
+      public static final double strafeThreshold = 0.0; // Don't strafe if within 0cm of lateral offset
+      public static final double strafeTolerance = 0.05; // 5 cm tolerance for strafe
+      public static final double strafeSlowZone = 1; // Slow down strafe speed of robot if within 1m left or right of
+                                                     // the aprilTag
+      public static final double rotationThreshold = 0.0; // Don't rotate if within 0 degrees of aprilTag
+      public static final double rotationTolerance = 1.5; // 2 degrees for turning left and right
+      public static final double rotationSlowZone = 10; // Slow down rotation speed of robot if within 10 degrees turned
+                                                        // left or right of the aprilTag
+      public static final double leftOffsetMeters = 0.2; // Adjust how far left to align to reach left bar on reef
+      public static final double rightOffsetMeters = 0.2; // Adjust how far right to align to reach right bar on reef
     }
 
     public static final class FeederStation {
@@ -212,9 +217,9 @@ public final class Constants {
       public static final double RotationkD = 0.02;
       public static final double targetDistanceMeters = 2.0; // Default: 2 meter away from target
       public static final double targetDistanceMetersLevel4 = 1.0; // Target distance level 4
-      public static final double distance_tolerance = 0.02; // How off are we willing to tolerate
-      public static final double strafe_tolerance = 0.05; // 5 cm tolerance
-      public static final double rotation_tolerance = 2.0; // 2 degrees for turning left and right
+      public static final double distanceTolerance = 0.02; // How off are we willing to tolerate
+      public static final double strafeTolerance = 0.05; // 5 cm tolerance
+      public static final double rotationTolerance = 2.0; // 2 degrees for turning left and right
       public static final double leftOffsetMeters = 1.0; // Adjust how far left to align
       public static final double rightOffsetMeters = 1.0; // Adjust how far right to align
 
@@ -239,11 +244,11 @@ public final class Constants {
       public static final double RotationkP = 0.8;
       public static final double RotationkI = 0.0;
       public static final double RotationkD = 0.02;
-      public static final double targetDistanceMeters = 2.0; // Default: 2 meter away from target
+      public static final double targetDistanceMeters = 0.3; // Default: 2 meter away from target
       public static final double targetDistanceMetersLevel4 = 1.0; // Target distance level 4
-      public static final double distance_tolerance = 0.02; // How off are we willing to tolerate
-      public static final double strafe_tolerance = 0.05; // 5 cm tolerance
-      public static final double rotation_tolerance = 2.0; // 2 degrees for turning left and right
+      public static final double distanceTolerance = 1; // How off are we willing to tolerate
+      public static final double strafeTolerance = 0.05; // 5 cm tolerance
+      public static final double rotationTolerance = 2.0; // 2 degrees for turning left and right
       public static final double leftOffsetMeters = 1.0; // Adjust how far left to align
       public static final double rightOffsetMeters = 1.0; // Adjust how far right to align
 
