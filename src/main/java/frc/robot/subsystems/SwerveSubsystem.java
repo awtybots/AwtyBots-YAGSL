@@ -44,6 +44,7 @@ public class SwerveSubsystem extends SubsystemBase {
   private final SwerveDrive swerveDrive;
   private final SwerveDrivePoseEstimator poseEstimator;
   private final double headingBias = -2; // set this if there is alot of drift on pathplanner
+
   public SwerveSubsystem(File directory) {
     try {
       swerveDrive = new SwerveParser(directory)
@@ -59,13 +60,13 @@ public class SwerveSubsystem extends SubsystemBase {
       throw new RuntimeException(e);
     }
 
-    setupPathPlanner();
     poseEstimator = new SwerveDrivePoseEstimator(
-      getKinematics(), 
-      Rotation2d.fromDegrees(getGyroYaw()), 
-      swerveDrive.getModulePositions(), 
-      new Pose2d(0.0,0.0, new Rotation2d())
-      );
+        getKinematics(),
+        Rotation2d.fromDegrees(getGyroYaw()),
+        swerveDrive.getModulePositions(),
+        new Pose2d(0.0, 0.0, new Rotation2d()));
+
+    setupPathPlanner();
   }
 
   public SwerveDrive getSwerveDrive() {
@@ -101,16 +102,14 @@ public class SwerveSubsystem extends SubsystemBase {
     Rotation2d correctionHeading = Rotation2d.fromDegrees(getGyroYaw() - fieldOrientedOffset + headingBias);
 
     Pose2d biasedPose = new Pose2d(
-      initialHolonomicPose.getTranslation(),
-      correctionHeading
-    );
+        initialHolonomicPose.getTranslation(),
+        correctionHeading);
 
     swerveDrive.resetOdometry(biasedPose);
     poseEstimator.resetPosition(
-      correctionHeading,
-      swerveDrive.getModulePositions(),
-      biasedPose
-    );
+        correctionHeading,
+        swerveDrive.getModulePositions(),
+        biasedPose);
     System.out.println("Odometry Reset to: " + biasedPose);
   }
 
@@ -138,10 +137,9 @@ public class SwerveSubsystem extends SubsystemBase {
             double flippedOmega = -speedsRobotRelative.omegaRadiansPerSecond;
 
             ChassisSpeeds correctedSpeeds = new ChassisSpeeds(
-              speedsRobotRelative.vxMetersPerSecond,
-              speedsRobotRelative.vyMetersPerSecond,
-              flippedOmega
-            );
+                speedsRobotRelative.vxMetersPerSecond,
+                speedsRobotRelative.vyMetersPerSecond,
+                flippedOmega);
 
             if (enableFeedforward) {
               swerveDrive.drive(
@@ -212,11 +210,10 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   public void stop() {
-    drive(new ChassisSpeeds(0,0,0));
+    drive(new ChassisSpeeds(0, 0, 0));
 
     swerveDrive.setModuleStates(
-      swerveDrive.kinematics.toSwerveModuleStates(new ChassisSpeeds(0,0,0)), true
-      );
+        swerveDrive.kinematics.toSwerveModuleStates(new ChassisSpeeds(0, 0, 0)), true);
   }
 
   /**
@@ -231,10 +228,9 @@ public class SwerveSubsystem extends SubsystemBase {
   public Pose2d getPose() {
     Pose2d rawPose = swerveDrive.getPose();
     Pose2d baisedPose = new Pose2d(
-      rawPose.getTranslation(),
-      rawPose.getRotation().plus(Rotation2d.fromDegrees(headingBias))
-    );
-    //return swerveDrive.getPose();
+        rawPose.getTranslation(),
+        rawPose.getRotation().plus(Rotation2d.fromDegrees(headingBias)));
+    // return swerveDrive.getPose();
     return baisedPose;
   }
 
@@ -251,6 +247,10 @@ public class SwerveSubsystem extends SubsystemBase {
     swerveDrive.zeroGyro();
   }
 
+  public void addVisionMeasurement(Pose2d visionPose, double timestamp) {
+    poseEstimator.addVisionMeasurement(visionPose, timestamp);
+  }
+
   public double getGyroYaw() {
     return gyro.getYaw();
   }
@@ -259,24 +259,25 @@ public class SwerveSubsystem extends SubsystemBase {
     return gyro.getAngle();
   }
 
+  private int loopCounter = 0;
+
   @Override
   public void periodic() {
     poseEstimator.update(
-      Rotation2d.fromDegrees(getGyroYaw()),
-      swerveDrive.getModulePositions() 
-      );
-
-    SmartDashboard.putNumber("Gyro Yaw", getGyroYaw());
-    SmartDashboard.putNumber("Gyro Angle", getGyroAngle());
+        Rotation2d.fromDegrees(getGyroYaw()),
+        swerveDrive.getModulePositions());
 
     Pose2d estimatedPose = poseEstimator.getEstimatedPosition();
-    SmartDashboard.putNumber("Odometry X", estimatedPose.getX());
-    SmartDashboard.putNumber("Odometry Y", estimatedPose.getY());
-    SmartDashboard.putNumber("Odometry Heading", estimatedPose.getRotation().getDegrees());
-    SmartDashboard.putString("Odometry Pose: ", estimatedPose.toString());
-    SmartDashboard.putString("PathPlanner Pose ", getPose().toString());
-
-
+    if (loopCounter % 10 == 0) { // Run every 10 cycle, updates every ~200 ms
+      SmartDashboard.putNumber("Gyro Yaw", getGyroYaw());
+      SmartDashboard.putNumber("Gyro Angle", getGyroAngle());
+      SmartDashboard.putNumber("Odometry X", estimatedPose.getX());
+      SmartDashboard.putNumber("Odometry Y", estimatedPose.getY());
+      SmartDashboard.putNumber("Odometry Heading", estimatedPose.getRotation().getDegrees());
+      SmartDashboard.putString("Odometry Pose: ", estimatedPose.toString());
+      SmartDashboard.putString("PathPlanner Pose ", getPose().toString());
+    }
+    loopCounter++;
 
     var positions = swerveDrive.getModulePositions();
     for (int i = 0; i < 4; i++) {
