@@ -69,8 +69,8 @@ public final class Configs {
 
         static{
 
-                r_armMotorConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(40).voltageCompensation(12);
-                l_armMotorConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(40).voltageCompensation(12);
+                r_armMotorConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(50).voltageCompensation(12);
+                l_armMotorConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(50).voltageCompensation(12);
                 r_armMotorConfig.inverted(true);
 
 
@@ -119,7 +119,7 @@ public final class Configs {
                 .maxAcceleration(6000)
                 .allowedClosedLoopError(.5);
 
-                wristMotorConfig.idleMode(IdleMode.kCoast).smartCurrentLimit(40).voltageCompensation(12);
+                wristMotorConfig.idleMode(IdleMode.kCoast).smartCurrentLimit(50).voltageCompensation(12);
 
                 wristMotorConfig
                 .closedLoop
@@ -131,7 +131,7 @@ public final class Configs {
                 .maxAcceleration(10000)
                 .allowedClosedLoopError(.25);
 
-                intakeMotorConfig.inverted(true).idleMode(IdleMode.kBrake).smartCurrentLimit(40);
+                intakeMotorConfig.inverted(true).idleMode(IdleMode.kBrake).smartCurrentLimit(50);
 
         }
 
