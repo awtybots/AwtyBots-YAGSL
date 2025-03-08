@@ -23,7 +23,8 @@ import java.lang.String;
  */
 public final class Constants {
   public static final boolean DebugMode = false;
-  public static final double maxSpeed = Units.feetToMeters(15.76);
+  public static final double maxSpeed = Units.feetToMeters(18.84);
+
 
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
@@ -84,44 +85,62 @@ public final class Constants {
     public static final int FunnelRIntake = 16;
   }
 
-  public static final class ElevatorSetpoints {
-    public static final int FeederStation = 0;
-    public static final int L1 = 15;
-    public static final int AlgaeLow = 0;
-    public static final int L2 = 40;
-    public static final int AlgaeHigh = 50;
-    public static final int L3 = 72;
-    public static final int L4 = 72;
+
+  public static final class ClimbConstants{
+    public static final int ClimbMotor = 21;
   }
 
-  public static final class ArmSetpoints {
-    public static final double FeederStation = 0;
+  public static final class ElevatorSetpoints{
+    public static final int FeederStation = 10;
+    public static final int L1 = 10;
+    public static final int AlgaeLow = 0;
+    public static final int L2 = 50;
+    public static final int AlgaeHigh = 57;
+    public static final int L3 = 95 ;
+    public static final int L4 = 100;
+  }
+
+  public static final class ArmSetpoints{
+    public static final double FeederStation = -0.5;
     public static final double L1 = -3;
     public static final double AlgaeLow = -9;
     public static final double L2 = -3;
     public static final double AlgaeHigh = -9;
-    public static final double L3 = -3;
-    public static final double L4 = -15;
+    public static final double L3 = -6;
+    public static final double L4 = -13;
   }
 
-  public static final class WristSetpoints {
-    public static final double FeederStation = -1;
-    public static final double L1 = 3;
-    public static final double AlgaeLow = -3;
-    public static final double L2 = 0;
-    public static final double AlgaeHigh = -3;
-    public static final double L3 = 0;
-    public static final double L4 = -2;
+  public static final class WristSetpoints{
+    public static final double FeederStation = -4;
+    public static final double L1 = -3;
+    public static final double AlgaeLow = -15;
+    public static final double L2 = -8;
+    public static final double AlgaeHigh = -15;
+    public static final double L3 = -15;
+    public static final double L4 = -8;
   }
 
   public static final class FunnelWristSetpoints {
     public static final double FeederStation = -2;
     public static final double Climb = 12;
+    public static final double kForward = 0.5;
+    public static final double kReverse = -.5;
+    public static final double kHold = 0.0;
   }
 
-  public static final class FunnelIntakeSetpoints {
-    public static final double kForward = 0.5;
-    public static final double kReverse = 0.65;
+  public static final class ClimbSetPoints{
+    public static final double start = 0;
+    public static final double climb = 30;
+    public static final double kExtend = 0.5;
+    public static final double kRetract = -0.5;
+    public static final double kHold = 0.0;
+    public static final double kIn = 0.5;
+    public static final double kOut = -0.5;
+  }
+
+  public static final class FunnelIntakeSetpoints{
+    public static final double kForward = 0.20;
+    public static final double kReverse = 0.30;
     public static final double kHold = 0.0;
   }
 
@@ -156,7 +175,7 @@ public final class Constants {
   }
 
   public static final class NeoMotorConstants {
-    public static final double kFreeSpeedRpm = 5676;
+    public static final double kFreeSpeedRpm = 6784;
   }
 
   public static final class VisionConstants {

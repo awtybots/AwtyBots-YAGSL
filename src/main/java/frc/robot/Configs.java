@@ -13,7 +13,7 @@ import frc.robot.subsystems.CoralSubsystem.Setpoint;
 
 public final class Configs {
     public static final class MAXSwerveModule {
-        public static final SparkMaxConfig drivingConfig = new SparkMaxConfig();
+        public static final SparkFlexConfig drivingConfig = new SparkFlexConfig();
         public static final SparkMaxConfig turningConfig = new SparkMaxConfig();
 
         static {
@@ -62,15 +62,15 @@ public final class Configs {
     public static final class CoralSubsystem {
         public static final SparkFlexConfig l_elevatorMotorConfig = new SparkFlexConfig();
         public static final SparkFlexConfig r_elevatorMotorConfig = new SparkFlexConfig(); 
-        public static final SparkMaxConfig r_armMotorConfig = new SparkMaxConfig();
-        public static final SparkMaxConfig l_armMotorConfig = new SparkMaxConfig();
+        public static final SparkFlexConfig r_armMotorConfig = new SparkFlexConfig();
+        public static final SparkFlexConfig l_armMotorConfig = new SparkFlexConfig();
         public static final SparkFlexConfig wristMotorConfig = new SparkFlexConfig();
         public static final SparkFlexConfig intakeMotorConfig = new SparkFlexConfig();
 
         static{
 
-                r_armMotorConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(40).voltageCompensation(12);
-                l_armMotorConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(40).voltageCompensation(12);
+                r_armMotorConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(50).voltageCompensation(12);
+                l_armMotorConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(50).voltageCompensation(12);
                 r_armMotorConfig.inverted(true);
 
 
@@ -119,7 +119,7 @@ public final class Configs {
                 .maxAcceleration(6000)
                 .allowedClosedLoopError(.5);
 
-                wristMotorConfig.idleMode(IdleMode.kCoast).smartCurrentLimit(40).voltageCompensation(12);
+                wristMotorConfig.idleMode(IdleMode.kCoast).smartCurrentLimit(50).voltageCompensation(12);
 
                 wristMotorConfig
                 .closedLoop
@@ -131,7 +131,7 @@ public final class Configs {
                 .maxAcceleration(10000)
                 .allowedClosedLoopError(.25);
 
-                intakeMotorConfig.inverted(true).idleMode(IdleMode.kBrake).smartCurrentLimit(40);
+                intakeMotorConfig.inverted(true).idleMode(IdleMode.kBrake).smartCurrentLimit(50);
 
         }
 
@@ -140,7 +140,7 @@ public final class Configs {
     public static final class FunnelIntakeSubsystem {
         public static final SparkFlexConfig l_funnelMotorConfig = new SparkFlexConfig();
         public static final SparkFlexConfig r_funnelMotorConfig = new SparkFlexConfig(); 
-        public static final SparkMaxConfig funnelWristMotorConfig = new SparkMaxConfig();
+        public static final SparkFlexConfig funnelWristMotorConfig = new SparkFlexConfig();
 
         static{
 
@@ -157,6 +157,22 @@ public final class Configs {
                 l_funnelMotorConfig.idleMode(IdleMode.kCoast).smartCurrentLimit(50);
                 r_funnelMotorConfig.inverted(true).idleMode(IdleMode.kCoast).smartCurrentLimit(50);
 
+        }
+    };
+
+    public static final class ClimberSubsystem {
+        public static final SparkFlexConfig climberMotorConfig = new SparkFlexConfig();
+
+        static{
+            climberMotorConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(40).voltageCompensation(12);
+            climberMotorConfig.closedLoop.
+            feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+            .p(0.1)
+            .outputRange(-1, 1)
+            .maxMotion
+            .maxVelocity(2000)
+            .maxAcceleration(10000)
+            .allowedClosedLoopError(.25);  
         }
     };
 }

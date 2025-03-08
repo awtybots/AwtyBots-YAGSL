@@ -8,7 +8,6 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -37,11 +36,12 @@ public class CoralSubsystem extends SubsystemBase {
     // Variable use for tracking if the elevator was raised to L4
     public static boolean ElevatorAtL4;
 
+
     public static boolean runFunnelIntake;
 
     // arm setup
-    private SparkMax l_armMotor = new SparkMax(ArmConstants.ArmLeftCanID, MotorType.kBrushless);
-    private SparkMax r_armMotor = new SparkMax(ArmConstants.ArmRightCanID, MotorType.kBrushless);
+    private SparkFlex l_armMotor = new SparkFlex(ArmConstants.ArmLeftCanID, MotorType.kBrushless);
+    private SparkFlex r_armMotor = new SparkFlex(ArmConstants.ArmRightCanID, MotorType.kBrushless);
     private SparkClosedLoopController l_armController = l_armMotor.getClosedLoopController();
     private SparkClosedLoopController r_armController = r_armMotor.getClosedLoopController();
     private RelativeEncoder armEncoder = l_armMotor.getEncoder();
@@ -106,11 +106,25 @@ public class CoralSubsystem extends SubsystemBase {
     }
 
     private void moveToSetpoint() {
+        l_elevatorController.setReference(elevatorCurrentTarget, ControlType.kMAXMotionPositionControl);
+        r_elevatorController.setReference(elevatorCurrentTarget, ControlType.kMAXMotionPositionControl);
+        if(runFunnelIntake){
+            double elevatorPos = elevatorEncoder.getPosition();
+            double elevatorError = Math.abs(elevatorCurrentTarget - elevatorPos);
+            double stopThreshold = 0.5;
+
+            if (elevatorError > stopThreshold){
+
+                return;
+            }
+
+
+
+        }
         l_armController.setReference(armCurrentTarget, ControlType.kMAXMotionPositionControl);
         r_armController.setReference(armCurrentTarget, ControlType.kMAXMotionPositionControl);
         wristController.setReference(wristCurrentTarget, ControlType.kMAXMotionPositionControl);
-        l_elevatorController.setReference(elevatorCurrentTarget, ControlType.kMAXMotionPositionControl);
-        r_elevatorController.setReference(elevatorCurrentTarget, ControlType.kMAXMotionPositionControl);
+        
     }
 
     // public Command manualElevatorDown() {
@@ -158,6 +172,7 @@ public class CoralSubsystem extends SubsystemBase {
                             armCurrentTarget = ArmSetpoints.FeederStation;
                             wristCurrentTarget = WristSetpoints.FeederStation;
                             elevatorCurrentTarget = ElevatorSetpoints.FeederStation;
+
                             break;
                         case L1:
                             ElevatorAtL4 = false;
