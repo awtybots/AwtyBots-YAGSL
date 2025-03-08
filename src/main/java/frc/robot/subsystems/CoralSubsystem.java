@@ -36,6 +36,7 @@ public class CoralSubsystem extends SubsystemBase {
     // Variable use for tracking if the elevator was raised to L4
     public static boolean ElevatorAtL4;
 
+
     public static boolean runFunnelIntake;
 
     // arm setup
@@ -105,11 +106,25 @@ public class CoralSubsystem extends SubsystemBase {
     }
 
     private void moveToSetpoint() {
+        l_elevatorController.setReference(elevatorCurrentTarget, ControlType.kMAXMotionPositionControl);
+        r_elevatorController.setReference(elevatorCurrentTarget, ControlType.kMAXMotionPositionControl);
+        if(runFunnelIntake){
+            double elevatorPos = elevatorEncoder.getPosition();
+            double elevatorError = Math.abs(elevatorCurrentTarget - elevatorPos);
+            double stopThreshold = 0.5;
+
+            if (elevatorError > stopThreshold){
+
+                return;
+            }
+
+
+
+        }
         l_armController.setReference(armCurrentTarget, ControlType.kMAXMotionPositionControl);
         r_armController.setReference(armCurrentTarget, ControlType.kMAXMotionPositionControl);
         wristController.setReference(wristCurrentTarget, ControlType.kMAXMotionPositionControl);
-        l_elevatorController.setReference(elevatorCurrentTarget, ControlType.kMAXMotionPositionControl);
-        r_elevatorController.setReference(elevatorCurrentTarget, ControlType.kMAXMotionPositionControl);
+        
     }
 
     // public Command manualElevatorDown() {
@@ -157,6 +172,7 @@ public class CoralSubsystem extends SubsystemBase {
                             armCurrentTarget = ArmSetpoints.FeederStation;
                             wristCurrentTarget = WristSetpoints.FeederStation;
                             elevatorCurrentTarget = ElevatorSetpoints.FeederStation;
+
                             break;
                         case L1:
                             ElevatorAtL4 = false;

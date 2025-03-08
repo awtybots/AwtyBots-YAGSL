@@ -95,7 +95,7 @@ public final class Constants {
   }
 
   public static final class ArmSetpoints{
-    public static final double FeederStation = 0;
+    public static final double FeederStation = -0.5;
     public static final double L1 = -3;
     public static final double AlgaeLow = -9;
     public static final double L2 = -3;
