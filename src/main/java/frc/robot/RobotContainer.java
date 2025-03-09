@@ -82,7 +82,9 @@ public class RobotContainer {
     NamedCommands.registerCommand("ElevatorLiftL4", m_coralSubsystem.setSetpointCommand(Setpoint.L4));
     NamedCommands.registerCommand("AlgaeLow", m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeLow));
     NamedCommands.registerCommand("AlgaeHigh", m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeHigh));
-    NamedCommands.registerCommand("Gyroreset", new InstantCommand(() -> drivebase.setInitialHeading(180), drivebase));
+    NamedCommands.registerCommand("Gyroreset",
+        new InstantCommand(() -> drivebase.setInitialHeadingWithVision(180, visionSubsystem), drivebase));
+
     NamedCommands.registerCommand("AlignToReefCoralLeft",
         new AlignToReefCoralCommand(drivebase, visionSubsystem, true));
 

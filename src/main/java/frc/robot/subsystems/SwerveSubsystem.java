@@ -15,6 +15,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -26,6 +27,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.swerve.SwerveModule;
@@ -235,6 +237,34 @@ public class SwerveSubsystem extends SubsystemBase {
   public void setInitialHeading(double angleDegrees) {
     gyro.setAngleAdjustment(angleDegrees);
     swerveDrive.resetOdometry(new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(angleDegrees)));
+  }
+
+  public void setInitialHeadingWithVision(double targetAngleDegrees, CoralToReefVisionSubsystem vision) {
+    var alliance = DriverStation.getAlliance();
+
+    // Flip target heading for Red Alliance
+    if (alliance.isPresent() && alliance.get() == Alliance.Red) {
+      targetAngleDegrees = -targetAngleDegrees;
+    }
+
+    // Get estimated heading from vision
+    Optional<Pose2d> visionPoseOpt = vision.getEstimatedPose();
+    if (visionPoseOpt.isPresent()) {
+      double estimatedFieldHeading = visionPoseOpt.get().getRotation().getDegrees();
+      double gyroCurrentHeading = getGyroYaw(); // Get current gyro heading
+
+      // Calculate correction offset
+      double headingCorrection = estimatedFieldHeading - gyroCurrentHeading;
+
+      // Apply correction
+      gyro.setAngleAdjustment(gyroCurrentHeading + headingCorrection);
+      System.out.println("[GyroReset] Adjusted with Vision Offset: " + headingCorrection + " degrees");
+    } else {
+      System.out.println("[GyroReset] No vision data available, setting based on gyro alone.");
+      gyro.setAngleAdjustment(targetAngleDegrees);
+    }
+
+    swerveDrive.resetOdometry(new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(targetAngleDegrees)));
   }
 
   public void stop() {
