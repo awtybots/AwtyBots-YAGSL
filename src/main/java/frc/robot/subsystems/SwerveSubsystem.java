@@ -23,15 +23,21 @@ import frc.robot.Constants;
 import com.studica.frc.AHRS;
 import com.studica.frc.AHRS.NavXComType;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.swerve.SwerveModule;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.studica.frc.AHRS.NavXComType;
 
@@ -188,6 +194,28 @@ public class SwerveSubsystem extends SubsystemBase {
     PathfindingCommand.warmupCommand().schedule();
   }
 
+  public PathConstraints getPathConstraintsFromSettings() {
+    Path path = Path.of(Filesystem.getDeployDirectory().toString(), "pathplanner/settings.json");
+    ObjectMapper objectMapper = new ObjectMapper();
+
+    try {
+      JsonNode rootNode = objectMapper.readTree(Files.readAllBytes(path));
+
+      double maxVelocity = rootNode.get("defaultMaxVel").asDouble(2.0); // Default: 2.0 m/s
+      double maxAcceleration = rootNode.get("defaultMaxAccel").asDouble(3.0); // Default: 3.0 m/s²
+      double maxAngularVelocity = Math.toRadians(rootNode.get("defaultMaxAngVel").asDouble(180.0)); // Convert degrees
+                                                                                                    // to radians
+      double maxAngularAcceleration = Math.toRadians(rootNode.get("defaultMaxAngAccel").asDouble(360.0)); // Convert
+                                                                                                          // degrees to
+                                                                                                          // radians
+
+      return new PathConstraints(maxVelocity, maxAcceleration, maxAngularVelocity, maxAngularAcceleration);
+    } catch (IOException e) {
+      System.out.println("[ERROR] Failed to read PathPlanner settings.json: " + e.getMessage());
+      return new PathConstraints(2.0, 3.0, Math.toRadians(180.0), Math.toRadians(360.0)); // Fallback defaults
+    }
+  }
+
   /**
    * Get the path follower with events.
    *
@@ -245,6 +273,11 @@ public class SwerveSubsystem extends SubsystemBase {
 
   public void zeroGyro() {
     swerveDrive.zeroGyro();
+  }
+
+  public void updateOdometry(Pose2d newPose) {
+    resetOdometry(newPose);
+    System.out.println("[SwerveSubsystem] Updated PathPlanner Start Position: " + newPose);
   }
 
   public void addVisionMeasurement(Pose2d visionPose, double timestamp) {

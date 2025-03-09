@@ -7,6 +7,8 @@ package frc.robot;
 import frc.robot.Constants.OIConstants;
 import frc.robot.commands.AlignToReefCoralCommand;
 import frc.robot.commands.Autos;
+import frc.robot.commands.PathPlannerMoveForwardCommand;
+import frc.robot.commands.PathPlannerMoveToFeederStation;
 import frc.robot.subsystems.CoralSubsystem;
 import frc.robot.subsystems.CoralSubsystem.Setpoint;
 import frc.robot.subsystems.FunnelIntake;
@@ -20,6 +22,8 @@ import java.io.File;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -79,6 +83,22 @@ public class RobotContainer {
     NamedCommands.registerCommand("AlgaeLow", m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeLow));
     NamedCommands.registerCommand("AlgaeHigh", m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeHigh));
     NamedCommands.registerCommand("Gyroreset", new InstantCommand(() -> drivebase.setInitialHeading(180), drivebase));
+    NamedCommands.registerCommand("AlignToReefCoralLeft",
+        new AlignToReefCoralCommand(drivebase, visionSubsystem, true));
+
+    NamedCommands.registerCommand("AlignToReefCoralRight",
+        new AlignToReefCoralCommand(drivebase, visionSubsystem, false));
+    NamedCommands.registerCommand("PathPlannerMoveToLeftFeederStation",
+        new PathPlannerMoveToFeederStation(drivebase, visionSubsystem,
+            new Pose2d(5.0, 3.0, Rotation2d.fromDegrees(90))));
+
+    NamedCommands.registerCommand("PathPlannerMoveToRightFeederStation",
+        new PathPlannerMoveToFeederStation(drivebase, visionSubsystem,
+            new Pose2d(5.0, 3.0, Rotation2d.fromDegrees(90))));
+
+    NamedCommands.registerCommand("MoveForwardDynamic",
+        new PathPlannerMoveForwardCommand(drivebase, visionSubsystem, 1.0) // Moves forward 1 meter dynamically
+    );
 
     autoChooser = AutoBuilder.buildAutoChooser();
 
@@ -236,7 +256,6 @@ public class RobotContainer {
 
     // D-Pad Down -> Elevator to 1st Algae pickup position
     m_operatorController.povDown().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeLow));
-    
 
     m_driverController.start().onTrue(new InstantCommand(() -> drivebase.setInitialHeading(180), drivebase));
     // A Button -> Climber Goes In

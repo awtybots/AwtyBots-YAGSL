@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
@@ -13,6 +14,7 @@ import edu.wpi.first.math.util.Units;
 import java.util.Optional;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -115,6 +117,29 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
         }
 
         return Optional.empty(); // No valid target found
+    }
+
+    public Optional<EstimatedRobotPose> getEstimatedGlobalPose() {
+        PhotonPipelineResult result = camera.getLatestResult();
+
+        if (result.hasTargets()) {
+            // Use PhotonVision's built-in estimator to calculate the pose
+            Optional<EstimatedRobotPose> estimatedPose = photonPoseEstimator.update(result);
+            return estimatedPose;
+        }
+
+        return Optional.empty(); // No valid vision target
+    }
+
+    public Optional<Pose2d> getEstimatedPose() {
+        Optional<EstimatedRobotPose> estimatedPoseOpt = getEstimatedGlobalPose();
+
+        if (estimatedPoseOpt.isPresent()) {
+            Pose2d estimatedPose2d = estimatedPoseOpt.get().estimatedPose.toPose2d();
+            return Optional.of(estimatedPose2d);
+        }
+
+        return Optional.empty();
     }
 
     private int loopCounter = 0;
