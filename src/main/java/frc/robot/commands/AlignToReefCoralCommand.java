@@ -109,28 +109,27 @@ public class AlignToReefCoralCommand extends Command {
             double targetRange = Math.abs(errorArray[1]);
             double lateralOffset = errorArray[2];
 
+            // Logging detected errors
+            System.out.println("Yaw Error: " + targetYaw);
+            System.out.println("Target Range: " + targetRange);
+            System.out.println("Lateral Offset: " + lateralOffset);
+
             // Use PID controllers for smoother movement
             double rotationSpeed = rotationPID.calculate(targetYaw, 0);
             if (rotationPID.atSetpoint()) {
                 rotationSpeed = 0;
             }
+
+            // Flip rotation direction
+            rotationSpeed = -rotationSpeed;
+
+            // Log rotation speed before applying
+            System.out.println("Computed Rotation Speed (Flipped): " + rotationSpeed);
+
             // Check if we are close enough (within target distance)
             boolean distanceError = targetRange < targetDistanceMeters;
-
-            // Check if we are inside the allowed tolerance range
             boolean withinTolerance = Math
                     .abs(targetRange - targetDistanceMeters) < Constants.VisionConstants.Coral.distanceTolerance;
-            if (Constants.DebugMode) {
-                System.out.println("distanceError: " + distanceError);
-                System.out.println("targetRange: " + targetRange);
-                System.out.println("targetDistanceMeters: " + targetDistanceMeters);
-                System.out
-                        .println(
-                                "targetRange - targetDistanceMeters < Constants.VisionConstants.Coral.distanceTolerance: "
-                                        + Math.abs(targetRange - targetDistanceMeters) + " < "
-                                        + Constants.VisionConstants.Coral.distanceTolerance);
-                System.out.println("withinTolerance: " + withinTolerance);
-            }
 
             double forwardSpeed = distancePID.calculate(targetRange);
             if (distancePID.atSetpoint()) {
@@ -143,23 +142,25 @@ public class AlignToReefCoralCommand extends Command {
 
             // Enforce max speed limits
             if (targetRange >= Constants.VisionConstants.Coral.distanceSlowZone) {
-                forwardSpeed = Math.min(forwardSpeed, 1.0); // Allow full power
+                forwardSpeed = Math.min(forwardSpeed, 1.0);
             } else {
                 forwardSpeed = Math.max(-Constants.VisionConstants.Coral.maxForwardSpeed,
                         Math.min(Constants.VisionConstants.Coral.maxForwardSpeed, forwardSpeed));
             }
 
-            // Full power if far from target laterally, slow down when close
             if (Math.abs(lateralOffset) < Constants.VisionConstants.Coral.strafeSlowZone) {
                 strafeSpeed = Math.max(-Constants.VisionConstants.Coral.maxStrafeSpeed,
                         Math.min(Constants.VisionConstants.Coral.maxStrafeSpeed, strafeSpeed));
             }
 
-            // Full power if far from target yaw, slow down when close
             if (Math.abs(targetYaw) < Constants.VisionConstants.Coral.rotationSlowZone) {
                 rotationSpeed = Math.max(-Constants.VisionConstants.Coral.maxRotationSpeed,
                         Math.min(Constants.VisionConstants.Coral.maxRotationSpeed, rotationSpeed));
             }
+
+            // Log final applied speeds
+            System.out.println("Final Applied Speeds -> Forward: " + forwardSpeed + ", Strafe: " + strafeSpeed
+                    + ", Rotation: " + rotationSpeed);
 
             // Apply corrected movement values
             swerve.drive(new ChassisSpeeds(forwardSpeed, strafeSpeed, rotationSpeed));
