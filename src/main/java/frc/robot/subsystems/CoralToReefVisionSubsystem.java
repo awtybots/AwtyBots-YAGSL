@@ -78,8 +78,6 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
             smoothedDistance = (SMOOTHING_FACTOR * rawDistance) + ((1 - SMOOTHING_FACTOR) * smoothedDistance);
 
             double normalLateralOffset = cameraToTarget.getY(); // Raw side-to-side alignment error
-            double adjustedLateralOffsetLeft = normalLateralOffset + Constants.VisionConstants.Coral.leftOffsetMeters;
-            double adjustedLateralOffsetRight = normalLateralOffset - Constants.VisionConstants.Coral.rightOffsetMeters;
 
             // ✅ Log values to SmartDashboard
             SmartDashboard.putBoolean("Vision/01 AprilTag Found", true);
@@ -87,15 +85,17 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
             SmartDashboard.putNumber("Vision/04 Yaw (degrees)", target.getYaw());
             SmartDashboard.putNumber("Vision/05 Distance (m)", smoothedDistance); // Use smoothed distance!
             SmartDashboard.putNumber("Vision/06 Raw Lateral Offset (m)", normalLateralOffset);
-            SmartDashboard.putNumber("Vision/07 Adjusted Lateral Offset (Left Align)", adjustedLateralOffsetLeft);
-            SmartDashboard.putNumber("Vision/08 Adjusted Lateral Offset (Right Align)", adjustedLateralOffsetRight);
+            SmartDashboard.putNumber("Vision/07 Lateral Offset Target (Left Align)",
+                    Constants.VisionConstants.Coral.leftOffsetMeters);
+            SmartDashboard.putNumber("Vision/08 Lateral Offset Target (Right Align)",
+                    Constants.VisionConstants.Coral.rightOffsetMeters);
         } else {
             SmartDashboard.putBoolean("Vision/01 AprilTag Found", false);
         }
     }
 
     /** Returns alignment errors [yaw, distance, lateral offset, tag ID] */
-    public Optional<double[]> getAlignmentErrors(boolean alignLeft) {
+    public Optional<double[]> getAlignmentErrors() {
         var targetOpt = getBestTarget();
 
         if (targetOpt.isPresent()) {
@@ -105,13 +105,6 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
             double targetYaw = target.getYaw(); // Rotation error in degrees
             double targetRange = cameraToTarget.getTranslation().getNorm(); // Distance in meters
             double lateralOffset = cameraToTarget.getY(); // Side-to-side alignment error
-
-            // Adjust lateral offset based on left/right alignment strategy
-            if (alignLeft) {
-                lateralOffset += Constants.VisionConstants.Coral.leftOffsetMeters;
-            } else {
-                lateralOffset -= Constants.VisionConstants.Coral.rightOffsetMeters;
-            }
 
             return Optional.of(new double[] { targetYaw, targetRange, lateralOffset, target.getFiducialId() });
         }

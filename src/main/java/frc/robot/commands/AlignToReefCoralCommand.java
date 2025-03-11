@@ -78,7 +78,12 @@ public class AlignToReefCoralCommand extends Command {
         rotationPID.setTolerance(Constants.VisionConstants.Coral.rotationTolerance);
 
         distancePID.setSetpoint(Constants.VisionConstants.Coral.distanceThreshold);
-        strafePID.setSetpoint(Constants.VisionConstants.Coral.strafeThreshold);
+        if (alignLeft) {
+            strafePID.setSetpoint(Constants.VisionConstants.Coral.leftOffsetMeters);
+        } else {
+            strafePID.setSetpoint(Constants.VisionConstants.Coral.rightOffsetMeters);
+        }
+
         rotationPID.setSetpoint(Constants.VisionConstants.Coral.rotationThreshold);
     }
 
@@ -101,7 +106,7 @@ public class AlignToReefCoralCommand extends Command {
             return;
         }
 
-        Optional<double[]> errors = vision.getAlignmentErrors(alignLeft);
+        Optional<double[]> errors = vision.getAlignmentErrors();
         if (errors.isPresent()) {
             hasValidTarget = true;
             double[] errorArray = errors.get();
@@ -126,16 +131,11 @@ public class AlignToReefCoralCommand extends Command {
             // Log rotation speed before applying
             System.out.println("Computed Rotation Speed (Flipped): " + rotationSpeed);
 
-            // Check if we are close enough (within target distance)
-            boolean distanceError = targetRange < targetDistanceMeters;
-            boolean withinTolerance = Math
-                    .abs(targetRange - targetDistanceMeters) < Constants.VisionConstants.Coral.distanceTolerance;
-
             double forwardSpeed = distancePID.calculate(targetRange);
             if (distancePID.atSetpoint()) {
                 forwardSpeed = 0; // Stops movement when within tolerance
             }
-            double strafeSpeed = strafePID.calculate(lateralOffset, 0);
+            double strafeSpeed = strafePID.calculate(lateralOffset);
             if (strafePID.atSetpoint()) {
                 strafeSpeed = 0;
             }
