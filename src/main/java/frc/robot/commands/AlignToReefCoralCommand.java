@@ -125,12 +125,6 @@ public class AlignToReefCoralCommand extends Command {
                 rotationSpeed = 0;
             }
 
-            // Flip rotation direction
-            rotationSpeed = -rotationSpeed;
-
-            // Log rotation speed before applying
-            System.out.println("Computed Rotation Speed (Flipped): " + rotationSpeed);
-
             double forwardSpeed = distancePID.calculate(targetRange);
             if (distancePID.atSetpoint()) {
                 forwardSpeed = 0; // Stops movement when within tolerance
@@ -153,11 +147,14 @@ public class AlignToReefCoralCommand extends Command {
                         Math.min(Constants.VisionConstants.Coral.maxStrafeSpeed, strafeSpeed));
             }
 
-            if (Math.abs(targetYaw) < Constants.VisionConstants.Coral.rotationSlowZone) {
-                rotationSpeed = Math.max(Constants.VisionConstants.Coral.maxRotationSpeed,
-                        Math.min(-Constants.VisionConstants.Coral.maxRotationSpeed, rotationSpeed));
-            }
+            rotationSpeed = Math.max(-Constants.VisionConstants.Coral.maxRotationSpeed,
+                    Math.min(Constants.VisionConstants.Coral.maxRotationSpeed, rotationSpeed));
 
+            // Flip rotation direction
+            rotationSpeed = -rotationSpeed;
+
+            // Log rotation speed before applying
+            System.out.println("Computed Rotation Speed (Flipped): " + rotationSpeed);
             // Log final applied speeds
             System.out.println("Final Applied Speeds -> Forward: " + forwardSpeed + ", Strafe: " + strafeSpeed
                     + ", Rotation: " + rotationSpeed);

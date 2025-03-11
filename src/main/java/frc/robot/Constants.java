@@ -193,7 +193,7 @@ public final class Constants {
       public static final double StrafekP = 1.2;
       public static final double StrafekI = 0.0;
       public static final double StrafekD = 0.03;
-      public static final double RotationkP = 0.5;
+      public static final double RotationkP = 0.2;
       public static final double RotationkI = 0.0;
       public static final double RotationkD = 0.02;
 
