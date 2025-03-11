@@ -19,6 +19,7 @@ public class AlignToReefCoralCommand extends Command {
     private final SwerveSubsystem swerve;
     private final CoralToReefVisionSubsystem vision;
     private final boolean alignLeft;
+    private Double visionGyroOffset = null; // Stores the correction offset
 
     // PID Controllers
     private final PIDController distancePID;
@@ -110,17 +111,23 @@ public class AlignToReefCoralCommand extends Command {
         if (errors.isPresent()) {
             hasValidTarget = true;
             double[] errorArray = errors.get();
-            double targetYaw = errorArray[0];
-            double targetRange = Math.abs(errorArray[1]);
-            double lateralOffset = errorArray[2];
+            double visionYaw = errorArray[0]; // Yaw from vision system
+            double targetRange = Math.abs(errorArray[1]); // Distance to target
+            double lateralOffset = errorArray[2]; // Side-to-side offset
 
-            // Logging detected errors
-            System.out.println("Yaw Error: " + targetYaw);
-            System.out.println("Target Range: " + targetRange);
-            System.out.println("Lateral Offset: " + lateralOffset);
+            // ✅ Get the current gyro yaw
+            double currentGyroYaw = swerve.getGyroYaw(); // Ensure this method exists in SwerveSubsystem
 
-            // Use PID controllers for smoother movement
-            double rotationSpeed = rotationPID.calculate(targetYaw, 0);
+            // ✅ Compute correction offset (only once when vision first detects a target)
+            if (visionGyroOffset == null) {
+                visionGyroOffset = visionYaw - currentGyroYaw;
+            }
+
+            // ✅ Apply correction to gyro yaw dynamically
+            double correctedYaw = currentGyroYaw + visionGyroOffset;
+
+            // ✅ Use corrected yaw for PID control
+            double rotationSpeed = rotationPID.calculate(correctedYaw, 0);
             if (rotationPID.atSetpoint()) {
                 rotationSpeed = 0;
             }
@@ -134,7 +141,7 @@ public class AlignToReefCoralCommand extends Command {
                 strafeSpeed = 0;
             }
 
-            // Enforce max speed limits
+            // ✅ Enforce max speed limits
             if (targetRange >= Constants.VisionConstants.Coral.distanceSlowZone) {
                 forwardSpeed = Math.min(forwardSpeed, 1.0);
             } else {
@@ -147,31 +154,35 @@ public class AlignToReefCoralCommand extends Command {
                         Math.min(Constants.VisionConstants.Coral.maxStrafeSpeed, strafeSpeed));
             }
 
+            // ✅ Properly clamp the rotation speed
             rotationSpeed = Math.max(-Constants.VisionConstants.Coral.maxRotationSpeed,
                     Math.min(Constants.VisionConstants.Coral.maxRotationSpeed, rotationSpeed));
 
-            // Flip rotation direction
+            // ✅ Flip rotation direction
             rotationSpeed = -rotationSpeed;
 
-            // Log rotation speed before applying
+            // ✅ Logging for debugging
+            System.out.println("Vision Yaw: " + visionYaw);
+            System.out.println("Gyro Yaw: " + currentGyroYaw);
+            System.out.println("Vision-Gyro Offset: " + visionGyroOffset);
+            System.out.println("Corrected Yaw: " + correctedYaw);
             System.out.println("Computed Rotation Speed (Flipped): " + rotationSpeed);
-            // Log final applied speeds
             System.out.println("Final Applied Speeds -> Forward: " + forwardSpeed + ", Strafe: " + strafeSpeed
                     + ", Rotation: " + rotationSpeed);
 
-            // Apply corrected movement values
+            // ✅ Apply corrected movement values
             swerve.drive(new ChassisSpeeds(forwardSpeed, strafeSpeed, rotationSpeed));
 
-            // Log PID values to SmartDashboard
+            // ✅ Log PID values to SmartDashboard
             SmartDashboard.putBoolean("Vision/03 Valid-Target", hasValidTarget);
             SmartDashboard.putNumber("PID-Vision/10 PID-Forward Speed", forwardSpeed);
             SmartDashboard.putNumber("PID-Vision/11 PID-Strafe Speed", strafeSpeed);
             SmartDashboard.putNumber("PID-Vision/12 PID-Rotation Speed", rotationSpeed);
 
         } else {
-            // No valid target → Stop the robot
+            // Reset correction offset when no valid target
+            visionGyroOffset = null;
             swerve.drive(new ChassisSpeeds(0, 0, 0));
-
             hasValidTarget = false;
             SmartDashboard.putBoolean("Vision/03 Valid-Target", hasValidTarget);
         }
