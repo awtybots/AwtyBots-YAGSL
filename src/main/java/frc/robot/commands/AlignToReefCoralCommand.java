@@ -154,8 +154,8 @@ public class AlignToReefCoralCommand extends Command {
             }
 
             if (Math.abs(targetYaw) < Constants.VisionConstants.Coral.rotationSlowZone) {
-                rotationSpeed = Math.max(-Constants.VisionConstants.Coral.maxRotationSpeed,
-                        Math.min(Constants.VisionConstants.Coral.maxRotationSpeed, rotationSpeed));
+                rotationSpeed = Math.max(Constants.VisionConstants.Coral.maxRotationSpeed,
+                        Math.min(-Constants.VisionConstants.Coral.maxRotationSpeed, rotationSpeed));
             }
 
             // Log final applied speeds

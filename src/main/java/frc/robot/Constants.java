@@ -193,23 +193,23 @@ public final class Constants {
       public static final double StrafekP = 1.2;
       public static final double StrafekI = 0.0;
       public static final double StrafekD = 0.03;
-      public static final double RotationkP = 0.8;
+      public static final double RotationkP = 0.5;
       public static final double RotationkI = 0.0;
       public static final double RotationkD = 0.02;
 
-      public static final double distanceThreshold = 0.3; // How far away do we want to be from aprilTag
+      public static final double distanceThreshold = 0.8; // How far away do we want to be from aprilTag
       public static final double distanceTolerance = 0.2; // How off are we willing to tolerate
       public static final double distanceSlowZone = 1; // Slow down forward/backward speed of robot if within 1m of
                                                        // aprilTag
-      public static final double strafeTolerance = 0.2; // 5 cm tolerance for strafe
+      public static final double strafeTolerance = 0.05; // 5 cm tolerance for strafe
       public static final double strafeSlowZone = 1; // Slow down strafe speed of robot if within 1m left or right of
                                                      // the aprilTag
-      public static final double rotationThreshold = 0.0; // Don't rotate if within 0 degrees of aprilTag
-      public static final double rotationTolerance = 1; // 2 degrees for turning left and right
-      public static final double rotationSlowZone = 10; // Slow down rotation speed of robot if within 10 degrees turned
+      public static final double rotationThreshold = -34.0; // Don't rotate if within 0 degrees of aprilTag
+      public static final double rotationTolerance = 0.2; // 2 degrees for turning left and right
+      public static final double rotationSlowZone = 10.0; // Slow down rotation speed of robot if within 10 degrees turned
                                                         // left or right of the aprilTag
       public static final double leftOffsetMeters = 0.43; // Adjust how far left to align to reach left bar on reef
-      public static final double rightOffsetMeters = 0.2; // Adjust how far right to align to reach right bar on reef
+      public static final double rightOffsetMeters = 0.6; // Adjust how far right to align to reach right bar on reef
     }
 
     public static final class FeederStation {
