@@ -201,7 +201,6 @@ public final class Constants {
       public static final double distanceTolerance = 0.2; // How off are we willing to tolerate
       public static final double distanceSlowZone = 1; // Slow down forward/backward speed of robot if within 1m of
                                                        // aprilTag
-      public static final double strafeThreshold = 0.0; // Don't strafe if within 0cm of lateral offset
       public static final double strafeTolerance = 0.2; // 5 cm tolerance for strafe
       public static final double strafeSlowZone = 1; // Slow down strafe speed of robot if within 1m left or right of
                                                      // the aprilTag
