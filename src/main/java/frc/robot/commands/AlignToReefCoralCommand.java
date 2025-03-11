@@ -111,39 +111,38 @@ public class AlignToReefCoralCommand extends Command {
         if (errors.isPresent()) {
             hasValidTarget = true;
             double[] errorArray = errors.get();
-            double visionYaw = errorArray[0]; // Vision-reported yaw
+            double visionYaw = errorArray[0]; // Using only vision yaw
             double targetRange = Math.abs(errorArray[1]);
             double lateralOffset = errorArray[2];
 
-            // ✅ Get the current gyro yaw
-            double currentGyroYaw = swerve.getGyroYaw();
+            // Calculate the error from the target rotation angle
+            double yawError = Constants.VisionConstants.Coral.rotationThreshold - visionYaw;
 
-            // ✅ Compute vision-gyro correction offset (only once)
-            if (visionGyroOffset == null) {
-                visionGyroOffset = visionYaw - currentGyroYaw;
-            }
-
-            // ✅ Compute corrected yaw
-            double correctedYaw = currentGyroYaw + visionGyroOffset;
-
-            // ✅ Calculate the error from the target rotation angle
-            double yawError = Constants.VisionConstants.Coral.rotationThreshold - correctedYaw;
-
-            // ✅ Use PID controller to correct the yaw error
+            // Use PID controller to correct the yaw error
             double rotationSpeed = rotationPID.calculate(yawError, 0);
-            if (rotationPID.atSetpoint()) {
-                rotationSpeed = 0;
+
+            // Enforce minimum rotation speed to overcome static friction
+            double minRotationSpeed = 0.3; // Adjust as needed
+            if (!rotationPID.atSetpoint() && Math.abs(rotationSpeed) < minRotationSpeed) {
+                rotationSpeed = Math.copySign(minRotationSpeed, rotationSpeed);
             }
 
-            // ✅ Align Rotation First - Stop Other Movement Until Yaw is Correct
+            // Clamp rotation speed to avoid excessive turning
+            rotationSpeed = Math.max(-Constants.VisionConstants.Coral.maxRotationSpeed,
+                    Math.min(Constants.VisionConstants.Coral.maxRotationSpeed, rotationSpeed));
+
+            // Flip rotation direction if needed
+            rotationSpeed = -rotationSpeed;
+
+            // Align Rotation First - Stop Other Movement Until Yaw is Correct
             if (!rotationPID.atSetpoint()) {
                 // Only rotate, no strafing or forward movement
-                swerve.drive(new ChassisSpeeds(0, 0, -rotationSpeed));
+                swerve.drive(new ChassisSpeeds(0, 0, rotationSpeed));
                 System.out.println("Rotating First -> Rotation Speed: " + rotationSpeed);
                 return; // Exit function early to avoid calculating strafe & distance
             }
 
-            // ✅ Now Handle Distance & Strafe PIDs
+            // Now Handle Distance & Strafe PIDs
             double forwardSpeed = distancePID.calculate(targetRange);
             if (distancePID.atSetpoint()) {
                 forwardSpeed = 0; // Stops movement when within tolerance
@@ -153,7 +152,7 @@ public class AlignToReefCoralCommand extends Command {
                 strafeSpeed = 0;
             }
 
-            // ✅ Enforce max speed limits
+            // Enforce max speed limits
             if (targetRange >= Constants.VisionConstants.Coral.distanceSlowZone) {
                 forwardSpeed = Math.min(forwardSpeed, 1.0);
             } else {
@@ -166,17 +165,19 @@ public class AlignToReefCoralCommand extends Command {
                         Math.min(Constants.VisionConstants.Coral.maxStrafeSpeed, strafeSpeed));
             }
 
-            // ✅ Logging for debugging
+            // Logging for debugging
             System.out.println("Target Yaw: " + Constants.VisionConstants.Coral.rotationThreshold);
+            System.out.println("Vision Yaw: " + visionYaw);
             System.out.println("Yaw Error: " + yawError);
-            System.out.println("Rotation Speed: " + rotationSpeed);
+            System.out.println("Raw Rotation Speed: " + rotationPID.calculate(yawError, 0));
+            System.out.println("Final Rotation Speed (With Deadband): " + rotationSpeed);
             System.out.println("Forward Speed: " + forwardSpeed);
             System.out.println("Strafe Speed: " + strafeSpeed);
 
-            // ✅ Apply corrected movement values
+            // Apply corrected movement values
             swerve.drive(new ChassisSpeeds(forwardSpeed, strafeSpeed, rotationSpeed));
 
-            // ✅ Log PID values to SmartDashboard
+            // Log PID values to SmartDashboard
             SmartDashboard.putBoolean("Vision/03 Valid-Target", hasValidTarget);
             SmartDashboard.putNumber("PID-Vision/10 PID-Forward Speed", forwardSpeed);
             SmartDashboard.putNumber("PID-Vision/11 PID-Strafe Speed", strafeSpeed);
@@ -184,7 +185,6 @@ public class AlignToReefCoralCommand extends Command {
 
         } else {
             // Reset correction offset when no valid target
-            visionGyroOffset = null;
             swerve.drive(new ChassisSpeeds(0, 0, 0));
             hasValidTarget = false;
             SmartDashboard.putBoolean("Vision/03 Valid-Target", hasValidTarget);
