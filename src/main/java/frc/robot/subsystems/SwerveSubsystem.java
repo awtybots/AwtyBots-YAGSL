@@ -242,11 +242,6 @@ public class SwerveSubsystem extends SubsystemBase {
   public void setInitialHeadingWithVision(double targetAngleDegrees, CoralToReefVisionSubsystem vision) {
     var alliance = DriverStation.getAlliance();
 
-    // Flip target heading for Red Alliance
-    if (alliance.isPresent() && alliance.get() == Alliance.Red) {
-      targetAngleDegrees = -targetAngleDegrees;
-    }
-
     // Get estimated heading from vision
     Optional<Pose2d> visionPoseOpt = vision.getEstimatedPose();
     if (visionPoseOpt.isPresent()) {
@@ -256,15 +251,28 @@ public class SwerveSubsystem extends SubsystemBase {
       // Calculate correction offset
       double headingCorrection = estimatedFieldHeading - gyroCurrentHeading;
 
+      // Flip target heading for Red Alliance AFTER applying correction
+      if (alliance.isPresent() && alliance.get() == Alliance.Red) {
+        targetAngleDegrees = 180 - targetAngleDegrees; // Flip around center
+      }
+
       // Apply correction
       gyro.setAngleAdjustment(gyroCurrentHeading + headingCorrection);
       System.out.println("[GyroReset] Adjusted with Vision Offset: " + headingCorrection + " degrees");
+
+      // Reset odometry using corrected vision pose
+      Pose2d correctedPose = new Pose2d(
+          visionPoseOpt.get().getTranslation(),
+          Rotation2d.fromDegrees(targetAngleDegrees) // Use corrected target angle
+      );
+
+      swerveDrive.resetOdometry(correctedPose);
     } else {
       System.out.println("[GyroReset] No vision data available, setting based on gyro alone.");
       gyro.setAngleAdjustment(targetAngleDegrees);
-    }
 
-    swerveDrive.resetOdometry(new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(targetAngleDegrees)));
+      swerveDrive.resetOdometry(new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(targetAngleDegrees)));
+    }
   }
 
   public void stop() {

@@ -25,7 +25,6 @@ public final class Constants {
   public static final boolean DebugMode = false;
   public static final double maxSpeed = Units.feetToMeters(18.84);
 
-
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
   }
@@ -85,22 +84,21 @@ public final class Constants {
     public static final int FunnelRIntake = 16;
   }
 
-
-  public static final class ClimbConstants{
+  public static final class ClimbConstants {
     public static final int ClimbMotor = 21;
   }
 
-  public static final class ElevatorSetpoints{
+  public static final class ElevatorSetpoints {
     public static final int FeederStation = 10;
     public static final int L1 = 10;
     public static final int AlgaeLow = 0;
     public static final int L2 = 50;
     public static final int AlgaeHigh = 57;
-    public static final int L3 = 95 ;
+    public static final int L3 = 95;
     public static final int L4 = 100;
   }
 
-  public static final class ArmSetpoints{
+  public static final class ArmSetpoints {
     public static final double FeederStation = -0.5;
     public static final double L1 = -3;
     public static final double AlgaeLow = -9;
@@ -110,7 +108,7 @@ public final class Constants {
     public static final double L4 = -13;
   }
 
-  public static final class WristSetpoints{
+  public static final class WristSetpoints {
     public static final double FeederStation = -4;
     public static final double L1 = -3;
     public static final double AlgaeLow = -15;
@@ -128,7 +126,7 @@ public final class Constants {
     public static final double kHold = 0.0;
   }
 
-  public static final class ClimbSetPoints{
+  public static final class ClimbSetPoints {
     public static final double start = 0;
     public static final double climb = 30;
     public static final double kExtend = 0.5;
@@ -138,7 +136,7 @@ public final class Constants {
     public static final double kOut = -0.5;
   }
 
-  public static final class FunnelIntakeSetpoints{
+  public static final class FunnelIntakeSetpoints {
     public static final double kForward = 0.20;
     public static final double kReverse = 0.30;
     public static final double kHold = 0.0;
@@ -208,7 +206,7 @@ public final class Constants {
       public static final double strafeSlowZone = 1; // Slow down strafe speed of robot if within 1m left or right of
                                                      // the aprilTag
       public static final double rotationThreshold = 0.0; // Don't rotate if within 0 degrees of aprilTag
-      public static final double rotationTolerance = 2.0; // 2 degrees for turning left and right
+      public static final double rotationTolerance = 1; // 2 degrees for turning left and right
       public static final double rotationSlowZone = 10; // Slow down rotation speed of robot if within 10 degrees turned
                                                         // left or right of the aprilTag
       public static final double leftOffsetMeters = 0.43; // Adjust how far left to align to reach left bar on reef

@@ -78,24 +78,52 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
             smoothedDistance = (SMOOTHING_FACTOR * rawDistance) + ((1 - SMOOTHING_FACTOR) * smoothedDistance);
 
             double normalLateralOffset = cameraToTarget.getY(); // Raw side-to-side alignment error
-            double adjustedLateralOffsetLeft = normalLateralOffset + Constants.VisionConstants.Coral.leftOffsetMeters;
-            double adjustedLateralOffsetRight = normalLateralOffset - Constants.VisionConstants.Coral.rightOffsetMeters;
 
-            // ✅ Log values to SmartDashboard
+            // ✅ Log AprilTag Tracking Data
             SmartDashboard.putBoolean("Vision/01 AprilTag Found", true);
             SmartDashboard.putNumber("Vision/02 AprilTag ID", target.getFiducialId());
             SmartDashboard.putNumber("Vision/04 Yaw (degrees)", target.getYaw());
             SmartDashboard.putNumber("Vision/05 Distance (m)", smoothedDistance); // Use smoothed distance!
             SmartDashboard.putNumber("Vision/06 Raw Lateral Offset (m)", normalLateralOffset);
-            SmartDashboard.putNumber("Vision/07 Adjusted Lateral Offset (Left Align)", adjustedLateralOffsetLeft);
-            SmartDashboard.putNumber("Vision/08 Adjusted Lateral Offset (Right Align)", adjustedLateralOffsetRight);
+            SmartDashboard.putNumber("Vision/07 Lateral Offset Target (Left Align)",
+                    Constants.VisionConstants.Coral.leftOffsetMeters);
+            SmartDashboard.putNumber("Vision/08 Lateral Offset Target (Right Align)",
+                    Constants.VisionConstants.Coral.rightOffsetMeters);
         } else {
             SmartDashboard.putBoolean("Vision/01 AprilTag Found", false);
+        }
+
+        // ✅ Log Estimated Global Pose (3D)
+        var estimatedGlobalPoseOpt = getEstimatedGlobalPose();
+        if (estimatedGlobalPoseOpt.isPresent()) {
+            EstimatedRobotPose estimatedPose = estimatedGlobalPoseOpt.get();
+            Pose3d robotPose3d = estimatedPose.estimatedPose;
+
+            SmartDashboard.putBoolean("Vision/09 Estimated Global Pose Found", true);
+            SmartDashboard.putNumber("Vision/10 Estimated X (m)", robotPose3d.getX());
+            SmartDashboard.putNumber("Vision/11 Estimated Y (m)", robotPose3d.getY());
+            SmartDashboard.putNumber("Vision/12 Estimated Rotation (deg)", robotPose3d.getRotation().getZ());
+            SmartDashboard.putNumber("Vision/13 Estimated Timestamp (s)", estimatedPose.timestampSeconds);
+        } else {
+            SmartDashboard.putBoolean("Vision/09 Estimated Global Pose Found", false);
+        }
+
+        // ✅ Log Estimated 2D Pose
+        var estimatedPoseOpt = getEstimatedPose();
+        if (estimatedPoseOpt.isPresent()) {
+            Pose2d robotPose2d = estimatedPoseOpt.get();
+            SmartDashboard.putBoolean("Vision/14 Estimated Pose2D Found", true);
+            SmartDashboard.putNumber("Vision/15 Estimated Pose2D X (m)", robotPose2d.getX());
+            SmartDashboard.putNumber("Vision/16 Estimated Pose2D Y (m)", robotPose2d.getY());
+            SmartDashboard.putNumber("Vision/17 Estimated Pose2D Rotation (deg)",
+                    robotPose2d.getRotation().getDegrees());
+        } else {
+            SmartDashboard.putBoolean("Vision/14 Estimated Pose2D Found", false);
         }
     }
 
     /** Returns alignment errors [yaw, distance, lateral offset, tag ID] */
-    public Optional<double[]> getAlignmentErrors(boolean alignLeft) {
+    public Optional<double[]> getAlignmentErrors() {
         var targetOpt = getBestTarget();
 
         if (targetOpt.isPresent()) {
@@ -105,13 +133,6 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
             double targetYaw = target.getYaw(); // Rotation error in degrees
             double targetRange = cameraToTarget.getTranslation().getNorm(); // Distance in meters
             double lateralOffset = cameraToTarget.getY(); // Side-to-side alignment error
-
-            // Adjust lateral offset based on left/right alignment strategy
-            if (alignLeft) {
-                lateralOffset += Constants.VisionConstants.Coral.leftOffsetMeters;
-            } else {
-                lateralOffset -= Constants.VisionConstants.Coral.rightOffsetMeters;
-            }
 
             return Optional.of(new double[] { targetYaw, targetRange, lateralOffset, target.getFiducialId() });
         }
