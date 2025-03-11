@@ -16,7 +16,7 @@ public class MoveForwardCommand extends Command {
     private Pose2d initialPose;
     private final PIDController distancePID;
 
-    private static final double MAX_SPEED = 1.5; // Max speed in meters/sec
+    private static final double MAX_SPEED = 1.0; // Max speed in meters/sec
     private static final double MIN_SPEED = 0.2; // Minimum speed to prevent stopping early
 
     public MoveForwardCommand(SwerveSubsystem swerve, double forwardDistanceTarget) {
