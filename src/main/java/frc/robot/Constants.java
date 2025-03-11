@@ -200,18 +200,18 @@ public final class Constants {
       public static final double RotationkD = 0.02;
 
       public static final double distanceThreshold = 0.3; // How far away do we want to be from aprilTag
-      public static final double distanceTolerance = 0.1; // How off are we willing to tolerate
+      public static final double distanceTolerance = 0.2; // How off are we willing to tolerate
       public static final double distanceSlowZone = 1; // Slow down forward/backward speed of robot if within 1m of
                                                        // aprilTag
       public static final double strafeThreshold = 0.0; // Don't strafe if within 0cm of lateral offset
-      public static final double strafeTolerance = 0.05; // 5 cm tolerance for strafe
+      public static final double strafeTolerance = 0.2; // 5 cm tolerance for strafe
       public static final double strafeSlowZone = 1; // Slow down strafe speed of robot if within 1m left or right of
                                                      // the aprilTag
       public static final double rotationThreshold = 0.0; // Don't rotate if within 0 degrees of aprilTag
-      public static final double rotationTolerance = 1.5; // 2 degrees for turning left and right
+      public static final double rotationTolerance = 2.0; // 2 degrees for turning left and right
       public static final double rotationSlowZone = 10; // Slow down rotation speed of robot if within 10 degrees turned
                                                         // left or right of the aprilTag
-      public static final double leftOffsetMeters = 0.2; // Adjust how far left to align to reach left bar on reef
+      public static final double leftOffsetMeters = 0.43; // Adjust how far left to align to reach left bar on reef
       public static final double rightOffsetMeters = 0.2; // Adjust how far right to align to reach right bar on reef
     }
 
