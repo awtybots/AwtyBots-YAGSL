@@ -79,7 +79,7 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
 
             double normalLateralOffset = cameraToTarget.getY(); // Raw side-to-side alignment error
 
-            // ✅ Log values to SmartDashboard
+            // ✅ Log AprilTag Tracking Data
             SmartDashboard.putBoolean("Vision/01 AprilTag Found", true);
             SmartDashboard.putNumber("Vision/02 AprilTag ID", target.getFiducialId());
             SmartDashboard.putNumber("Vision/04 Yaw (degrees)", target.getYaw());
@@ -91,6 +91,34 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
                     Constants.VisionConstants.Coral.rightOffsetMeters);
         } else {
             SmartDashboard.putBoolean("Vision/01 AprilTag Found", false);
+        }
+
+        // ✅ Log Estimated Global Pose (3D)
+        var estimatedGlobalPoseOpt = getEstimatedGlobalPose();
+        if (estimatedGlobalPoseOpt.isPresent()) {
+            EstimatedRobotPose estimatedPose = estimatedGlobalPoseOpt.get();
+            Pose3d robotPose3d = estimatedPose.estimatedPose;
+
+            SmartDashboard.putBoolean("Vision/09 Estimated Global Pose Found", true);
+            SmartDashboard.putNumber("Vision/10 Estimated X (m)", robotPose3d.getX());
+            SmartDashboard.putNumber("Vision/11 Estimated Y (m)", robotPose3d.getY());
+            SmartDashboard.putNumber("Vision/12 Estimated Rotation (deg)", robotPose3d.getRotation().getZ());
+            SmartDashboard.putNumber("Vision/13 Estimated Timestamp (s)", estimatedPose.timestampSeconds);
+        } else {
+            SmartDashboard.putBoolean("Vision/09 Estimated Global Pose Found", false);
+        }
+
+        // ✅ Log Estimated 2D Pose
+        var estimatedPoseOpt = getEstimatedPose();
+        if (estimatedPoseOpt.isPresent()) {
+            Pose2d robotPose2d = estimatedPoseOpt.get();
+            SmartDashboard.putBoolean("Vision/14 Estimated Pose2D Found", true);
+            SmartDashboard.putNumber("Vision/15 Estimated Pose2D X (m)", robotPose2d.getX());
+            SmartDashboard.putNumber("Vision/16 Estimated Pose2D Y (m)", robotPose2d.getY());
+            SmartDashboard.putNumber("Vision/17 Estimated Pose2D Rotation (deg)",
+                    robotPose2d.getRotation().getDegrees());
+        } else {
+            SmartDashboard.putBoolean("Vision/14 Estimated Pose2D Found", false);
         }
     }
 
