@@ -202,12 +202,13 @@ public final class Constants {
       public static final double distanceSlowZone = 1; // Slow down forward/backward speed of robot if within 1m of
                                                        // aprilTag
       public static final double strafeTolerance = 0.05; // 5 cm tolerance for strafe
-      public static final double strafeSlowZone = 1; // Slow down strafe speed of robot if within 1m left or right of
+      public static final double strafeSlowZone = 2; // Slow down strafe speed of robot if within 1m left or right of
                                                      // the aprilTag
-      public static final double rotationThreshold = -34.0; // Don't rotate if within 0 degrees of aprilTag
+      public static final double rotationThreshold = -2.0; // Don't rotate if within 0 degrees of aprilTag
       public static final double rotationTolerance = 0.2; // 2 degrees for turning left and right
-      public static final double rotationSlowZone = 10.0; // Slow down rotation speed of robot if within 10 degrees turned
-                                                        // left or right of the aprilTag
+      public static final double rotationSlowZone = 10.0; // Slow down rotation speed of robot if within 10 degrees
+                                                          // turned
+      // left or right of the aprilTag
       public static final double leftOffsetMeters = 0.43; // Adjust how far left to align to reach left bar on reef
       public static final double rightOffsetMeters = 0.6; // Adjust how far right to align to reach right bar on reef
     }
