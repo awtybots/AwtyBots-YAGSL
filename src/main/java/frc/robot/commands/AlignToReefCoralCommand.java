@@ -13,6 +13,7 @@ public class AlignToReefCoralCommand extends Command {
         private final SwerveSubsystem swerve;
         private final CoralToReefVisionSubsystem vision;
         private final boolean alignLeft;
+        private final double desiredRotationDegrees; // Target rotation angle
 
         private final ProfiledPIDController translationController;
         private final ProfiledPIDController strafeController;
@@ -20,13 +21,16 @@ public class AlignToReefCoralCommand extends Command {
 
         private boolean hasValidTarget = false;
 
-        public AlignToReefCoralCommand(SwerveSubsystem swerve, CoralToReefVisionSubsystem vision, boolean alignLeft) {
+        public AlignToReefCoralCommand(SwerveSubsystem swerve, CoralToReefVisionSubsystem vision, boolean alignLeft,
+                        double desiredRotationDegrees) {
                 this.swerve = swerve;
                 this.vision = vision;
                 this.alignLeft = alignLeft;
+                this.desiredRotationDegrees = desiredRotationDegrees;
+
                 addRequirements(swerve, vision);
 
-                // Profiled PID Controllers for smoother motion control
+                // Profiled PID Controllers for smooth control
                 translationController = new ProfiledPIDController(
                                 Constants.VisionConstants.Coral.TRANSLATION_kP,
                                 Constants.VisionConstants.Coral.TRANSLATION_kI,
@@ -49,15 +53,21 @@ public class AlignToReefCoralCommand extends Command {
                 translationController.setTolerance(Constants.VisionConstants.Coral.TRANSLATION_TOLERANCE);
                 strafeController.setTolerance(Constants.VisionConstants.Coral.STRAFE_TOLERANCE);
                 rotationController.setTolerance(Constants.VisionConstants.Coral.ROTATION_TOLERANCE);
+
+                // Set the PID controller setpoints
+                translationController.setGoal(Constants.VisionConstants.Coral.DISTANCE_THRESHOLD);
+                strafeController.setGoal(alignLeft ? Constants.VisionConstants.Coral.LEFT_OFFSET
+                                : Constants.VisionConstants.Coral.RIGHT_OFFSET);
+                rotationController.setGoal(desiredRotationDegrees);
         }
 
         @Override
         public void initialize() {
                 System.out.println("[AlignToReefCoralCommand] STARTED");
                 System.out.println(" - Aligning to: " + (alignLeft ? "LEFT" : "RIGHT") + " Reef");
+                System.out.println(" - Target Rotation Angle: " + desiredRotationDegrees + " degrees");
 
                 Optional<double[]> alignmentErrorsOpt = vision.getAlignmentErrors();
-
                 if (alignmentErrorsOpt.isEmpty()) {
                         System.out.println(" - No valid target found, canceling command.");
                         cancel();
@@ -78,7 +88,7 @@ public class AlignToReefCoralCommand extends Command {
                 }
 
                 double[] errors = alignmentErrorsOpt.get();
-                double targetYaw = errors[0]; // Initial Rotation error in degrees
+                double currentYaw = errors[0]; // Current rotation error in degrees
                 double targetDistance = errors[1]; // Distance in meters
                 double lateralOffset = errors[2]; // Side-to-side error
 
@@ -86,7 +96,7 @@ public class AlignToReefCoralCommand extends Command {
                 double yawRate = (-8.3728 * lateralOffset) - 69.9854;
 
                 // Adjust targetYaw dynamically using calculus-based correction
-                targetYaw += yawRate * 0.01; // Small time-step factor for real-time adjustments
+                double correctedYaw = currentYaw + (yawRate * 0.01); // Small time-step factor
 
                 // Determine strafe setpoint based on alignment side
                 double strafeSetpoint = alignLeft
@@ -94,10 +104,23 @@ public class AlignToReefCoralCommand extends Command {
                                 : Constants.VisionConstants.Coral.RIGHT_OFFSET;
 
                 // PID Calculations
-                double rotationPIDOutput = rotationController.calculate(targetYaw, 0);
+                double rotationPIDOutput = rotationController.calculate(correctedYaw, desiredRotationDegrees);
                 double forwardSpeed = translationController.calculate(targetDistance,
                                 Constants.VisionConstants.Coral.DISTANCE_THRESHOLD);
                 double strafeSpeed = strafeController.calculate(lateralOffset, strafeSetpoint);
+
+                // Apply tolerance-based stopping
+                if (Math.abs(targetDistance
+                                - Constants.VisionConstants.Coral.DISTANCE_THRESHOLD) < Constants.VisionConstants.Coral.TRANSLATION_TOLERANCE) {
+                        forwardSpeed = 0; // Stop when within translation tolerance
+                }
+                if (Math.abs(lateralOffset - strafeSetpoint) < Constants.VisionConstants.Coral.STRAFE_TOLERANCE) {
+                        strafeSpeed = 0; // Stop when within strafe tolerance
+                }
+                if (Math.abs(correctedYaw
+                                - desiredRotationDegrees) < Constants.VisionConstants.Coral.ROTATION_THRESHOLD) {
+                        rotationPIDOutput = 0; // Stop rotating when within rotation threshold
+                }
 
                 // Enforce speed limits
                 forwardSpeed = MathUtil.clamp(forwardSpeed, -Constants.VisionConstants.Coral.maxForwardSpeed,
@@ -108,14 +131,14 @@ public class AlignToReefCoralCommand extends Command {
                                 Constants.VisionConstants.Coral.maxRotationSpeed);
 
                 // Log values for debugging
-                SmartDashboard.putNumber("Vision/18 Updated Yaw Correction (w/ Derivative)", targetYaw);
+                SmartDashboard.putNumber("Vision/18 Updated Yaw Correction (w/ Derivative)", correctedYaw);
                 SmartDashboard.putNumber("Vision/19 Yaw Rate (dYaw/dL)", yawRate);
-                // Log PID values to SmartDashboard
+                SmartDashboard.putNumber("Vision/20 Desired Rotation Setpoint", desiredRotationDegrees);
                 SmartDashboard.putBoolean("Vision/03 Valid-Target", hasValidTarget);
                 SmartDashboard.putNumber("PID-Vision/10 PID-Forward Speed", forwardSpeed);
                 SmartDashboard.putNumber("PID-Vision/11 PID-Strafe Speed", strafeSpeed);
                 SmartDashboard.putNumber("PID-Vision/12 PID-Rotation Speed", rotationPIDOutput);
-                SmartDashboard.putNumber("Vision/04 Yaw (degrees)", targetYaw);
+                SmartDashboard.putNumber("Vision/04 Yaw (degrees)", correctedYaw);
                 SmartDashboard.putNumber("Vision/05 Distance (m)", targetDistance);
                 SmartDashboard.putNumber("Vision/06 Lateral Offset (m)", lateralOffset);
 
