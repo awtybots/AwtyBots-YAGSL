@@ -203,12 +203,11 @@ public final class Constants {
       public static final double ROTATION_kD = 0.02;
 
       // Distance Thresholds (How Close Should the Robot Get?)
-      public static final double DISTANCE_THRESHOLD = 0.8; // Target distance from AprilTag
-      public static final double TRANSLATION_TOLERANCE = 0.1; // Allowable translation error in meters
-      public static final double STRAFE_THRESHOLD = 0.02; // 5 cm strafe tolerance
+      public static final double DISTANCE_THRESHOLD = 0.5; // Target distance from AprilTag
+      public static final double TRANSLATION_TOLERANCE = 0.5; // Allowable translation error in meters 
       public static final double STRAFE_TOLERANCE = 0.05; // 5 cm strafe tolerance
       public static final double ROTATION_THRESHOLD = 0.0; // 5 cm strafe tolerance
-      public static final double ROTATION_TOLERANCE = 0.8; // 2 degrees of rotation tolerance
+      public static final double ROTATION_TOLERANCE = 5; // 2 degrees of rotation tolerance
 
       // Profiled PID Constraints (Velocity & Acceleration Limits)
       public static final edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints TRANSLATION_CONSTRAINTS = new edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints(
@@ -222,7 +221,7 @@ public final class Constants {
 
       // Alignment Offsets (Lateral Adjustments for Reef Bars)
       public static final double LEFT_OFFSET = 0.43; // Adjust this to align with left reef bar
-      public static final double RIGHT_OFFSET = 0.6; // Adjust this to align with right reef bar
+      public static final double RIGHT_OFFSET = 0.0; // Adjust this to align with right reef bar
     }
 
     public static final class FeederStation {
