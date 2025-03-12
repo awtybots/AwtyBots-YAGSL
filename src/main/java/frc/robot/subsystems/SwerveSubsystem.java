@@ -275,6 +275,11 @@ public class SwerveSubsystem extends SubsystemBase {
     }
   }
 
+  public void drive(double forwardSpeed, double strafeSpeed, double rotationSpeed) {
+    ChassisSpeeds speeds = new ChassisSpeeds(forwardSpeed, strafeSpeed, rotationSpeed);
+    swerveDrive.drive(speeds);
+  }
+
   public void stop() {
     drive(new ChassisSpeeds(0, 0, 0));
 

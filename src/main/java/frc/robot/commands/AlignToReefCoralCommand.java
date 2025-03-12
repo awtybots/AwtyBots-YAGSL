@@ -1,216 +1,138 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot.commands;
 
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.CoralToReefVisionSubsystem;
 import frc.robot.Constants;
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import java.util.Optional;
-import java.util.Set;
 
-/** Aligns the robot to an AprilTag while the button is held */
 public class AlignToReefCoralCommand extends Command {
     private final SwerveSubsystem swerve;
     private final CoralToReefVisionSubsystem vision;
     private final boolean alignLeft;
-    private Double visionGyroOffset = null; // Stores the correction offset
 
-    // PID Controllers
-    private final PIDController distancePID;
-    private final PIDController strafePID;
-    private final PIDController rotationPID;
+    private final ProfiledPIDController translationController;
+    private final ProfiledPIDController strafeController;
+    private final ProfiledPIDController rotationController;
 
     private boolean hasValidTarget = false;
 
-    // Define allowed AprilTag IDs
-    private static final Set<Integer> VALID_APRILTAG_IDS = Set.of(1, 6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22);
-
-    private final double targetDistanceMeters = Constants.VisionConstants.Coral.distanceThreshold;
-
-    /**
-     * Creates a new AlignToAprilTagCommand.
-     *
-     * @param swerve    The drivetrain subsystem.
-     * @param vision    The vision subsystem.
-     * @param alignLeft `true` to align to left reef bar, `false` for the
-     *                  right.
-     * 
-     */
-    public AlignToReefCoralCommand(SwerveSubsystem swerve,
-            CoralToReefVisionSubsystem vision, boolean alignLeft) {
+    public AlignToReefCoralCommand(SwerveSubsystem swerve, CoralToReefVisionSubsystem vision, boolean alignLeft) {
         this.swerve = swerve;
         this.vision = vision;
         this.alignLeft = alignLeft;
         addRequirements(swerve, vision);
 
-        // Initialize PID Constants on SmartDashboard
-        SmartDashboard.putNumber("PID-Vision/01 Distance kP", Constants.VisionConstants.Coral.DistancekP);
-        SmartDashboard.putNumber("PID-Vision/02 Distance kI", Constants.VisionConstants.Coral.DistancekI);
-        SmartDashboard.putNumber("PID-Vision/03 Distance kD", Constants.VisionConstants.Coral.DistancekD);
+        // Profiled PID Controllers for smoother motion control
+        translationController = new ProfiledPIDController(
+                Constants.VisionConstants.Coral.TRANSLATION_kP,
+                Constants.VisionConstants.Coral.TRANSLATION_kI,
+                Constants.VisionConstants.Coral.TRANSLATION_kD,
+                Constants.VisionConstants.Coral.TRANSLATION_CONSTRAINTS);
 
-        SmartDashboard.putNumber("PID-Vision/04 Strafe kP", Constants.VisionConstants.Coral.StrafekP);
-        SmartDashboard.putNumber("PID-Vision/05 Strafe kI", Constants.VisionConstants.Coral.StrafekI);
-        SmartDashboard.putNumber("PID-Vision/06 Strafe kD", Constants.VisionConstants.Coral.StrafekD);
+        strafeController = new ProfiledPIDController(
+                Constants.VisionConstants.Coral.STRAFE_kP,
+                Constants.VisionConstants.Coral.STRAFE_kI,
+                Constants.VisionConstants.Coral.STRAFE_kD,
+                Constants.VisionConstants.Coral.STRAFE_CONSTRAINTS);
 
-        SmartDashboard.putNumber("PID-Vision/07 Rotation kP", Constants.VisionConstants.Coral.RotationkP);
-        SmartDashboard.putNumber("PID-Vision/08 Rotation kI", Constants.VisionConstants.Coral.RotationkI);
-        SmartDashboard.putNumber("PID-Vision/09 Rotation kD", Constants.VisionConstants.Coral.RotationkD);
+        rotationController = new ProfiledPIDController(
+                Constants.VisionConstants.Coral.ROTATION_kP,
+                Constants.VisionConstants.Coral.ROTATION_kI,
+                Constants.VisionConstants.Coral.ROTATION_kD,
+                Constants.VisionConstants.Coral.ROTATION_CONSTRAINTS);
 
-        // Initialize PID Controllers (will be updated dynamically in execute())
-        distancePID = new PIDController(Constants.VisionConstants.Coral.DistancekP,
-                Constants.VisionConstants.Coral.DistancekI,
-                Constants.VisionConstants.Coral.DistancekD);
-        strafePID = new PIDController(Constants.VisionConstants.Coral.StrafekP,
-                Constants.VisionConstants.Coral.StrafekI,
-                Constants.VisionConstants.Coral.StrafekD);
-        rotationPID = new PIDController(Constants.VisionConstants.Coral.RotationkP,
-                Constants.VisionConstants.Coral.RotationkI,
-                Constants.VisionConstants.Coral.RotationkD);
-
-        // Set Tolerances
-        distancePID.setTolerance(Constants.VisionConstants.Coral.distanceTolerance);
-        strafePID.setTolerance(Constants.VisionConstants.Coral.strafeTolerance);
-        rotationPID.setTolerance(Constants.VisionConstants.Coral.rotationTolerance);
-
-        distancePID.setSetpoint(Constants.VisionConstants.Coral.distanceThreshold);
-        if (alignLeft) {
-            strafePID.setSetpoint(Constants.VisionConstants.Coral.leftOffsetMeters);
-        } else {
-            strafePID.setSetpoint(Constants.VisionConstants.Coral.rightOffsetMeters);
-        }
-
-        rotationPID.setSetpoint(Constants.VisionConstants.Coral.rotationThreshold);
+        // Set tolerances
+        translationController.setTolerance(Constants.VisionConstants.Coral.TRANSLATION_TOLERANCE);
+        strafeController.setTolerance(Constants.VisionConstants.Coral.STRAFE_TOLERANCE);
+        rotationController.setTolerance(Constants.VisionConstants.Coral.ROTATION_TOLERANCE);
     }
 
     @Override
     public void initialize() {
         System.out.println("[AlignToReefCoralCommand] STARTED");
         System.out.println(" - Aligning to: " + (alignLeft ? "LEFT" : "RIGHT") + " Reef");
-        System.out.println(" - Target Distance: " + targetDistanceMeters + " meters");
+
+        Optional<double[]> alignmentErrorsOpt = vision.getAlignmentErrors();
+
+        if (alignmentErrorsOpt.isEmpty()) {
+            System.out.println(" - No valid target found, canceling command.");
+            cancel();
+            return;
+        }
+
+        hasValidTarget = true;
     }
 
     @Override
     public void execute() {
-        int detectedTagId = vision.getBestTargetTagID();
-
-        // Ensure detected tag is in the valid set
-        if (!VALID_APRILTAG_IDS.contains(detectedTagId)) {
-            swerve.drive(new ChassisSpeeds(0, 0, 0)); // Stop movement if tag is not valid
+        Optional<double[]> alignmentErrorsOpt = vision.getAlignmentErrors();
+        if (alignmentErrorsOpt.isEmpty()) {
             hasValidTarget = false;
+            swerve.stop();
             SmartDashboard.putBoolean("Vision/03 Valid-Target", hasValidTarget);
             return;
         }
 
-        Optional<double[]> errors = vision.getAlignmentErrors();
-        if (errors.isPresent()) {
-            hasValidTarget = true;
-            double[] errorArray = errors.get();
-            double visionYaw = errorArray[0]; // ✅ Using only vision yaw initially
-            double targetRange = Math.abs(errorArray[1]);
-            double lateralOffset = errorArray[2];
+        double[] errors = alignmentErrorsOpt.get();
+        double targetYaw = errors[0]; // Rotation error in degrees
+        double targetDistance = errors[1]; // Distance in meters
+        double lateralOffset = errors[2]; // Side-to-side error
 
-            // ✅ Step 1: Use Vision Yaw to Align at Start
-            if (visionGyroOffset == null) {
-                visionGyroOffset = visionYaw - swerve.getGyroYaw(); // Store offset to lock heading
-            }
+        // Determine strafe setpoint based on alignment side
+        double strafeSetpoint = alignLeft
+                ? Constants.VisionConstants.Coral.LEFT_OFFSET
+                : Constants.VisionConstants.Coral.RIGHT_OFFSET;
 
-            // ✅ Step 2: Use Gyro to Maintain Heading After Rotation is Aligned
-            double correctedYaw = swerve.getGyroYaw() + visionGyroOffset; // Maintain locked heading
+        // PID Calculations
+        double rotationPIDOutput = rotationController.calculate(targetYaw, 0);
+        double forwardSpeed = translationController.calculate(targetDistance,
+                Constants.VisionConstants.Coral.DISTANCE_THRESHOLD);
+        double strafeSpeed = strafeController.calculate(lateralOffset, strafeSetpoint);
 
-            // ✅ Calculate the error from the target rotation angle
-            double yawError = Constants.VisionConstants.Coral.rotationThreshold - correctedYaw;
+        // Enforce speed limits
+        forwardSpeed = MathUtil.clamp(forwardSpeed, -Constants.VisionConstants.Coral.maxForwardSpeed,
+                Constants.VisionConstants.Coral.maxForwardSpeed);
+        strafeSpeed = MathUtil.clamp(strafeSpeed, -Constants.VisionConstants.Coral.maxStrafeSpeed,
+                Constants.VisionConstants.Coral.maxStrafeSpeed);
+        rotationPIDOutput = MathUtil.clamp(rotationPIDOutput, -Constants.VisionConstants.Coral.maxRotationSpeed,
+                Constants.VisionConstants.Coral.maxRotationSpeed);
 
-            // ✅ Use PID controller to correct the yaw error
-            double rotationSpeed = rotationPID.calculate(yawError, 0);
+        // Logging for debugging
+        System.out.println("Target Yaw: " + targetYaw);
+        System.out.println("Target Distance: " + targetDistance);
+        System.out.println("Lateral Offset: " + lateralOffset);
+        System.out.println("Rotation PID Output: " + rotationPIDOutput);
+        System.out.println("Forward Speed: " + forwardSpeed);
+        System.out.println("Strafe Speed: " + strafeSpeed);
 
-            // ✅ Enforce minimum rotation speed to overcome static friction
-            double minRotationSpeed = 0.3; // Adjust as needed
-            if (!rotationPID.atSetpoint() && Math.abs(rotationSpeed) < minRotationSpeed) {
-                rotationSpeed = Math.copySign(minRotationSpeed, rotationSpeed);
-            }
+        // Log PID values to SmartDashboard
+        SmartDashboard.putBoolean("Vision/03 Valid-Target", hasValidTarget);
+        SmartDashboard.putNumber("PID-Vision/10 PID-Forward Speed", forwardSpeed);
+        SmartDashboard.putNumber("PID-Vision/11 PID-Strafe Speed", strafeSpeed);
+        SmartDashboard.putNumber("PID-Vision/12 PID-Rotation Speed", rotationPIDOutput);
+        SmartDashboard.putNumber("Vision/04 Yaw (degrees)", targetYaw);
+        SmartDashboard.putNumber("Vision/05 Distance (m)", targetDistance);
+        SmartDashboard.putNumber("Vision/06 Lateral Offset (m)", lateralOffset);
 
-            // ✅ Clamp rotation speed to avoid excessive turning
-            rotationSpeed = Math.max(-Constants.VisionConstants.Coral.maxRotationSpeed,
-                    Math.min(Constants.VisionConstants.Coral.maxRotationSpeed, rotationSpeed));
-
-            // ✅ Flip rotation direction if needed
-            rotationSpeed = rotationSpeed;
-
-            // ✅ Align Rotation First - Stop Other Movement Until Yaw is Correct
-            if (!rotationPID.atSetpoint()) {
-                // Only rotate, no strafing or forward movement
-                swerve.drive(new ChassisSpeeds(0, 0, rotationSpeed));
-                System.out.println("Rotating First -> Rotation Speed: " + rotationSpeed);
-                return; // Exit function early to avoid calculating strafe & distance
-            }
-
-            // ✅ Now Handle Distance & Strafe PIDs
-            double forwardSpeed = distancePID.calculate(targetRange);
-            if (distancePID.atSetpoint()) {
-                forwardSpeed = 0; // Stops movement when within tolerance
-            }
-            double strafeSpeed = strafePID.calculate(lateralOffset);
-            if (strafePID.atSetpoint()) {
-                strafeSpeed = 0;
-            }
-
-            // ✅ Enforce max speed limits
-            if (targetRange >= Constants.VisionConstants.Coral.distanceSlowZone) {
-                forwardSpeed = Math.min(forwardSpeed, 1.0);
-            } else {
-                forwardSpeed = Math.max(-Constants.VisionConstants.Coral.maxForwardSpeed,
-                        Math.min(Constants.VisionConstants.Coral.maxForwardSpeed, forwardSpeed));
-            }
-
-            if (Math.abs(lateralOffset) < Constants.VisionConstants.Coral.strafeSlowZone) {
-                strafeSpeed = Math.max(-Constants.VisionConstants.Coral.maxStrafeSpeed,
-                        Math.min(Constants.VisionConstants.Coral.maxStrafeSpeed, strafeSpeed));
-            }
-
-            // ✅ Logging for debugging
-            System.out.println("Target Yaw: " + Constants.VisionConstants.Coral.rotationThreshold);
-            System.out.println("Vision Yaw: " + visionYaw);
-            System.out.println("Corrected Yaw (Using Gyro Lock): " + correctedYaw);
-            System.out.println("Yaw Error: " + yawError);
-            System.out.println("Raw Rotation Speed: " + rotationPID.calculate(yawError, 0));
-            System.out.println("Final Rotation Speed (With Deadband): " + rotationSpeed);
-            System.out.println("Forward Speed: " + forwardSpeed);
-            System.out.println("Strafe Speed: " + strafeSpeed);
-
-            // ✅ Apply corrected movement values
-            swerve.drive(new ChassisSpeeds(forwardSpeed, strafeSpeed, rotationSpeed));
-
-            // ✅ Log PID values to SmartDashboard
-            SmartDashboard.putBoolean("Vision/03 Valid-Target", hasValidTarget);
-            SmartDashboard.putNumber("PID-Vision/10 PID-Forward Speed", forwardSpeed);
-            SmartDashboard.putNumber("PID-Vision/11 PID-Strafe Speed", strafeSpeed);
-            SmartDashboard.putNumber("PID-Vision/12 PID-Rotation Speed", rotationSpeed);
-
-        } else {
-            // Reset correction offset when no valid target
-            visionGyroOffset = null;
-            swerve.drive(new ChassisSpeeds(0, 0, 0));
-            hasValidTarget = false;
-            SmartDashboard.putBoolean("Vision/03 Valid-Target", hasValidTarget);
-        }
+        // Apply movement
+        swerve.drive(forwardSpeed, strafeSpeed, rotationPIDOutput);
     }
 
     @Override
     public void end(boolean interrupted) {
         hasValidTarget = false;
-        swerve.drive(new ChassisSpeeds(0, 0, 0));
-        System.out.println("AlignToReefCommand ended.");
+        swerve.stop();
+        System.out.println("AlignToReefCoralCommand ended. Interrupted: " + interrupted);
     }
 
     @Override
     public boolean isFinished() {
-        return distancePID.atSetpoint() && strafePID.atSetpoint() &&
-                rotationPID.atSetpoint();
+        return translationController.atGoal() &&
+                strafeController.atGoal() &&
+                rotationController.atGoal();
     }
 }

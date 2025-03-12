@@ -79,21 +79,21 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
 
             double normalLateralOffset = cameraToTarget.getY(); // Raw side-to-side alignment error
 
-            // ✅ Log AprilTag Tracking Data
+            // Log AprilTag Tracking Data
             SmartDashboard.putBoolean("Vision/01 AprilTag Found", true);
             SmartDashboard.putNumber("Vision/02 AprilTag ID", target.getFiducialId());
             SmartDashboard.putNumber("Vision/04 Yaw (degrees)", target.getYaw());
             SmartDashboard.putNumber("Vision/05 Distance (m)", smoothedDistance); // Use smoothed distance!
             SmartDashboard.putNumber("Vision/06 Raw Lateral Offset (m)", normalLateralOffset);
             SmartDashboard.putNumber("Vision/07 Lateral Offset Target (Left Align)",
-                    Constants.VisionConstants.Coral.leftOffsetMeters);
+                    Constants.VisionConstants.Coral.LEFT_OFFSET);
             SmartDashboard.putNumber("Vision/08 Lateral Offset Target (Right Align)",
-                    Constants.VisionConstants.Coral.rightOffsetMeters);
+                    Constants.VisionConstants.Coral.RIGHT_OFFSET);
         } else {
             SmartDashboard.putBoolean("Vision/01 AprilTag Found", false);
         }
 
-        // ✅ Log Estimated Global Pose (3D)
+        // Log Estimated Global Pose (3D)
         var estimatedGlobalPoseOpt = getEstimatedGlobalPose();
         if (estimatedGlobalPoseOpt.isPresent()) {
             EstimatedRobotPose estimatedPose = estimatedGlobalPoseOpt.get();
@@ -108,7 +108,7 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
             SmartDashboard.putBoolean("Vision/09 Estimated Global Pose Found", false);
         }
 
-        // ✅ Log Estimated 2D Pose
+        // Log Estimated 2D Pose
         var estimatedPoseOpt = getEstimatedPose();
         if (estimatedPoseOpt.isPresent()) {
             Pose2d robotPose2d = estimatedPoseOpt.get();

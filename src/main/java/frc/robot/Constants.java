@@ -187,30 +187,40 @@ public final class Constants {
       public static final double maxForwardSpeed = 0.5; // Max forward/backward speed (m/s)
       public static final double maxStrafeSpeed = 0.5; // Max strafe speed (m/s)
       public static final double maxRotationSpeed = 0.5; // Max rotation speed (rad/s)
-      public static final double DistancekP = 0.8;
-      public static final double DistancekI = 0.08;
-      public static final double DistancekD = 0.05;
-      public static final double StrafekP = 1.2;
-      public static final double StrafekI = 0.0;
-      public static final double StrafekD = 0.03;
-      public static final double RotationkP = 0.2;
-      public static final double RotationkI = 0.0;
-      public static final double RotationkD = 0.02;
+      // PID Constants for Forward/Backward Translation
+      public static final double TRANSLATION_kP = 0.8;
+      public static final double TRANSLATION_kI = 0.08;
+      public static final double TRANSLATION_kD = 0.05;
 
-      public static final double distanceThreshold = 0.8; // How far away do we want to be from aprilTag
-      public static final double distanceTolerance = 0.2; // How off are we willing to tolerate
-      public static final double distanceSlowZone = 1; // Slow down forward/backward speed of robot if within 1m of
-                                                       // aprilTag
-      public static final double strafeTolerance = 0.05; // 5 cm tolerance for strafe
-      public static final double strafeSlowZone = 2; // Slow down strafe speed of robot if within 1m left or right of
-                                                     // the aprilTag
-      public static final double rotationThreshold = -2.0; // Don't rotate if within 0 degrees of aprilTag
-      public static final double rotationTolerance = 0.2; // 2 degrees for turning left and right
-      public static final double rotationSlowZone = 10.0; // Slow down rotation speed of robot if within 10 degrees
-                                                          // turned
-      // left or right of the aprilTag
-      public static final double leftOffsetMeters = 0.43; // Adjust how far left to align to reach left bar on reef
-      public static final double rightOffsetMeters = 0.6; // Adjust how far right to align to reach right bar on reef
+      // PID Constants for Strafing (Side-to-Side Movement)
+      public static final double STRAFE_kP = 1.2;
+      public static final double STRAFE_kI = 0.0;
+      public static final double STRAFE_kD = 0.03;
+
+      // PID Constants for Rotation (Turning to Face Target)
+      public static final double ROTATION_kP = 0.2;
+      public static final double ROTATION_kI = 0.0;
+      public static final double ROTATION_kD = 0.02;
+
+      // Distance Thresholds (How Close Should the Robot Get?)
+      public static final double DISTANCE_THRESHOLD = 0.8; // Target distance from AprilTag
+      public static final double TRANSLATION_TOLERANCE = 0.1; // Allowable translation error in meters
+      public static final double STRAFE_TOLERANCE = 0.05; // 5 cm strafe tolerance
+      public static final double ROTATION_TOLERANCE = 0.2; // 2 degrees of rotation tolerance
+
+      // Profiled PID Constraints (Velocity & Acceleration Limits)
+      public static final edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints TRANSLATION_CONSTRAINTS = new edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints(
+          1.5, 1.0); // Max: 1.5 m/s, Accel: 1.0 m/s²
+
+      public static final edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints STRAFE_CONSTRAINTS = new edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints(
+          1.5, 1.0); // Same as translation
+
+      public static final edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints ROTATION_CONSTRAINTS = new edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints(
+          Units.degreesToRadians(180), Units.degreesToRadians(90)); // Max: 180°/s, Accel: 90°/s²
+
+      // Alignment Offsets (Lateral Adjustments for Reef Bars)
+      public static final double LEFT_OFFSET = 0.43; // Adjust this to align with left reef bar
+      public static final double RIGHT_OFFSET = 0.6; // Adjust this to align with right reef bar
     }
 
     public static final class FeederStation {
