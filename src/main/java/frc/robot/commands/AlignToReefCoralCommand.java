@@ -109,17 +109,24 @@ public class AlignToReefCoralCommand extends Command {
                                 Constants.VisionConstants.Coral.DISTANCE_THRESHOLD);
                 double strafeSpeed = strafeController.calculate(lateralOffset, strafeSetpoint);
 
-                // Apply tolerance-based stopping
+                // Stop Forward Movement if Within Distance Tolerance
                 if (Math.abs(targetDistance
                                 - Constants.VisionConstants.Coral.DISTANCE_THRESHOLD) < Constants.VisionConstants.Coral.TRANSLATION_TOLERANCE) {
-                        forwardSpeed = 0; // Stop when within translation tolerance
+                        forwardSpeed = 0; // Stop forward movement
+                        translationController.reset(Constants.VisionConstants.Coral.DISTANCE_THRESHOLD);
                 }
+
+                // Stop Strafing if Within Strafe Tolerance
                 if (Math.abs(lateralOffset - strafeSetpoint) < Constants.VisionConstants.Coral.STRAFE_TOLERANCE) {
-                        strafeSpeed = 0; // Stop when within strafe tolerance
+                        strafeSpeed = 0; // Stop strafing movement
+                        strafeController.reset(strafeSetpoint);
                 }
+
+                // Stop Rotation if Within Rotation Tolerance (FIXED!)
                 if (Math.abs(correctedYaw
-                                - desiredRotationDegrees) < Constants.VisionConstants.Coral.ROTATION_THRESHOLD) {
-                        rotationPIDOutput = 0; // Stop rotating when within rotation threshold
+                                - desiredRotationDegrees) < Constants.VisionConstants.Coral.ROTATION_TOLERANCE) {
+                        rotationPIDOutput = 0; // Stop rotating
+                        rotationController.reset(desiredRotationDegrees);
                 }
 
                 // Enforce speed limits
