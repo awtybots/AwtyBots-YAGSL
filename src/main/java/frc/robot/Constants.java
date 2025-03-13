@@ -4,10 +4,21 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+
 import java.lang.String;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -178,8 +189,80 @@ public final class Constants {
 
   public static final class VisionConstants {
     public static final class Coral {
+      public static final int[] redReefIds = { 6, 7, 8, 9, 10, 11 };
+      public static final int[] blueReefIds = { 17, 18, 19, 20, 21, 22 };
+
+      public static final int[] allReefIds = { 6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22 };
+
+      public static final int[] nonReefIds = { 1, 2, 3, 4, 5, 12, 13, 14, 15, 16 };
+
+      public static final Map<Integer, Pose2d[]> redReefScoringPoses = new HashMap<>();
+      public static final Map<Integer, Pose2d[]> blueReefScoringPoses = new HashMap<>();
+
+      static {
+        // Populate red alliance scoring positions
+        redReefScoringPoses.put(6, new Pose2d[] {
+            new Pose2d(13.690, 2.664, Rotation2d.fromDegrees(37.619)), // Tag 6 Left Bar
+            new Pose2d(13.966, 2.856, Rotation2d.fromDegrees(37.619)) // Tag 6 Right Bar
+        });
+
+        redReefScoringPoses.put(7, new Pose2d[] {
+            new Pose2d(8.5, 2.5, Rotation2d.fromDegrees(180)), // Tag 7 Left Bar
+            new Pose2d(8.5, 3.0, Rotation2d.fromDegrees(180)) // Tag 7 Right Bar
+        });
+
+        // Populate blue alliance scoring positions
+        blueReefScoringPoses.put(17, new Pose2d[] {
+            new Pose2d(2.0, 2.5, Rotation2d.fromDegrees(0)), // Tag 17 Left Bar
+            new Pose2d(2.0, 3.0, Rotation2d.fromDegrees(0)) // Tag 17 Right Bar
+        });
+
+        blueReefScoringPoses.put(18, new Pose2d[] {
+            new Pose2d(4.0, 2.5, Rotation2d.fromDegrees(0)), // Tag 18 Left Bar
+            new Pose2d(4.0, 3.0, Rotation2d.fromDegrees(0)) // Tag 18 Right Bar
+        });
+      }
+
+      /**
+       * Get the best scoring pose based on the detected AprilTag and bar alignment.
+       * 
+       * @param aprilTagID The detected AprilTag ID
+       * @param alignLeft  True for the left bar, False for the right bar
+       * @return The target Pose2d for alignment, or a default Pose2d if the tag isn't
+       *         found
+       */
+      public static Pose2d getBestReefPose(int aprilTagID, boolean alignLeft) {
+        boolean isRedAlliance = DriverStation.getAlliance().isPresent() &&
+            DriverStation.getAlliance().get() == Alliance.Red;
+
+        Map<Integer, Pose2d[]> scoringMap = isRedAlliance ? redReefScoringPoses : blueReefScoringPoses;
+
+        // Fetch pose array, default to a safe value if the tag isn't recognized
+        Pose2d[] scoringPoses = scoringMap.getOrDefault(aprilTagID, new Pose2d[] { new Pose2d(), new Pose2d() });
+
+        return scoringPoses[alignLeft ? 0 : 1]; // Return left or right position
+      }
+
+      public static final List<String> cameraNames = List.of(
+          "Arducam_OV9782_USB_Camera (1)" // Front Camera (AprilTag Limelight)
+      // "Arducam_Left", // Left Camera
+      // "Arducam_Right" // Right Camera
+      );
+
+      public static final List<Transform3d> cameraPoses = List.of(
+          new Transform3d( // Front Camera (Limelight)
+              new Translation3d(0.35, 0.35, 0.381),
+              new Rotation3d(0, Units.degreesToRadians(0), 0))
+      // new Transform3d( // Left Camera
+      // new Translation3d(0.3, 0.2, 0.35),
+      // new Rotation3d(0, Units.degreesToRadians(0), Units.degreesToRadians(90))),
+      // new Transform3d( // Right Camera
+      // new Translation3d(0.3, -0.2, 0.35),
+      // new Rotation3d(0, Units.degreesToRadians(0), Units.degreesToRadians(-90)))
+      );
+
       // Camera's
-      public static final String limelightAprilTagCamera = "OV9281";
+      // public static final String limelightAprilTagCamera = "OV9281";
       public static final double cameraMountX = 0.35; // How far forwards/backwards is the camera mounted from center
       public static final double cameraMountY = 0.35; // How far left/right is the camera mounted from center
       public static final double cameraMountZ = 0.381; // This is in meters
@@ -204,7 +287,7 @@ public final class Constants {
 
       // Distance Thresholds (How Close Should the Robot Get?)
       public static final double DISTANCE_THRESHOLD = 0.5; // Target distance from AprilTag
-      public static final double TRANSLATION_TOLERANCE = 0.5; // Allowable translation error in meters 
+      public static final double TRANSLATION_TOLERANCE = 0.5; // Allowable translation error in meters
       public static final double STRAFE_TOLERANCE = 0.05; // 5 cm strafe tolerance
       public static final double ROTATION_THRESHOLD = 0.0; // 5 cm strafe tolerance
       public static final double ROTATION_TOLERANCE = 5; // 2 degrees of rotation tolerance

@@ -32,14 +32,15 @@ public class BackupUntilVisionCommand extends Command {
 
     @Override
     public void execute() {
-        // Check if vision has found a valid AprilTag pose
-        Optional<Pose2d> visionPoseOpt = vision.getEstimatedPose();
-        if (visionPoseOpt.isPresent()) {
-            swerve.updateOdometry(visionPoseOpt.get());
-            visionPoseFound = true;
-            System.out.println("[BackupUntilVision] Vision Pose Found! Updated Odometry: " + visionPoseOpt.get());
-            return;
-        }
+        // // Check if vision has found a valid AprilTag pose
+        // Optional<Pose2d> visionPoseOpt = vision.getEstimatedFieldPose();
+        // if (visionPoseOpt.isPresent()) {
+        // swerve.updateOdometry(visionPoseOpt.get());
+        // visionPoseFound = true;
+        // System.out.println("[BackupUntilVision] Vision Pose Found! Updated Odometry:
+        // " + visionPoseOpt.get());
+        // return;
+        // }
 
         // Move backward until we reach the max distance
         double distanceTraveled = swerve.getPose().getTranslation().getDistance(initialPose.getTranslation());

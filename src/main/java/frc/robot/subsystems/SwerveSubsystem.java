@@ -7,6 +7,7 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.Rotation;
 
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.estimator.PoseEstimator;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -17,6 +18,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -234,6 +236,10 @@ public class SwerveSubsystem extends SubsystemBase {
     swerveDrive.drive(velocity);
   }
 
+  public void addVisionMeasurement(Pose2d visionPose) {
+    poseEstimator.addVisionMeasurement(visionPose, Timer.getFPGATimestamp());
+  }
+
   public void setInitialHeading(double angleDegrees) {
     gyro.setAngleAdjustment(angleDegrees);
     swerveDrive.resetOdometry(new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(angleDegrees)));
@@ -243,9 +249,13 @@ public class SwerveSubsystem extends SubsystemBase {
     var alliance = DriverStation.getAlliance();
 
     // Get estimated heading from vision
-    Optional<Pose2d> visionPoseOpt = vision.getEstimatedPose();
+    Optional<Pair<Integer, Pose2d>> visionPoseOpt = vision.getEstimatedFieldPose();
+
     if (visionPoseOpt.isPresent()) {
-      double estimatedFieldHeading = visionPoseOpt.get().getRotation().getDegrees();
+      int detectedAprilTagID = visionPoseOpt.get().getFirst(); // Extract AprilTag ID
+      Pose2d estimatedPose = visionPoseOpt.get().getSecond(); // Extract Pose2d
+
+      double estimatedFieldHeading = estimatedPose.getRotation().getDegrees();
       double gyroCurrentHeading = getGyroYaw(); // Get current gyro heading
 
       // Calculate correction offset
@@ -262,17 +272,23 @@ public class SwerveSubsystem extends SubsystemBase {
 
       // Reset odometry using corrected vision pose
       Pose2d correctedPose = new Pose2d(
-          visionPoseOpt.get().getTranslation(),
+          estimatedPose.getTranslation(),
           Rotation2d.fromDegrees(targetAngleDegrees) // Use corrected target angle
       );
 
       swerveDrive.resetOdometry(correctedPose);
+
+      System.out.println("[GyroReset] Vision Data Used (Tag ID: " + detectedAprilTagID + ")");
     } else {
       System.out.println("[GyroReset] No vision data available, setting based on gyro alone.");
       gyro.setAngleAdjustment(targetAngleDegrees);
 
       swerveDrive.resetOdometry(new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(targetAngleDegrees)));
     }
+  }
+
+  public ChassisSpeeds getRobotVelocity() {
+    return swerveDrive.getRobotVelocity();
   }
 
   public void drive(double forwardSpeed, double strafeSpeed, double rotationSpeed) {

@@ -5,6 +5,8 @@ import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.Waypoint;
 import com.pathplanner.lib.auto.AutoBuilder;
+
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -30,18 +32,25 @@ public class PathPlannerMoveToFeederStation extends Command {
 
     @Override
     public void initialize() {
-        Optional<Pose2d> visionPoseOpt = vision.getEstimatedPose();
+        // Optional<Pair<Integer, Pose2d>> visionPoseOpt =
+        // vision.getEstimatedFieldPose();
 
-        if (visionPoseOpt.isEmpty()) {
-            System.out.println("[MoveToFeeder] No vision detected, backing up to get vision...");
+        // if (visionPoseOpt.isEmpty()) {
+        // System.out.println("[MoveToFeeder] No vision detected, backing up to get
+        // vision...");
 
-            // Move back until we detect an AprilTag, then update odometry
-            new BackupUntilVisionCommand(swerve, vision).schedule();
-            return;
-        } else {
-            System.out.println("[MoveToFeeder] Vision Pose Found, Updating Odometry.");
-            swerve.updateOdometry(visionPoseOpt.get());
-        }
+        // // Move back until we detect an AprilTag, then update odometry
+        // new BackupUntilVisionCommand(swerve, vision).schedule();
+        // return;
+        // } else {
+        // int detectedAprilTagID = visionPoseOpt.get().getFirst(); // Extract AprilTag
+        // ID
+        // Pose2d estimatedPose = visionPoseOpt.get().getSecond(); // Extract Pose2d
+
+        // System.out.println("[MoveToFeeder] Vision Pose Found (Tag " +
+        // detectedAprilTagID + "), Updating Odometry.");
+        // swerve.updateOdometry(estimatedPose);
+        // }
 
         // Now proceed with generating the path to the feeder station
         Pose2d startPose = swerve.getPose(); // Use the latest odometry pose

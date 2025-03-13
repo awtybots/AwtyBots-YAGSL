@@ -5,6 +5,8 @@ import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.Waypoint;
 import com.pathplanner.lib.auto.AutoBuilder;
+
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -32,14 +34,17 @@ public class PathPlannerMoveForwardCommand extends Command {
     @Override
     public void initialize() {
         // Try to get the most accurate pose using vision first
-        Optional<Pose2d> visionPoseOpt = vision.getEstimatedPose();
+        // Optional<Pair<Integer, Pose2d>> visionPoseOpt =
+        // vision.getEstimatedFieldPose();
 
-        if (visionPoseOpt.isPresent()) {
-            swerve.updateOdometry(visionPoseOpt.get());
-            System.out.println("[MoveForwardCommand] Updated Odometry from Vision: " + visionPoseOpt.get());
-        } else {
-            System.out.println("[MoveForwardCommand] No Vision Pose Found, Using Odometry.");
-        }
+        // if (visionPoseOpt.isPresent()) {
+        // swerve.updateOdometry(visionPoseOpt.get());
+        // System.out.println("[MoveForwardCommand] Updated Odometry from Vision: " +
+        // visionPoseOpt.get());
+        // } else {
+        // System.out.println("[MoveForwardCommand] No Vision Pose Found, Using
+        // Odometry.");
+        // }
 
         // Use the latest odometry pose
         Pose2d startPose = swerve.getPose();
