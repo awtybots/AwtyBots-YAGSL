@@ -125,36 +125,21 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
      * Returns the first detected AprilTag ID from all unread results.
      */
 
-    private Optional<Integer> lastDetectedTag = Optional.empty();
-
     public Optional<Integer> getDetectedTagID() {
-        System.out.println("[Vision] Checking for detected AprilTag...");
-
-        // Look for new results.
         for (int i = 0; i < cameras.size(); i++) {
-            List<PhotonPipelineResult> results = cameras.get(i).getAllUnreadResults();
-            System.out.println("[Vision] Camera " + i + " has " + results.size() + " unread results.");
+            PhotonPipelineResult latestResult = cameras.get(i).getLatestResult();
+            System.out.println("[Vision] Camera " + i + " latest frame received.");
 
-            for (PhotonPipelineResult result : results) {
-                if (result.hasTargets()) {
-                    PhotonTrackedTarget bestTarget = result.getBestTarget();
-                    int tagID = bestTarget.getFiducialId();
-                    lastDetectedTag = Optional.of(tagID);
-
-                    System.out.println("[Vision] Detected AprilTag ID: " + tagID);
-                    return lastDetectedTag;
-                }
+            if (latestResult.hasTargets()) {
+                PhotonTrackedTarget bestTarget = latestResult.getBestTarget();
+                System.out.println("[Vision] Detected AprilTag ID: " + bestTarget.getFiducialId());
+                return Optional.of(bestTarget.getFiducialId());
+            } else {
+                System.out.println("[Vision] No valid targets found in the latest frame.");
             }
         }
-
-        // If no new results, return the cached value.
-        if (lastDetectedTag.isPresent()) {
-            System.out.println("[Vision] No new tags detected, using cached tag ID: " + lastDetectedTag.get());
-        } else {
-            System.out.println("[Vision] No tags detected and no cached value available.");
-        }
-
-        return lastDetectedTag;
+        System.out.println("[Vision] No tags detected in the latest result.");
+        return Optional.empty();
     }
 
     /**
