@@ -56,13 +56,15 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
         for (int i = 0; i < cameras.size(); i++) {
             List<PhotonPipelineResult> results = cameras.get(i).getAllUnreadResults();
             for (PhotonPipelineResult result : results) {
-                if (result.hasTargets()) {
-                    Transform3d cameraToTarget = result.getBestTarget().getBestCameraToTarget();
-                    Pose3d estimatedPose3d = new Pose3d().transformBy(robotToCameraTransforms.get(i))
-                            .transformBy(cameraToTarget);
-
-                    System.out.println("[Vision] Raw Estimated Pose: " + estimatedPose3d.toPose2d());
-                    return Optional.of(estimatedPose3d.toPose2d());
+                // Use PhotonPoseEstimator to compute the field-relative pose.
+                var poseResultOpt = photonPoseEstimators.get(i).update(
+                        result,
+                        cameras.get(i).getCameraMatrix(),
+                        cameras.get(i).getDistCoeffs());
+                if (poseResultOpt.isPresent()) {
+                    Pose2d estimatedPose = poseResultOpt.get().estimatedPose.toPose2d();
+                    System.out.println("[Vision] Estimated Field Pose: " + estimatedPose);
+                    return Optional.of(estimatedPose);
                 }
             }
         }

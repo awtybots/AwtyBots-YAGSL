@@ -58,17 +58,15 @@ public class AlignToReefCoralCommand extends Command {
         @Override
         public void initialize() {
                 vision.updateOdometryWithVision();
-
                 Pose2d currentPose = swerve.getPose();
                 targetPose = vision.getBestReefPos(alignLeft);
-
-                if (targetPose == null) {
+                // Check if the targetPose is the default (empty) pose.
+                if (targetPose.equals(new Pose2d())) {
                         System.out.println("[AlignToReefCoralCommand] No valid scoring pose found. Stopping.");
                         hasValidTarget = false;
                         swerve.stop();
                         return;
                 }
-
                 hasValidTarget = true;
                 System.out.println("[AlignToReefCoralCommand] STARTED");
                 System.out.println(" - Aligning to: " + (alignLeft ? "LEFT" : "RIGHT") + " Reef");
@@ -81,7 +79,6 @@ public class AlignToReefCoralCommand extends Command {
                         System.out.println("No valid target, exiting execute");
                         return;
                 }
-
                 Pose2d currentPose = swerve.getPose();
                 Pose2d targetPose = vision.getBestReefPos(alignLeft); // Pass alignLeft here
                 if (targetPose == null) {
