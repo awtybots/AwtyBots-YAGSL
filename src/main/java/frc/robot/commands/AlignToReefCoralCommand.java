@@ -65,6 +65,8 @@ public class AlignToReefCoralCommand extends Command {
         public void initialize() {
                 vision.updateOdometryWithVision();
 
+                swerve.setFieldOriented(false);
+
                 // 1) Retrieve your “best reef pose”
                 targetPose = vision.getBestReefPos(alignLeft);
 
@@ -206,6 +208,7 @@ public class AlignToReefCoralCommand extends Command {
         public void end(boolean interrupted) {
                 System.out.println("[AlignToReefCoralCommand] END called. Interrupted: " + interrupted);
                 hasValidTarget = false;
+                swerve.setFieldOriented(true);
                 swerve.stop();
         }
 
