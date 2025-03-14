@@ -6,10 +6,8 @@ import frc.robot.Constants;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj.DriverStation;
 
 public class AlignToReefCoralCommand extends Command {
         private final SwerveSubsystem swerve;
@@ -62,7 +60,7 @@ public class AlignToReefCoralCommand extends Command {
                 vision.updateOdometryWithVision();
 
                 Pose2d currentPose = swerve.getPose();
-                Pose2d targetPose = vision.getBestReefPos(alignLeft);
+                targetPose = vision.getBestReefPos(alignLeft);
 
                 if (targetPose == null) {
                         System.out.println("[AlignToReefCoralCommand] No valid scoring pose found. Stopping.");
@@ -73,6 +71,8 @@ public class AlignToReefCoralCommand extends Command {
 
                 hasValidTarget = true;
                 System.out.println("[AlignToReefCoralCommand] STARTED");
+                System.out.println(" - Aligning to: " + (alignLeft ? "LEFT" : "RIGHT") + " Reef");
+                System.out.println(" - Target Pose: " + targetPose);
         }
 
         @Override
@@ -82,9 +82,10 @@ public class AlignToReefCoralCommand extends Command {
                 }
 
                 Pose2d currentPose = swerve.getPose();
-                Pose2d targetPose = vision.getBestReefPos(alignLeft);
+                Pose2d targetPose = vision.getBestReefPos(alignLeft); // Pass alignLeft here
                 if (targetPose == null) {
-                        System.out.println("[AlignToReefCoralCommand] No valid scoring pose found. Stopping.");
+                        System.out.println(
+                                        "[AlignToReefCoralCommand] No valid scoring pose found during execution. Stopping.");
                         hasValidTarget = false;
                         swerve.stop();
                         return;
@@ -119,18 +120,41 @@ public class AlignToReefCoralCommand extends Command {
                                 -Constants.VisionConstants.Coral.maxRotationSpeed,
                                 Constants.VisionConstants.Coral.maxRotationSpeed);
 
+                // Log debugging info
+                System.out.println("[AlignToReefCoralCommand] EXECUTING");
+                System.out.println(" - Current Pose: " + currentPose);
+                System.out.println(" - Target Pose: " + targetPose);
+                System.out.println(" - Target Distance: " + targetDistance);
+                System.out.println(" - Lateral Offset: " + lateralOffset);
+                System.out.println(" - Forward Speed: " + forwardSpeed);
+                System.out.println(" - Strafe Speed: " + strafeSpeed);
+                System.out.println(" - Rotation Speed: " + rotationSpeed);
+
+                // Send data to SmartDashboard for debugging
+                SmartDashboard.putNumber("Vision/Target Distance", targetDistance);
+                SmartDashboard.putNumber("Vision/Lateral Offset", lateralOffset);
+                SmartDashboard.putNumber("PID-Vision/Forward Speed", forwardSpeed);
+                SmartDashboard.putNumber("PID-Vision/Strafe Speed", strafeSpeed);
+                SmartDashboard.putNumber("PID-Vision/Rotation Speed", rotationSpeed);
+                SmartDashboard.putBoolean("Vision/Has Valid Target", hasValidTarget);
+
                 // Drive the robot
                 swerve.drive(forwardSpeed, strafeSpeed, rotationSpeed);
         }
 
         @Override
         public void end(boolean interrupted) {
+                System.out.println("[AlignToReefCoralCommand] END called. Interrupted: " + interrupted);
                 hasValidTarget = false;
                 swerve.stop();
         }
 
         @Override
         public boolean isFinished() {
-                return translationController.atGoal() && strafeController.atGoal() && rotationController.atGoal();
+                boolean finished = translationController.atGoal() && strafeController.atGoal()
+                                && rotationController.atGoal();
+                System.out.println("[AlignToReefCoralCommand] isFinished: " + finished);
+                SmartDashboard.putBoolean("Vision/Alignment Finished", finished);
+                return finished;
         }
 }
