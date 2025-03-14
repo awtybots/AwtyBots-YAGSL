@@ -138,9 +138,9 @@ public class AlignToReefCoralCommand extends Command {
                                 Constants.VisionConstants.Coral.maxRotationSpeed);
 
                 // Define minimum outputs to overcome static friction.
-                double minForwardOutput = 0.2;
-                double minStrafeOutput = 0.2;
-                double minRotationOutput = 0.2;
+                double minForwardOutput = 0.4;
+                double minStrafeOutput = 0.4;
+                double minRotationOutput = 0.4;
 
                 // Apply minimum threshold for forward speed.
                 if (forwardSpeed > 0 && forwardSpeed < minForwardOutput) {
