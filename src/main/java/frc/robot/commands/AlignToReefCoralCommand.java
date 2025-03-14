@@ -78,6 +78,7 @@ public class AlignToReefCoralCommand extends Command {
         @Override
         public void execute() {
                 if (!hasValidTarget) {
+                        System.out.println("No valid target, exiting execute");
                         return;
                 }
 
