@@ -65,7 +65,7 @@ public class AlignToReefCoralCommand extends Command {
         public void initialize() {
                 vision.updateOdometryWithVision();
 
-                swerve.setFieldOriented(false);
+                swerve.setFieldOriented(true);
 
                 // 1) Retrieve your “best reef pose”
                 targetPose = vision.getBestReefPos(alignLeft);
@@ -189,7 +189,7 @@ public class AlignToReefCoralCommand extends Command {
                 SmartDashboard.putNumber("PID-Vision/Drive Y", driveY);
                 SmartDashboard.putNumber("PID-Vision/Rotation Output", rotationOutput);
                 SmartDashboard.putBoolean("Vision/Has Valid Target", hasValidTarget);
-
+                rotationOutput = -rotationOutput;
                 // 9) Command the drive
                 swerve.drive(driveX, driveY, rotationOutput);
         }
