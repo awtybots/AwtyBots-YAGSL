@@ -75,6 +75,7 @@ public class AlignToReefCoralCommand extends Command {
 
         @Override
         public void execute() {
+                System.out.println("[AlignToReefCoralCommand] EXECUTE CALLED");
                 Optional<Pair<Integer, Pose2d>> fieldPoseOpt = vision.getEstimatedFieldPose();
                 if (fieldPoseOpt.isEmpty()) {
                         hasValidTarget = false;
@@ -144,15 +145,19 @@ public class AlignToReefCoralCommand extends Command {
 
         @Override
         public void end(boolean interrupted) {
+                System.out.println("[AlignToReefCoralCommand] END called. Interrupted: " + interrupted);
                 hasValidTarget = false;
                 swerve.stop();
-                System.out.println("AlignToReefCoralCommand ended. Interrupted: " + interrupted);
         }
 
         @Override
         public boolean isFinished() {
-                return translationController.atGoal() &&
+                boolean finished = translationController.atGoal() &&
                                 strafeController.atGoal() &&
                                 rotationController.atGoal();
+
+                System.out.println("[AlignToReefCoralCommand] isFinished() called. Result: " + finished);
+                return finished;
         }
+
 }
