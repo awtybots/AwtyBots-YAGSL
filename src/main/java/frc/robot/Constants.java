@@ -267,7 +267,7 @@ public final class Constants {
       }
 
       public static final List<String> cameraNames = List.of(
-          "Arducam_OV9782_USB_Camera (1)" // Front Camera (AprilTag Limelight)
+          "OV9281" // Front Camera (AprilTag Limelight)
       // "Arducam_Left", // Left Camera
       // "Arducam_Right" // Right Camera
       );
