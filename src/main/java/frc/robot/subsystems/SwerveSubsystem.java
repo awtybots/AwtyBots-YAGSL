@@ -249,36 +249,30 @@ public class SwerveSubsystem extends SubsystemBase {
     var alliance = DriverStation.getAlliance();
 
     // Get estimated heading from vision
-    Optional<Pair<Integer, Pose2d>> visionPoseOpt = vision.getEstimatedFieldPose();
+    Optional<Pose2d> visionPoseOpt = vision.getEstimatedFieldPose();
 
     if (visionPoseOpt.isPresent()) {
-      int detectedAprilTagID = visionPoseOpt.get().getFirst(); // Extract AprilTag ID
-      Pose2d estimatedPose = visionPoseOpt.get().getSecond(); // Extract Pose2d
-
+      Pose2d estimatedPose = visionPoseOpt.get(); // Extract Pose2d
       double estimatedFieldHeading = estimatedPose.getRotation().getDegrees();
       double gyroCurrentHeading = getGyroYaw(); // Get current gyro heading
-
-      // Calculate correction offset
-      double headingCorrection = estimatedFieldHeading - gyroCurrentHeading;
 
       // Flip target heading for Red Alliance AFTER applying correction
       if (alliance.isPresent() && alliance.get() == Alliance.Red) {
         targetAngleDegrees = 180 - targetAngleDegrees; // Flip around center
       }
 
-      // Apply correction
-      gyro.setAngleAdjustment(gyroCurrentHeading + headingCorrection);
-      System.out.println("[GyroReset] Adjusted with Vision Offset: " + headingCorrection + " degrees");
+      // Apply vision-based correction
+      gyro.setAngleAdjustment(estimatedFieldHeading);
+      System.out.println("[GyroReset] Adjusted with Vision Heading: " + estimatedFieldHeading + " degrees");
 
       // Reset odometry using corrected vision pose
       Pose2d correctedPose = new Pose2d(
           estimatedPose.getTranslation(),
-          Rotation2d.fromDegrees(targetAngleDegrees) // Use corrected target angle
+          Rotation2d.fromDegrees(estimatedFieldHeading) // Use corrected target angle
       );
 
       swerveDrive.resetOdometry(correctedPose);
-
-      System.out.println("[GyroReset] Vision Data Used (Tag ID: " + detectedAprilTagID + ")");
+      System.out.println("[GyroReset] Vision Data Used");
     } else {
       System.out.println("[GyroReset] No vision data available, setting based on gyro alone.");
       gyro.setAngleAdjustment(targetAngleDegrees);
