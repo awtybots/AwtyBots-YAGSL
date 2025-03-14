@@ -93,26 +93,55 @@ public class AlignToReefCoralCommand extends Command {
         public void execute() {
                 // 1) If we don't have a valid target from initialize(), do nothing
                 if (!hasValidTarget) {
-                        System.out.println("No valid target, exiting execute");
+                        System.out.println("[AlignToReefCoralCommand] No valid target, exiting execute.");
                         return;
                 }
 
                 // 2) Grab current pose and compute the distance + heading error to target
                 Pose2d currentPose = swerve.getPose();
+                double currentX = currentPose.getX();
+                double currentY = currentPose.getY();
+                double currentRotation = currentPose.getRotation().getRadians();
+                double targetX = targetPose.getX();
+                double targetY = targetPose.getY();
+                double targetRotation = targetPose.getRotation().getRadians();
 
                 double targetDistance = currentPose.getTranslation().getDistance(targetPose.getTranslation());
                 double distanceError = targetDistance; // We want to get to 0.0m away
                 double rotationError = currentPose.getRotation().getRadians() - targetPose.getRotation().getRadians();
 
+                // Normalize rotation error to [-π, π] range to avoid excessive spinning
+                rotationError = Math.atan2(Math.sin(rotationError), Math.cos(rotationError));
+
+                // Debug logs before PID calculation
+                System.out.println("[AlignToReefCoralCommand] --- ERROR VALUES ---");
+                System.out.println("Current X: " + currentX + " | Target X: " + targetX + " | X Error: "
+                                + (targetX - currentX));
+                System.out.println("Current Y: " + currentY + " | Target Y: " + targetY + " | Y Error: "
+                                + (targetY - currentY));
+                System.out.println("Target Distance: " + targetDistance + " | Distance Error: " + distanceError);
+                System.out.println("Rotation Error (radians): " + rotationError + " | Rotation Error (degrees): "
+                                + Math.toDegrees(rotationError));
+
                 // 3) Calculate PID outputs
                 double distanceOutput = distanceController.calculate(distanceError, 0.0);
                 double rotationOutput = rotationController.calculate(rotationError, 0.0);
 
-                // 4) If we’re close enough, zero the output (prevents “dancing”)
-                if (distanceController.atGoal()) {
+                // Log raw PID outputs
+                System.out.println("[AlignToReefCoralCommand] --- RAW PID OUTPUTS ---");
+                System.out.println("Distance Output: " + distanceOutput);
+                System.out.println("Rotation Output: " + rotationOutput);
+
+                // 4) Zero outputs if we're within tolerance
+                boolean distanceAtGoal = distanceController.atGoal();
+                boolean rotationAtGoal = rotationController.atGoal();
+
+                if (distanceAtGoal) {
+                        System.out.println("[AlignToReefCoralCommand] Distance PID at goal. Zeroing distance output.");
                         distanceOutput = 0.0;
                 }
-                if (rotationController.atGoal()) {
+                if (rotationAtGoal) {
+                        System.out.println("[AlignToReefCoralCommand] Rotation PID at goal. Zeroing rotation output.");
                         rotationOutput = 0.0;
                 }
 
@@ -139,39 +168,19 @@ public class AlignToReefCoralCommand extends Command {
                                 -Constants.VisionConstants.Coral.maxRotationSpeed,
                                 Constants.VisionConstants.Coral.maxRotationSpeed);
 
-                // 7) [Optional] Minimum output thresholds to overcome static friction
+                // 7) Apply minimum output thresholds to overcome static friction
                 double minDriveOutput = 0.4;
                 double minRotationOutput = 0.4;
 
-                // For driveX
-                if (driveX > 0 && driveX < minDriveOutput) {
-                        driveX = minDriveOutput;
-                } else if (driveX < 0 && driveX > -minDriveOutput) {
-                        driveX = -minDriveOutput;
-                }
-
-                // For driveY
-                if (driveY > 0 && driveY < minDriveOutput) {
-                        driveY = minDriveOutput;
-                } else if (driveY < 0 && driveY > -minDriveOutput) {
-                        driveY = -minDriveOutput;
-                }
-
-                // For rotation
-                if (rotationOutput > 0 && rotationOutput < minRotationOutput) {
-                        rotationOutput = minRotationOutput;
-                } else if (rotationOutput < 0 && rotationOutput > -minRotationOutput) {
-                        rotationOutput = -minRotationOutput;
-                }
+                driveX = applyMinimumThreshold(driveX, minDriveOutput);
+                driveY = applyMinimumThreshold(driveY, minDriveOutput);
+                rotationOutput = applyMinimumThreshold(rotationOutput, minRotationOutput);
 
                 // 8) Debug logging
-                System.out.println("[AlignToReefCoralCommand] EXECUTING");
-                System.out.println(" - Current Pose: " + currentPose);
-                System.out.println(" - Target Pose:  " + targetPose);
-                System.out.println(" - Target Distance: " + targetDistance);
-                System.out.println(" - Distance Output: " + distanceOutput);
-                System.out.println(" - Rotation Error:  " + rotationError);
-                System.out.println(" - Rotation Output: " + rotationOutput);
+                System.out.println("[AlignToReefCoralCommand] --- FINAL OUTPUTS ---");
+                System.out.println("Drive X (Adjusted): " + driveX);
+                System.out.println("Drive Y (Adjusted): " + driveY);
+                System.out.println("Rotation Output (Adjusted): " + rotationOutput);
 
                 SmartDashboard.putNumber("Vision/Target Distance", targetDistance);
                 SmartDashboard.putNumber("PID-Vision/Drive X", driveX);
@@ -181,6 +190,16 @@ public class AlignToReefCoralCommand extends Command {
 
                 // 9) Command the drive
                 swerve.drive(driveX, driveY, rotationOutput);
+        }
+
+        // Helper function to apply minimum output thresholds
+        private double applyMinimumThreshold(double value, double threshold) {
+                if (value > 0 && value < threshold) {
+                        return threshold;
+                } else if (value < 0 && value > -threshold) {
+                        return -threshold;
+                }
+                return value;
         }
 
         @Override
