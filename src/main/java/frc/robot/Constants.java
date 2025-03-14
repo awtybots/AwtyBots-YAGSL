@@ -4,9 +4,13 @@
 
 package frc.robot;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -15,10 +19,12 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
+import java.io.IOException;
 import java.lang.String;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -223,6 +229,18 @@ public final class Constants {
         });
       }
 
+      public static AprilTagFieldLayout aprilTagFieldLayout;
+
+      static {
+        try {
+          aprilTagFieldLayout = AprilTagFieldLayout
+              .loadFromResource(AprilTagFields.k2025ReefscapeAndyMark.m_resourceFile);
+          aprilTagFieldLayout.setOrigin(AprilTagFieldLayout.OriginPosition.kBlueAllianceWallRightSide);
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
+
       /**
        * Get the best scoring pose based on the detected AprilTag and bar alignment.
        * 
@@ -231,16 +249,21 @@ public final class Constants {
        * @return The target Pose2d for alignment, or a default Pose2d if the tag isn't
        *         found
        */
-      public static Pose2d getBestReefPose(int aprilTagID, boolean alignLeft) {
-        boolean isRedAlliance = DriverStation.getAlliance().isPresent() &&
-            DriverStation.getAlliance().get() == Alliance.Red;
+      public static Pose2d getBestReefPose(int tagID, boolean alignLeft) {
+        Optional<Pose3d> tagPoseOpt = aprilTagFieldLayout.getTagPose(tagID);
 
-        Map<Integer, Pose2d[]> scoringMap = isRedAlliance ? redReefScoringPoses : blueReefScoringPoses;
+        if (tagPoseOpt.isPresent()) {
+          Pose2d tagPose = tagPoseOpt.get().toPose2d();
 
-        // Fetch pose array, default to a safe value if the tag isn't recognized
-        Pose2d[] scoringPoses = scoringMap.getOrDefault(aprilTagID, new Pose2d[] { new Pose2d(), new Pose2d() });
+          // Apply an offset based on which side the robot needs to align with
+          double xOffset = 0.45; // Move forward slightly to align better
+          double yOffset = alignLeft ? 0.3 : -0.3; // Adjust laterally based on alignment
 
-        return scoringPoses[alignLeft ? 0 : 1]; // Return left or right position
+          return tagPose.plus(new Transform2d(xOffset, yOffset, new Rotation2d(Math.PI)));
+        }
+
+        // Return a default pose if the tag is not found
+        return new Pose2d();
       }
 
       public static final List<String> cameraNames = List.of(

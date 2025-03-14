@@ -49,25 +49,14 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
         for (int i = 0; i < cameras.size(); i++) {
             PhotonPipelineResult result = cameras.get(i).getLatestResult();
             if (result.hasTargets()) {
-                Optional<EstimatedRobotPose> estimatedPoseOpt = photonPoseEstimators.get(i).update(result);
-                if (estimatedPoseOpt.isPresent()) {
-                    Pose3d estimatedPose3d = estimatedPoseOpt.get().estimatedPose;
-                    int aprilTagID = result.getBestTarget().getFiducialId();
+                PhotonTrackedTarget bestTarget = result.getBestTarget();
+                int aprilTagID = bestTarget.getFiducialId();
 
-                    // Convert to 2D pose
-                    Pose2d estimatedPose2d = new Pose2d(
-                            estimatedPose3d.getTranslation().getX(),
-                            estimatedPose3d.getTranslation().getY(),
-                            new Rotation2d(estimatedPose3d.getRotation().getZ()));
-
-                    // Adjust for camera mounting offset
-                    Transform3d cameraTransform = robotToCameraTransforms.get(i);
-                    Pose2d correctedPose = new Pose2d(
-                            estimatedPose2d.getX() - cameraTransform.getX(),
-                            estimatedPose2d.getY() - cameraTransform.getY(),
-                            estimatedPose2d.getRotation());
-
-                    return Optional.of(Pair.of(aprilTagID, correctedPose));
+                // Use predefined AprilTag pose if available
+                Optional<Pose3d> tagPoseOpt = fieldLayout.getTagPose(aprilTagID);
+                if (tagPoseOpt.isPresent()) {
+                    Pose2d tagPose = tagPoseOpt.get().toPose2d();
+                    return Optional.of(Pair.of(aprilTagID, tagPose));
                 }
             }
         }
