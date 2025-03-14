@@ -106,7 +106,7 @@ public final class Constants {
   }
 
   public static final class ElevatorSetpoints {
-    public static final int FeederStation = 0;//10
+    public static final int FeederStation = 0;// 10
     public static final int L1 = 10;
     public static final int AlgaeLow = 0;
     public static final int L2 = 50;
@@ -209,7 +209,7 @@ public final class Constants {
         // Populate red alliance scoring positions
         redReefScoringPoses.put(6, new Pose2d[] {
             new Pose2d(13.690, 2.664, Rotation2d.fromDegrees(37.619)), // Tag 6 Left Bar
-            new Pose2d(13.834, 2.533, Rotation2d.fromDegrees(-59.534)) // Tag 6 Right Bar
+            new Pose2d(13.978, 2.772, Rotation2d.fromDegrees(121.185)) // Tag 6 Right Bar
         });
 
         redReefScoringPoses.put(7, new Pose2d[] {
@@ -286,7 +286,7 @@ public final class Constants {
 
       // Camera's
       // public static final String limelightAprilTagCamera = "OV9281";
-    
+
       public static final double maxForwardSpeed = 0.5; // Max forward/backward speed (m/s)
       public static final double maxStrafeSpeed = 0.5; // Max strafe speed (m/s)
       public static final double maxRotationSpeed = 0.5; // Max rotation speed (rad/s)

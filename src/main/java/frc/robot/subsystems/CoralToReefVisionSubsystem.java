@@ -109,6 +109,23 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
     }
 
     /**
+     * Returns the first detected AprilTag ID from all unread results.
+     */
+    public Optional<Integer> getDetectedTagID() {
+        for (int i = 0; i < cameras.size(); i++) {
+            List<PhotonPipelineResult> results = cameras.get(i).getAllUnreadResults();
+            for (PhotonPipelineResult result : results) {
+                if (result.hasTargets()) {
+                    // Retrieve the best target’s fiducial ID.
+                    PhotonTrackedTarget bestTarget = result.getBestTarget();
+                    return Optional.of(bestTarget.getFiducialId());
+                }
+            }
+        }
+        return Optional.empty();
+    }
+
+    /**
      * Updates odometry with vision-based pose estimation.
      */
     public void updateOdometryWithVision() {

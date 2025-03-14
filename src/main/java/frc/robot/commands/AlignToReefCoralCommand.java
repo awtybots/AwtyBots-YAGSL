@@ -3,6 +3,9 @@ package frc.robot.commands;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.CoralToReefVisionSubsystem;
 import frc.robot.Constants;
+
+import java.util.Optional;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -59,14 +62,26 @@ public class AlignToReefCoralCommand extends Command {
         public void initialize() {
                 vision.updateOdometryWithVision();
                 Pose2d currentPose = swerve.getPose();
-                targetPose = vision.getBestReefPos(alignLeft);
-                // Check for null or default target pose
+
+                // Try to get the detected tag ID from vision.
+                Optional<Integer> detectedTag = vision.getDetectedTagID();
+                if (detectedTag.isPresent()) {
+                        // Use the fixed field pose from Constants based on the detected tag.
+                        targetPose = Constants.VisionConstants.Coral.getBestReefPose(detectedTag.get(), alignLeft);
+                        System.out.println("[AlignToReefCoralCommand] Detected tag ID: " + detectedTag.get());
+                } else {
+                        // Fallback: use the vision-based method (or decide to abort)
+                        targetPose = vision.getBestReefPos(alignLeft);
+                }
+
+                // Check for a valid target pose.
                 if (targetPose == null || targetPose.equals(new Pose2d())) {
                         System.out.println("[AlignToReefCoralCommand] No valid scoring pose found. Stopping.");
                         hasValidTarget = false;
                         swerve.stop();
                         return;
                 }
+
                 hasValidTarget = true;
                 System.out.println("[AlignToReefCoralCommand] STARTED");
                 System.out.println(" - Aligning to: " + (alignLeft ? "LEFT" : "RIGHT") + " Reef");
