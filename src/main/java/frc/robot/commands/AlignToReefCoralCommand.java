@@ -38,7 +38,7 @@ public class AlignToReefCoralCommand extends Command {
                                 Constants.VisionConstants.Coral.TRANSLATION_kI,
                                 Constants.VisionConstants.Coral.TRANSLATION_kD,
                                 Constants.VisionConstants.Coral.TRANSLATION_CONSTRAINTS);
-                translationController.setTolerance(0.0254); // ~1 inch
+                translationController.setTolerance(Constants.VisionConstants.Coral.TRANSLATION_TOLERANCE); // ~1 inch
 
                 // Strafe PID
                 strafeController = new ProfiledPIDController(
@@ -54,7 +54,7 @@ public class AlignToReefCoralCommand extends Command {
                                 Constants.VisionConstants.Coral.ROTATION_kI,
                                 Constants.VisionConstants.Coral.ROTATION_kD,
                                 Constants.VisionConstants.Coral.ROTATION_CONSTRAINTS);
-                rotationController.setTolerance(Math.toRadians(1));
+                rotationController.setTolerance(Math.toRadians(Constants.VisionConstants.Coral.ROTATION_TOLERANCE));
                 rotationController.enableContinuousInput(-Math.PI, Math.PI);
         }
 
@@ -81,6 +81,10 @@ public class AlignToReefCoralCommand extends Command {
                         return;
                 }
 
+                translationController.setTolerance(Constants.VisionConstants.Coral.TRANSLATION_TOLERANCE);
+                strafeController.setTolerance(Constants.VisionConstants.Coral.STRAFE_TOLERANCE);
+                rotationController.setTolerance(Math.toRadians(Constants.VisionConstants.Coral.ROTATION_TOLERANCE));
+
                 hasValidTarget = true;
                 System.out.println("[AlignToReefCoralCommand] STARTED - Aligning using AprilTag");
         }
@@ -95,23 +99,30 @@ public class AlignToReefCoralCommand extends Command {
                 System.out.println("[AlignToReefCoralCommand] Executing movement toward target...");
 
                 // Use the fixed targetPose determined in initialize()
+                // Get current position
                 Pose2d currentPose = swerve.getPose();
                 System.out.println("[AlignToReefCoralCommand] Current Pose: " + currentPose);
                 System.out.println("[AlignToReefCoralCommand] Target Pose: " + targetPose);
+                double currentX = currentPose.getX();
+                double currentY = currentPose.getY();
+                double currentRotation = currentPose.getRotation().getRadians();
 
-                // Compute errors between current pose and the fixed targetPose.
-                double targetDistance = currentPose.getTranslation().getDistance(targetPose.getTranslation());
-                double lateralOffset = currentPose.getTranslation().getY() - targetPose.getTranslation().getY();
-                double rotationError = currentPose.getRotation().getRadians() - targetPose.getRotation().getRadians();
+                // Get target position
+                double targetX = targetPose.getX();
+                double targetY = targetPose.getY();
+                double targetRotation = targetPose.getRotation().getRadians();
 
-                System.out.println("[AlignToReefCoralCommand] Target Distance: " + targetDistance);
-                System.out.println("[AlignToReefCoralCommand] Lateral Offset: " + lateralOffset);
-                System.out.println("[AlignToReefCoralCommand] Rotation Error: " + rotationError);
+                // Compute PID outputs
+                double forwardSpeed = translationController.calculate(currentX, targetX);
+                double strafeSpeed = strafeController.calculate(currentY, targetY);
+                double rotationSpeed = rotationController.calculate(currentRotation, targetRotation);
 
-                // Calculate PID outputs.
-                double forwardSpeed = translationController.calculate(targetDistance, 0);
-                double strafeSpeed = strafeController.calculate(lateralOffset, 0);
-                double rotationSpeed = rotationController.calculate(rotationError, 0);
+                System.out.println("[AlignToReefCoralCommand] Target X Position: " + targetX + " | Current X: "
+                                + currentX);
+                System.out.println("[AlignToReefCoralCommand] Target Y Position: " + targetY + " | Current Y: "
+                                + currentY);
+                System.out.println("[AlignToReefCoralCommand] Target Rotation (Radians): " + targetRotation
+                                + " | Current Rotation: " + currentRotation);
 
                 // Log PID output before applying constraints
                 System.out.println("[AlignToReefCoralCommand] Raw PID Speeds: Forward=" + forwardSpeed + ", Strafe="
@@ -166,14 +177,9 @@ public class AlignToReefCoralCommand extends Command {
                 System.out.println("[AlignToReefCoralCommand] EXECUTING");
                 System.out.println(" - Current Pose: " + currentPose);
                 System.out.println(" - Fixed Target Pose: " + targetPose);
-                System.out.println(" - Target Distance: " + targetDistance);
-                System.out.println(" - Lateral Offset: " + lateralOffset);
                 System.out.println(" - Forward Speed: " + forwardSpeed);
                 System.out.println(" - Strafe Speed: " + strafeSpeed);
                 System.out.println(" - Rotation Speed: " + rotationSpeed);
-
-                SmartDashboard.putNumber("Vision/Target Distance", targetDistance);
-                SmartDashboard.putNumber("Vision/Lateral Offset", lateralOffset);
                 SmartDashboard.putNumber("PID-Vision/Forward Speed", forwardSpeed);
                 SmartDashboard.putNumber("PID-Vision/Strafe Speed", strafeSpeed);
                 SmartDashboard.putNumber("PID-Vision/Rotation Speed", rotationSpeed);
@@ -197,8 +203,11 @@ public class AlignToReefCoralCommand extends Command {
 
         @Override
         public boolean isFinished() {
-                boolean finished = translationController.atGoal() && strafeController.atGoal()
-                                && rotationController.atGoal();
+                double targetDistance = swerve.getPose().getTranslation().getDistance(targetPose.getTranslation());
+                boolean withinDistance = Math.abs(targetDistance) < Constants.VisionConstants.Coral.DISTANCE_THRESHOLD;
+                boolean finished = translationController.atGoal() && strafeController.atGoal() &&
+                                rotationController.atGoal() && withinDistance;
+
                 System.out.println("[AlignToReefCoralCommand] isFinished: " + finished);
                 SmartDashboard.putBoolean("Vision/Alignment Finished", finished);
                 return finished;
