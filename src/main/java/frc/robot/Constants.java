@@ -256,7 +256,7 @@ public final class Constants {
           Pose2d tagPose = tagPoseOpt.get().toPose2d();
 
           // Apply an offset based on which side the robot needs to align with
-          double xOffset = 0.45; // Move forward slightly to align better
+          double xOffset = -0.45; // negative going away, we should never set the number bigger than zero
           double yOffset = alignLeft ? 0.3 : -0.3; // Adjust laterally based on alignment
 
           return tagPose.plus(new Transform2d(xOffset, yOffset, new Rotation2d(Math.PI)));

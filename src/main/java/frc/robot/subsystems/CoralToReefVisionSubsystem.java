@@ -17,9 +17,10 @@ import frc.robot.subsystems.SwerveSubsystem;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.ArrayList;
 
 public class CoralToReefVisionSubsystem extends SubsystemBase {
     private final SwerveSubsystem swerve;
@@ -31,7 +32,9 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
     private Optional<Pose2d> lastFieldPose = Optional.empty();
     private long lastUpdateTimeMs = 0;
 
-    public CoralToReefVisionSubsystem(SwerveSubsystem swerve, List<String> cameraNames,
+    public CoralToReefVisionSubsystem(
+            SwerveSubsystem swerve,
+            List<String> cameraNames,
             List<Transform3d> cameraTransforms) {
         this.swerve = swerve;
         this.robotToCameraTransforms = cameraTransforms;
@@ -75,29 +78,22 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
         return Optional.empty();
     }
 
-    /**
-     * Determines the best reef pose to align with.
-     */
     public Pose2d getBestReefPos(boolean alignLeft) {
-        // Require vision pose for alignment
-        Optional<Pose2d> visionPoseOpt = getEstimatedFieldPose();
-        if (visionPoseOpt.isEmpty()) {
-            System.out.println("[Vision] No valid target detected! Stopping.");
-            return null; // Stop if no vision data
-        }
+        // 1) Grab the current robot position from your swerve subsystem
+        Pose2d robotPose = swerve.getPose();
 
-        Pose2d robotPose = visionPoseOpt.get(); // Always use vision-based pose
-        Pose2d bestPose = new Pose2d();
-        double bestDistance = Double.MAX_VALUE;
-
+        // 2) Pick which array of reef poses to loop over
         DriverStation.Alliance alliance = DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue);
-
-        for (Pose2d[] poses : (alliance == DriverStation.Alliance.Red)
+        Collection<Pose2d[]> possiblePosesCollections = (alliance == DriverStation.Alliance.Red)
                 ? Constants.VisionConstants.Coral.redReefScoringPoses.values()
-                : Constants.VisionConstants.Coral.blueReefScoringPoses.values()) {
+                : Constants.VisionConstants.Coral.blueReefScoringPoses.values();
 
-            // Choose left or right based on alignment preference
-            Pose2d candidate = alignLeft ? poses[0] : poses[1];
+        // 3) Among all possible reef-scoring positions, pick the one that’s closest
+        Pose2d bestPose = null;
+        double bestDistance = Double.MAX_VALUE;
+        for (Pose2d[] pair : possiblePosesCollections) {
+            // This pair is [ leftBarPose, rightBarPose ]
+            Pose2d candidate = alignLeft ? pair[0] : pair[1];
             double distance = candidate.getTranslation().getDistance(robotPose.getTranslation());
             if (distance < bestDistance) {
                 bestDistance = distance;
@@ -105,12 +101,52 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
             }
         }
 
-        // Log for debugging
-        System.out.println("[Vision] Vision Pose: " + robotPose);
-        System.out.println("[Vision] Selected Target Pose: " + bestPose);
+        if (bestPose == null) {
+            // Return an empty pose if no valid tags found
+            return new Pose2d();
+        }
 
         return bestPose;
     }
+
+    /**
+     * Determines the best reef pose to align with.
+     */
+    // public Pose2d getBestReefPos(boolean alignLeft) {
+    // // Require vision pose for alignment
+    // Optional<Pose2d> visionPoseOpt = getEstimatedFieldPose();
+    // if (visionPoseOpt.isEmpty()) {
+    // System.out.println("[Vision] No valid target detected! Stopping.");
+    // return null; // Stop if no vision data
+    // }
+
+    // Pose2d robotPose = visionPoseOpt.get(); // Always use vision-based pose
+    // Pose2d bestPose = new Pose2d();
+    // double bestDistance = Double.MAX_VALUE;
+
+    // DriverStation.Alliance alliance =
+    // DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue);
+
+    // for (Pose2d[] poses : (alliance == DriverStation.Alliance.Red)
+    // ? Constants.VisionConstants.Coral.redReefScoringPoses.values()
+    // : Constants.VisionConstants.Coral.blueReefScoringPoses.values()) {
+
+    // // Choose left or right based on alignment preference
+    // Pose2d candidate = alignLeft ? poses[0] : poses[1];
+    // double distance =
+    // candidate.getTranslation().getDistance(robotPose.getTranslation());
+    // if (distance < bestDistance) {
+    // bestDistance = distance;
+    // bestPose = candidate;
+    // }
+    // }
+
+    // // Log for debugging
+    // System.out.println("[Vision] Vision Pose: " + robotPose);
+    // System.out.println("[Vision] Selected Target Pose: " + bestPose);
+
+    // return bestPose;
+    // }
 
     /**
      * Returns the last valid field pose (as stored by getEstimatedFieldPose()).
@@ -128,32 +164,19 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
     private Optional<Integer> lastDetectedTag = Optional.empty();
 
     public Optional<Integer> getDetectedTagID() {
-        System.out.println("[Vision] Checking for detected AprilTag...");
-
         // Look for new results.
         for (int i = 0; i < cameras.size(); i++) {
             List<PhotonPipelineResult> results = cameras.get(i).getAllUnreadResults();
-            System.out.println("[Vision] Camera " + i + " has " + results.size() + " unread results.");
-
             for (PhotonPipelineResult result : results) {
                 if (result.hasTargets()) {
+                    // Retrieve the best target’s fiducial ID and cache it.
                     PhotonTrackedTarget bestTarget = result.getBestTarget();
-                    int tagID = bestTarget.getFiducialId();
-                    lastDetectedTag = Optional.of(tagID);
-
-                    System.out.println("[Vision] Detected AprilTag ID: " + tagID);
+                    lastDetectedTag = Optional.of(bestTarget.getFiducialId());
                     return lastDetectedTag;
                 }
             }
         }
-
-        // If no new results, return the cached value.
-        if (lastDetectedTag.isPresent()) {
-            System.out.println("[Vision] No new tags detected, using cached tag ID: " + lastDetectedTag.get());
-        } else {
-            System.out.println("[Vision] No tags detected and no cached value available.");
-        }
-
+        // Return the cached value if no new result is found.
         return lastDetectedTag;
     }
 

@@ -9,6 +9,7 @@ import java.util.Optional;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -18,9 +19,11 @@ public class AlignToReefCoralCommand extends Command {
         private final boolean alignLeft;
 
         // PID controllers for movement
-        private final ProfiledPIDController translationController;
-        private final ProfiledPIDController strafeController;
-        private final ProfiledPIDController rotationController;
+        // private final ProfiledPIDController distanceController;
+        // private final ProfiledPIDController strafeController;
+        // private final ProfiledPIDController rotationController;
+        private final ProfiledPIDController distanceController; // used for radial distance
+        private final ProfiledPIDController rotationController; // used for heading
 
         private Pose2d targetPose;
         private boolean hasValidTarget = false;
@@ -33,20 +36,20 @@ public class AlignToReefCoralCommand extends Command {
                 addRequirements(swerve, vision);
 
                 // Translation PID
-                translationController = new ProfiledPIDController(
+                distanceController = new ProfiledPIDController(
                                 Constants.VisionConstants.Coral.TRANSLATION_kP,
                                 Constants.VisionConstants.Coral.TRANSLATION_kI,
                                 Constants.VisionConstants.Coral.TRANSLATION_kD,
                                 Constants.VisionConstants.Coral.TRANSLATION_CONSTRAINTS);
-                translationController.setTolerance(0.0254); // ~1 inch
+                distanceController.setTolerance(0.0254); // ~1 inch
 
                 // Strafe PID
-                strafeController = new ProfiledPIDController(
-                                Constants.VisionConstants.Coral.STRAFE_kP,
-                                Constants.VisionConstants.Coral.STRAFE_kI,
-                                Constants.VisionConstants.Coral.STRAFE_kD,
-                                Constants.VisionConstants.Coral.STRAFE_CONSTRAINTS);
-                strafeController.setTolerance(Constants.VisionConstants.Coral.STRAFE_TOLERANCE);
+                // strafeController = new ProfiledPIDController(
+                // Constants.VisionConstants.Coral.STRAFE_kP,
+                // Constants.VisionConstants.Coral.STRAFE_kI,
+                // Constants.VisionConstants.Coral.STRAFE_kD,
+                // Constants.VisionConstants.Coral.STRAFE_CONSTRAINTS);
+                // strafeController.setTolerance(Constants.VisionConstants.Coral.STRAFE_TOLERANCE);
 
                 // Rotation PID
                 rotationController = new ProfiledPIDController(
@@ -60,132 +63,124 @@ public class AlignToReefCoralCommand extends Command {
 
         @Override
         public void initialize() {
-                System.out.println("[AlignToReefCoralCommand] Initializing...");
                 vision.updateOdometryWithVision();
 
-                // Get current pose
-                Pose2d currentPose = swerve.getPose();
-                System.out.println("[AlignToReefCoralCommand] Current Robot Pose: " + currentPose);
+                // 1) Retrieve your “best reef pose”
+                targetPose = vision.getBestReefPos(alignLeft);
 
-                // Try to get the detected AprilTag ID from vision.
-                Optional<Integer> detectedTag = vision.getDetectedTagID();
-                if (detectedTag.isPresent()) {
-                        // Look up the fixed field pose from constants using the detected tag.
-                        targetPose = Constants.VisionConstants.Coral.getBestReefPose(detectedTag.get(), alignLeft);
-                        System.out.println("[AlignToReefCoralCommand] Detected AprilTag ID: " + detectedTag.get());
-                        System.out.println("[AlignToReefCoralCommand] Target Pose from Constants: " + targetPose);
-                } else {
-                        System.out.println("[AlignToReefCoralCommand] No AprilTag detected, cannot get target pose.");
-                }
-
-                // If targetPose is still null or default, abort.
+                // 2) If invalid, stop
                 if (targetPose == null || targetPose.equals(new Pose2d())) {
                         System.out.println("[AlignToReefCoralCommand] No valid scoring pose found. Stopping.");
                         hasValidTarget = false;
                         swerve.stop();
                         return;
                 }
-
                 hasValidTarget = true;
-                System.out.println("[AlignToReefCoralCommand] Target Pose Successfully Acquired.");
+
+                // 3) Reset controllers
+                Pose2d currentPose = swerve.getPose();
+                double distance = currentPose.getTranslation().getDistance(targetPose.getTranslation());
+                distanceController.reset(distance); // zero velocity, or distanceController.reset(distance, 0.0);
+
+                double currentHeading = currentPose.getRotation().getRadians();
+                double currentRotVel = 0.0; // or get from swerve if you track angular velocity
+                rotationController.reset(currentHeading, currentRotVel);
+
+                System.out.println("[AlignToReefCoralCommand] STARTED, targetPose=" + targetPose);
         }
 
         @Override
         public void execute() {
+                // 1) If we don't have a valid target from initialize(), do nothing
                 if (!hasValidTarget) {
-                        System.out.println("[AlignToReefCoralCommand] No valid target, exiting execute.");
+                        System.out.println("No valid target, exiting execute");
                         return;
                 }
 
-                System.out.println("[AlignToReefCoralCommand] Executing movement toward target...");
-
-                // Use the fixed targetPose determined in initialize()
+                // 2) Grab current pose and compute the distance + heading error to target
                 Pose2d currentPose = swerve.getPose();
-                System.out.println("[AlignToReefCoralCommand] Current Pose: " + currentPose);
-                System.out.println("[AlignToReefCoralCommand] Target Pose: " + targetPose);
 
-                // Compute errors between current pose and the fixed targetPose.
                 double targetDistance = currentPose.getTranslation().getDistance(targetPose.getTranslation());
-                double lateralOffset = currentPose.getTranslation().getY() - targetPose.getTranslation().getY();
+                double distanceError = targetDistance; // We want to get to 0.0m away
                 double rotationError = currentPose.getRotation().getRadians() - targetPose.getRotation().getRadians();
 
-                System.out.println("[AlignToReefCoralCommand] Target Distance: " + targetDistance);
-                System.out.println("[AlignToReefCoralCommand] Lateral Offset: " + lateralOffset);
-                System.out.println("[AlignToReefCoralCommand] Rotation Error: " + rotationError);
+                // 3) Calculate PID outputs
+                double distanceOutput = distanceController.calculate(distanceError, 0.0);
+                double rotationOutput = rotationController.calculate(rotationError, 0.0);
 
-                // Calculate PID outputs.
-                double forwardSpeed = translationController.calculate(targetDistance, 0);
-                double strafeSpeed = strafeController.calculate(lateralOffset, 0);
-                double rotationSpeed = rotationController.calculate(rotationError, 0);
-
-                // Log PID output before applying constraints
-                System.out.println("[AlignToReefCoralCommand] Raw PID Speeds: Forward=" + forwardSpeed + ", Strafe="
-                                + strafeSpeed + ", Rotation=" + rotationSpeed);
-
-                // Zero outputs if we're within tolerance.
-                if (translationController.atGoal()) {
-                        forwardSpeed = 0;
-                }
-                if (strafeController.atGoal()) {
-                        strafeSpeed = 0;
+                // 4) If we’re close enough, zero the output (prevents “dancing”)
+                if (distanceController.atGoal()) {
+                        distanceOutput = 0.0;
                 }
                 if (rotationController.atGoal()) {
-                        rotationSpeed = 0;
+                        rotationOutput = 0.0;
                 }
 
-                // Clamp outputs to max values.
-                forwardSpeed = MathUtil.clamp(forwardSpeed,
+                // 5) Convert distanceOutput into X/Y speed by finding the direction from
+                // current to target
+                double dx = targetPose.getX() - currentPose.getX();
+                double dy = targetPose.getY() - currentPose.getY();
+                Rotation2d direction = new Rotation2d(dx, dy);
+
+                double driveX = distanceOutput * direction.getCos();
+                double driveY = distanceOutput * direction.getSin();
+
+                // 6) Clamp final outputs to max speeds
+                driveX = MathUtil.clamp(
+                                driveX,
                                 -Constants.VisionConstants.Coral.maxForwardSpeed,
                                 Constants.VisionConstants.Coral.maxForwardSpeed);
-                strafeSpeed = MathUtil.clamp(strafeSpeed,
+                driveY = MathUtil.clamp(
+                                driveY,
                                 -Constants.VisionConstants.Coral.maxStrafeSpeed,
                                 Constants.VisionConstants.Coral.maxStrafeSpeed);
-                rotationSpeed = MathUtil.clamp(rotationSpeed,
+                rotationOutput = MathUtil.clamp(
+                                rotationOutput,
                                 -Constants.VisionConstants.Coral.maxRotationSpeed,
                                 Constants.VisionConstants.Coral.maxRotationSpeed);
 
-                // Apply minimum output thresholds to overcome static friction.
-                double minForwardOutput = 0.4;
-                double minStrafeOutput = 0.4;
+                // 7) [Optional] Minimum output thresholds to overcome static friction
+                double minDriveOutput = 0.4;
                 double minRotationOutput = 0.4;
 
-                if (forwardSpeed > 0 && forwardSpeed < minForwardOutput) {
-                        forwardSpeed = minForwardOutput;
-                } else if (forwardSpeed < 0 && forwardSpeed > -minForwardOutput) {
-                        forwardSpeed = -minForwardOutput;
+                // For driveX
+                if (driveX > 0 && driveX < minDriveOutput) {
+                        driveX = minDriveOutput;
+                } else if (driveX < 0 && driveX > -minDriveOutput) {
+                        driveX = -minDriveOutput;
                 }
 
-                if (strafeSpeed > 0 && strafeSpeed < minStrafeOutput) {
-                        strafeSpeed = minStrafeOutput;
-                } else if (strafeSpeed < 0 && strafeSpeed > -minStrafeOutput) {
-                        strafeSpeed = -minStrafeOutput;
+                // For driveY
+                if (driveY > 0 && driveY < minDriveOutput) {
+                        driveY = minDriveOutput;
+                } else if (driveY < 0 && driveY > -minDriveOutput) {
+                        driveY = -minDriveOutput;
                 }
 
-                if (rotationSpeed > 0 && rotationSpeed < minRotationOutput) {
-                        rotationSpeed = minRotationOutput;
-                } else if (rotationSpeed < 0 && rotationSpeed > -minRotationOutput) {
-                        rotationSpeed = -minRotationOutput;
+                // For rotation
+                if (rotationOutput > 0 && rotationOutput < minRotationOutput) {
+                        rotationOutput = minRotationOutput;
+                } else if (rotationOutput < 0 && rotationOutput > -minRotationOutput) {
+                        rotationOutput = -minRotationOutput;
                 }
 
-                // Debug logging.
+                // 8) Debug logging
                 System.out.println("[AlignToReefCoralCommand] EXECUTING");
                 System.out.println(" - Current Pose: " + currentPose);
-                System.out.println(" - Fixed Target Pose: " + targetPose);
+                System.out.println(" - Target Pose:  " + targetPose);
                 System.out.println(" - Target Distance: " + targetDistance);
-                System.out.println(" - Lateral Offset: " + lateralOffset);
-                System.out.println(" - Forward Speed: " + forwardSpeed);
-                System.out.println(" - Strafe Speed: " + strafeSpeed);
-                System.out.println(" - Rotation Speed: " + rotationSpeed);
+                System.out.println(" - Distance Output: " + distanceOutput);
+                System.out.println(" - Rotation Error:  " + rotationError);
+                System.out.println(" - Rotation Output: " + rotationOutput);
 
                 SmartDashboard.putNumber("Vision/Target Distance", targetDistance);
-                SmartDashboard.putNumber("Vision/Lateral Offset", lateralOffset);
-                SmartDashboard.putNumber("PID-Vision/Forward Speed", forwardSpeed);
-                SmartDashboard.putNumber("PID-Vision/Strafe Speed", strafeSpeed);
-                SmartDashboard.putNumber("PID-Vision/Rotation Speed", rotationSpeed);
+                SmartDashboard.putNumber("PID-Vision/Drive X", driveX);
+                SmartDashboard.putNumber("PID-Vision/Drive Y", driveY);
+                SmartDashboard.putNumber("PID-Vision/Rotation Output", rotationOutput);
                 SmartDashboard.putBoolean("Vision/Has Valid Target", hasValidTarget);
 
-                // Command the drive.
-                swerve.drive(forwardSpeed, strafeSpeed, rotationSpeed);
+                // 9) Command the drive
+                swerve.drive(driveX, driveY, rotationOutput);
         }
 
         @Override
@@ -197,8 +192,9 @@ public class AlignToReefCoralCommand extends Command {
 
         @Override
         public boolean isFinished() {
-                boolean finished = translationController.atGoal() && strafeController.atGoal()
-                                && rotationController.atGoal();
+                // boolean finished = distanceController.atGoal() && strafeController.atGoal()
+                // && rotationController.atGoal();
+                boolean finished = distanceController.atGoal() && rotationController.atGoal();
                 System.out.println("[AlignToReefCoralCommand] isFinished: " + finished);
                 SmartDashboard.putBoolean("Vision/Alignment Finished", finished);
                 return finished;
