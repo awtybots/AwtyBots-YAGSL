@@ -250,20 +250,27 @@ public final class Constants {
        *         found
        */
       public static Pose2d getBestReefPose(int tagID, boolean alignLeft) {
-        Optional<Pose3d> tagPoseOpt = aprilTagFieldLayout.getTagPose(tagID);
+        System.out.println("[getBestReefPose] Looking for tag ID: " + tagID + ", alignLeft: " + alignLeft);
 
-        if (tagPoseOpt.isPresent()) {
-          Pose2d tagPose = tagPoseOpt.get().toPose2d();
+        // Determine alliance color
+        DriverStation.Alliance alliance = DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue);
 
-          // Apply an offset based on which side the robot needs to align with
-          double xOffset = 0.45; // Move forward slightly to align better
-          double yOffset = alignLeft ? 0.3 : -0.3; // Adjust laterally based on alignment
+        // Use the correct alliance-specific map
+        Map<Integer, Pose2d[]> scoringPoses = (alliance == DriverStation.Alliance.Red)
+            ? redReefScoringPoses
+            : blueReefScoringPoses;
 
-          return tagPose.plus(new Transform2d(xOffset, yOffset, new Rotation2d(Math.PI)));
+        // Check if the tagID exists in the scoring positions map
+        if (scoringPoses.containsKey(tagID)) {
+          Pose2d selectedPose = alignLeft ? scoringPoses.get(tagID)[0] : scoringPoses.get(tagID)[1];
+
+          System.out.println("[getBestReefPose] Found pose for Tag ID " + tagID + ": " + selectedPose);
+          return selectedPose;
         }
 
-        // Return a default pose if the tag is not found
-        return new Pose2d();
+        // Log error if the tagID is not found
+        System.out.println("[getBestReefPose] ERROR: No predefined pose for Tag ID " + tagID);
+        return new Pose2d(); // Default empty pose
       }
 
       public static final List<String> cameraNames = List.of(
