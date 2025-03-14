@@ -171,7 +171,7 @@ public class AlignToReefCoralCommand extends Command {
                                 Constants.VisionConstants.Coral.maxRotationSpeed);
 
                 // 7) Apply minimum output thresholds to overcome static friction
-                double minDriveOutput = 0.4;
+                double minDriveOutput = 0.1;
                 double minRotationOutput = 0.4;
 
                 driveX = applyMinimumThreshold(driveX, minDriveOutput);
