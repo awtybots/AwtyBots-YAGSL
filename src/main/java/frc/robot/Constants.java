@@ -106,7 +106,7 @@ public final class Constants {
   }
 
   public static final class ElevatorSetpoints {
-    public static final int FeederStation = 10;
+    public static final int FeederStation = 0;//10
     public static final int L1 = 10;
     public static final int AlgaeLow = 0;
     public static final int L2 = 50;
@@ -274,7 +274,7 @@ public final class Constants {
 
       public static final List<Transform3d> cameraPoses = List.of(
           new Transform3d( // Front Camera (Limelight)
-              new Translation3d(0.35, 0.35, 0.381),
+              new Translation3d(0.25, -0.25, 0.381),
               new Rotation3d(0, Units.degreesToRadians(0), 0))
       // new Transform3d( // Left Camera
       // new Translation3d(0.3, 0.2, 0.35),
@@ -286,10 +286,7 @@ public final class Constants {
 
       // Camera's
       // public static final String limelightAprilTagCamera = "OV9281";
-      public static final double cameraMountX = 0.35; // How far forwards/backwards is the camera mounted from center
-      public static final double cameraMountY = 0.35; // How far left/right is the camera mounted from center
-      public static final double cameraMountZ = 0.381; // This is in meters
-      public static final double cameraMountAngle = 0.0; // This is in degrees
+    
       public static final double maxForwardSpeed = 0.5; // Max forward/backward speed (m/s)
       public static final double maxStrafeSpeed = 0.5; // Max strafe speed (m/s)
       public static final double maxRotationSpeed = 0.5; // Max rotation speed (rad/s)
