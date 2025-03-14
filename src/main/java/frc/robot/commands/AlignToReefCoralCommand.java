@@ -87,8 +87,7 @@ public class AlignToReefCoralCommand extends Command {
                                 .map(Pair::getSecond)
                                 .orElse(swerve.getPose());
 
-                // Get the Correct Predefined Scoring Pose Based on Alliance & AprilTag
-                // ID**
+                // Get the Correct Predefined Scoring Pose Based on Alliance & AprilTag ID
                 Pose2d targetPose = Constants.VisionConstants.Coral.getBestReefPose(detectedAprilTagID, alignLeft);
 
                 // Compute Field-Centric Distance
@@ -108,49 +107,31 @@ public class AlignToReefCoralCommand extends Command {
                                                 / translationErrorNorm
                                 : 0.0;
 
-                // PID Control for Translation & Rotation
+                // **✅ Apply ONLY Forward Speed (Commenting Out Strafe & Rotation)**
                 double forwardSpeed = translationController.calculate(targetDistance, 0) - velocityProjection;
 
-                double rotationPIDOutput = rotationController.calculate(
-                                swerve.getGyroYaw(), targetPose.getRotation().getDegrees()); // 🔄 Use gyro-based
-                                                                                             // rotation
+                // ❌ Comment out rotation PID calculation
+                // double rotationPIDOutput = rotationController.calculate(
+                // swerve.getGyroYaw(), targetPose.getRotation().getDegrees());
 
-                double lateralOffset = currentPose.getTranslation().getY() - targetPose.getTranslation().getY();
-                double strafeSpeed = strafeController.calculate(lateralOffset, 0);
+                // ❌ Comment out lateral offset and strafe speed calculation
+                // double lateralOffset = currentPose.getTranslation().getY() -
+                // targetPose.getTranslation().getY();
+                // double strafeSpeed = strafeController.calculate(lateralOffset, 0);
 
-                // Apply Stop Conditions When Close Enough
-                if (targetDistance < Constants.VisionConstants.Coral.TRANSLATION_TOLERANCE) {
-                        forwardSpeed = 0;
-                        translationController.reset(0);
-                }
-
-                if (Math.abs(lateralOffset) < Constants.VisionConstants.Coral.STRAFE_TOLERANCE) {
-                        strafeSpeed = 0;
-                        strafeController.reset(0);
-                }
-
-                if (Math.abs(swerve.getGyroYaw() - targetPose.getRotation()
-                                .getDegrees()) < Constants.VisionConstants.Coral.ROTATION_TOLERANCE) {
-                        rotationPIDOutput = 0;
-                        rotationController.reset(targetPose.getRotation().getDegrees());
-                }
-
-                // Limit Speed to Prevent Overcorrection
+                // ✅ Ensure forward speed follows constraints
                 forwardSpeed = MathUtil.clamp(forwardSpeed,
                                 -Constants.VisionConstants.Coral.maxForwardSpeed,
                                 Constants.VisionConstants.Coral.maxForwardSpeed);
-                strafeSpeed = MathUtil.clamp(strafeSpeed,
-                                -Constants.VisionConstants.Coral.maxStrafeSpeed,
-                                Constants.VisionConstants.Coral.maxStrafeSpeed);
-                rotationPIDOutput = MathUtil.clamp(rotationPIDOutput,
-                                -Constants.VisionConstants.Coral.maxRotationSpeed,
-                                Constants.VisionConstants.Coral.maxRotationSpeed);
 
+                // ❌ Remove strafe and rotation from SmartDashboard logging
                 SmartDashboard.putNumber("PID-Vision/10 PID-Forward Speed", forwardSpeed);
-                SmartDashboard.putNumber("PID-Vision/11 PID-Strafe Speed", strafeSpeed);
-                SmartDashboard.putNumber("PID-Vision/12 PID-Rotation Speed", rotationPIDOutput);
+                // SmartDashboard.putNumber("PID-Vision/11 PID-Strafe Speed", strafeSpeed);
+                // SmartDashboard.putNumber("PID-Vision/12 PID-Rotation Speed",
+                // rotationPIDOutput);
 
-                swerve.drive(forwardSpeed, strafeSpeed, rotationPIDOutput);
+                // ✅ Apply only forward movement to the robot
+                swerve.drive(forwardSpeed, 0, 0); // ❌ Remove strafeSpeed & rotationPIDOutput
         }
 
         @Override
