@@ -60,25 +60,20 @@ public class AlignToReefCoralCommand extends Command {
 
         @Override
         public void initialize() {
-                System.out.println("[AlignToReefCoralCommand] Initializing...");
                 vision.updateOdometryWithVision();
-
-                // Get current pose
                 Pose2d currentPose = swerve.getPose();
-                System.out.println("[AlignToReefCoralCommand] Current Robot Pose: " + currentPose);
 
-                // Try to get the detected AprilTag ID from vision.
+                // 🚨 Switch to Robot-Oriented Mode for Alignment
+                swerve.setFieldOriented(false);
+                System.out.println("[AlignToReefCoralCommand] Switching to Robot-Oriented Mode");
+
+                // Detect AprilTag and get the best scoring pose
                 Optional<Integer> detectedTag = vision.getDetectedTagID();
                 if (detectedTag.isPresent()) {
-                        // Look up the fixed field pose from constants using the detected tag.
                         targetPose = Constants.VisionConstants.Coral.getBestReefPose(detectedTag.get(), alignLeft);
-                        System.out.println("[AlignToReefCoralCommand] Detected AprilTag ID: " + detectedTag.get());
-                        System.out.println("[AlignToReefCoralCommand] Target Pose from Constants: " + targetPose);
-                } else {
-                        System.out.println("[AlignToReefCoralCommand] No AprilTag detected, cannot get target pose.");
+                        System.out.println("[AlignToReefCoralCommand] Detected Tag ID: " + detectedTag.get());
                 }
 
-                // If targetPose is still null or default, abort.
                 if (targetPose == null || targetPose.equals(new Pose2d())) {
                         System.out.println("[AlignToReefCoralCommand] No valid scoring pose found. Stopping.");
                         hasValidTarget = false;
@@ -87,7 +82,7 @@ public class AlignToReefCoralCommand extends Command {
                 }
 
                 hasValidTarget = true;
-                System.out.println("[AlignToReefCoralCommand] Target Pose Successfully Acquired.");
+                System.out.println("[AlignToReefCoralCommand] STARTED - Aligning using AprilTag");
         }
 
         @Override
@@ -191,6 +186,11 @@ public class AlignToReefCoralCommand extends Command {
         @Override
         public void end(boolean interrupted) {
                 System.out.println("[AlignToReefCoralCommand] END called. Interrupted: " + interrupted);
+
+                // 🚨 Restore Field-Oriented Mode after command ends
+                swerve.setFieldOriented(true);
+                System.out.println("[AlignToReefCoralCommand] Restoring Field-Oriented Mode");
+
                 hasValidTarget = false;
                 swerve.stop();
         }

@@ -287,6 +287,12 @@ public class SwerveSubsystem extends SubsystemBase {
 
   public void drive(double forwardSpeed, double strafeSpeed, double rotationSpeed) {
     ChassisSpeeds speeds = new ChassisSpeeds(forwardSpeed, strafeSpeed, rotationSpeed);
+
+    if (fieldOriented) {
+      // Convert to field-relative speeds if needed
+      speeds = ChassisSpeeds.fromFieldRelativeSpeeds(forwardSpeed, strafeSpeed, rotationSpeed, getPose().getRotation());
+    }
+
     swerveDrive.drive(speeds);
   }
 
@@ -339,6 +345,13 @@ public class SwerveSubsystem extends SubsystemBase {
 
   public void addVisionMeasurement(Pose2d visionPose, double timestamp) {
     poseEstimator.addVisionMeasurement(visionPose, timestamp);
+  }
+
+  private boolean fieldOriented = true; // Default to field-oriented mode
+
+  public void setFieldOriented(boolean isFieldOriented) {
+    this.fieldOriented = isFieldOriented;
+    System.out.println("[SwerveSubsystem] Field-Oriented Mode: " + isFieldOriented);
   }
 
   public double getGyroYaw() {
