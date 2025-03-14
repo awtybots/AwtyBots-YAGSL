@@ -203,7 +203,7 @@ public final class Constants {
         // Populate red alliance scoring positions
         redReefScoringPoses.put(6, new Pose2d[] {
             new Pose2d(13.690, 2.664, Rotation2d.fromDegrees(37.619)), // Tag 6 Left Bar
-            new Pose2d(13.966, 2.856, Rotation2d.fromDegrees(37.619)) // Tag 6 Right Bar
+            new Pose2d(13.834, 2.533, Rotation2d.fromDegrees(-59.534)) // Tag 6 Right Bar
         });
 
         redReefScoringPoses.put(7, new Pose2d[] {
