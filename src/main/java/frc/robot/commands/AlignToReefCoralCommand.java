@@ -97,7 +97,8 @@ public class AlignToReefCoralCommand extends Command {
                         return;
                 }
 
-                // Use the estimated field pose as the target.
+                // Try to get the latest target pose (using the cached vision value if
+                // available)
                 Optional<Pose2d> estimatedPoseOpt = vision.getTargetPose();
                 if (estimatedPoseOpt.isEmpty()) {
                         System.out.println(
@@ -117,6 +118,7 @@ public class AlignToReefCoralCommand extends Command {
                 double strafeSpeed = strafeController.calculate(lateralOffset, 0);
                 double rotationSpeed = rotationController.calculate(rotationError, 0);
 
+                // Zero out outputs if goals are met.
                 if (translationController.atGoal())
                         forwardSpeed = 0;
                 if (strafeController.atGoal())
@@ -124,6 +126,7 @@ public class AlignToReefCoralCommand extends Command {
                 if (rotationController.atGoal())
                         rotationSpeed = 0;
 
+                // Clamp speeds to max values.
                 forwardSpeed = MathUtil.clamp(forwardSpeed,
                                 -Constants.VisionConstants.Coral.maxForwardSpeed,
                                 Constants.VisionConstants.Coral.maxForwardSpeed);
@@ -134,6 +137,33 @@ public class AlignToReefCoralCommand extends Command {
                                 -Constants.VisionConstants.Coral.maxRotationSpeed,
                                 Constants.VisionConstants.Coral.maxRotationSpeed);
 
+                // Define minimum outputs to overcome static friction.
+                double minForwardOutput = 0.2;
+                double minStrafeOutput = 0.2;
+                double minRotationOutput = 0.2;
+
+                // Apply minimum threshold for forward speed.
+                if (forwardSpeed > 0 && forwardSpeed < minForwardOutput) {
+                        forwardSpeed = minForwardOutput;
+                } else if (forwardSpeed < 0 && forwardSpeed > -minForwardOutput) {
+                        forwardSpeed = -minForwardOutput;
+                }
+
+                // Apply minimum threshold for strafe speed.
+                if (strafeSpeed > 0 && strafeSpeed < minStrafeOutput) {
+                        strafeSpeed = minStrafeOutput;
+                } else if (strafeSpeed < 0 && strafeSpeed > -minStrafeOutput) {
+                        strafeSpeed = -minStrafeOutput;
+                }
+
+                // Apply minimum threshold for rotation speed.
+                if (rotationSpeed > 0 && rotationSpeed < minRotationOutput) {
+                        rotationSpeed = minRotationOutput;
+                } else if (rotationSpeed < 0 && rotationSpeed > -minRotationOutput) {
+                        rotationSpeed = -minRotationOutput;
+                }
+
+                // Debug logging.
                 System.out.println("[AlignToReefCoralCommand] EXECUTING");
                 System.out.println(" - Current Pose: " + currentPose);
                 System.out.println(" - Target Pose: " + targetPose);
@@ -150,6 +180,7 @@ public class AlignToReefCoralCommand extends Command {
                 SmartDashboard.putNumber("PID-Vision/Rotation Speed", rotationSpeed);
                 SmartDashboard.putBoolean("Vision/Has Valid Target", hasValidTarget);
 
+                // Drive the robot.
                 swerve.drive(forwardSpeed, strafeSpeed, rotationSpeed);
         }
 
