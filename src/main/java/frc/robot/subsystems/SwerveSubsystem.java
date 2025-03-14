@@ -330,7 +330,6 @@ public class SwerveSubsystem extends SubsystemBase {
 
   public void updateOdometry(Pose2d newPose) {
     resetOdometry(newPose);
-    System.out.println("[SwerveSubsystem] Updated PathPlanner Start Position: " + newPose);
   }
 
   public void addVisionMeasurement(Pose2d visionPose, double timestamp) {
