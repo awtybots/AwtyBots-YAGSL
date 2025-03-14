@@ -79,6 +79,7 @@ public class AlignToReefCoralCommand extends Command {
                 if (fieldPoseOpt.isEmpty()) {
                         hasValidTarget = false;
                         swerve.stop();
+                        System.out.println("[AlignToReefCoralCommand] No vision target found. Stopping.");
                         return;
                 }
 
@@ -124,11 +125,18 @@ public class AlignToReefCoralCommand extends Command {
                                 -Constants.VisionConstants.Coral.maxForwardSpeed,
                                 Constants.VisionConstants.Coral.maxForwardSpeed);
 
-                // ❌ Remove strafe and rotation from SmartDashboard logging
+                // 📝 **LOGGING for Debugging**
+                System.out.println("====== AlignToReefCoralCommand Debug ======");
+                System.out.println("Current Pose: " + currentPose);
+                System.out.println("Target Pose: " + targetPose);
+                System.out.println("Target Distance: " + targetDistance);
+                System.out.println("Velocity Projection: " + velocityProjection);
+                System.out.println("Calculated Forward Speed: " + forwardSpeed);
+                System.out.println("========================================");
+
                 SmartDashboard.putNumber("PID-Vision/10 PID-Forward Speed", forwardSpeed);
-                // SmartDashboard.putNumber("PID-Vision/11 PID-Strafe Speed", strafeSpeed);
-                // SmartDashboard.putNumber("PID-Vision/12 PID-Rotation Speed",
-                // rotationPIDOutput);
+                SmartDashboard.putNumber("Vision/Target Distance", targetDistance);
+                SmartDashboard.putNumber("Vision/Velocity Projection", velocityProjection);
 
                 // ✅ Apply only forward movement to the robot
                 swerve.drive(forwardSpeed, 0, 0); // ❌ Remove strafeSpeed & rotationPIDOutput
