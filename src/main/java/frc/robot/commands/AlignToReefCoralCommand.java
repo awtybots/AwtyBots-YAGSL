@@ -66,7 +66,6 @@ public class AlignToReefCoralCommand extends Command {
                 // Option 1: If you want to use fixed coordinates when a tag is detected…
                 Optional<Integer> detectedTag = vision.getDetectedTagID();
                 if (detectedTag.isPresent()) {
-                        // Look up the fixed field pose from constants using the detected tag.
                         targetPose = Constants.VisionConstants.Coral.getBestReefPose(detectedTag.get(), alignLeft);
                         System.out.println("[AlignToReefCoralCommand] Detected tag ID: " + detectedTag.get());
                 }
