@@ -55,13 +55,13 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
     public Optional<Pose2d> getEstimatedFieldPose() {
         for (int i = 0; i < cameras.size(); i++) {
             List<PhotonPipelineResult> results = cameras.get(i).getAllUnreadResults();
-
             for (PhotonPipelineResult result : results) {
                 if (result.hasTargets()) {
                     Transform3d cameraToTarget = result.getBestTarget().getBestCameraToTarget();
                     Pose3d estimatedPose3d = new Pose3d().transformBy(robotToCameraTransforms.get(i))
                             .transformBy(cameraToTarget);
 
+                    System.out.println("[Vision] Raw Estimated Pose: " + estimatedPose3d.toPose2d());
                     return Optional.of(estimatedPose3d.toPose2d());
                 }
             }
@@ -73,7 +73,14 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
      * Determines the best reef pose to align with.
      */
     public Pose2d getBestReefPos(boolean alignLeft) {
-        Translation2d robotPose = swerve.getPose().getTranslation();
+        // Require vision pose for alignment
+        Optional<Pose2d> visionPoseOpt = getEstimatedFieldPose();
+        if (visionPoseOpt.isEmpty()) {
+            System.out.println("[Vision] No valid target detected! Stopping.");
+            return null; // Stop if no vision data
+        }
+
+        Pose2d robotPose = visionPoseOpt.get(); // Always use vision-based pose
         Pose2d bestPose = new Pose2d();
         double bestDistance = Double.MAX_VALUE;
 
@@ -85,12 +92,17 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
 
             // Choose left or right based on alignment preference
             Pose2d candidate = alignLeft ? poses[0] : poses[1];
-            double distance = candidate.getTranslation().getDistance(robotPose);
+            double distance = candidate.getTranslation().getDistance(robotPose.getTranslation());
             if (distance < bestDistance) {
                 bestDistance = distance;
                 bestPose = candidate;
             }
         }
+
+        // Log for debugging
+        System.out.println("[Vision] Vision Pose: " + robotPose);
+        System.out.println("[Vision] Selected Target Pose: " + bestPose);
+
         return bestPose;
     }
 
