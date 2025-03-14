@@ -28,6 +28,9 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
     private final List<PhotonPoseEstimator> photonPoseEstimators = new ArrayList<>();
     private final List<Transform3d> robotToCameraTransforms;
 
+    private Optional<Pose2d> lastFieldPose = Optional.empty();
+    private long lastUpdateTimeMs = 0;
+
     public CoralToReefVisionSubsystem(SwerveSubsystem swerve, List<String> cameraNames,
             List<Transform3d> cameraTransforms) {
         this.swerve = swerve;
@@ -56,7 +59,6 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
         for (int i = 0; i < cameras.size(); i++) {
             List<PhotonPipelineResult> results = cameras.get(i).getAllUnreadResults();
             for (PhotonPipelineResult result : results) {
-                // Use PhotonPoseEstimator to compute the field-relative pose.
                 var poseResultOpt = photonPoseEstimators.get(i).update(
                         result,
                         cameras.get(i).getCameraMatrix(),
@@ -64,10 +66,13 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
                 if (poseResultOpt.isPresent()) {
                     Pose2d estimatedPose = poseResultOpt.get().estimatedPose.toPose2d();
                     System.out.println("[Vision] Estimated Field Pose: " + estimatedPose);
-                    return Optional.of(estimatedPose);
+                    lastFieldPose = Optional.of(estimatedPose);
+                    lastUpdateTimeMs = System.currentTimeMillis();
+                    return lastFieldPose;
                 }
             }
         }
+        // If no new results, return empty so that periodic() remains unchanged.
         return Optional.empty();
     }
 
@@ -108,8 +113,13 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
         return bestPose;
     }
 
+    /**
+     * Returns the last valid field pose (as stored by getEstimatedFieldPose()).
+     * This is used by the command so it isn’t forced to receive an empty Optional
+     * when no new unread results are available.
+     */
     public Optional<Pose2d> getTargetPose() {
-        return getEstimatedFieldPose();
+        return lastFieldPose;
     }
 
     /**
