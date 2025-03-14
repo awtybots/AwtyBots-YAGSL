@@ -72,13 +72,12 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
     /**
      * Determines the best reef pose to align with.
      */
-    public Pose2d getBestReefPos() {
+    public Pose2d getBestReefPos(boolean alignLeft) {
         Translation2d robotPose = swerve.getPose().getTranslation();
         Pose2d bestPose = new Pose2d();
         double bestDistance = Double.MAX_VALUE;
 
         DriverStation.Alliance alliance = DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue);
-        boolean alignLeft = true; // Default to left, can be overridden dynamically
 
         for (Pose2d[] poses : (alliance == DriverStation.Alliance.Red)
                 ? Constants.VisionConstants.Coral.redReefScoringPoses.values()
