@@ -108,6 +108,10 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
         return bestPose;
     }
 
+    public Optional<Pose2d> getTargetPose() {
+        return getEstimatedFieldPose();
+    }
+
     /**
      * Returns the first detected AprilTag ID from all unread results.
      */

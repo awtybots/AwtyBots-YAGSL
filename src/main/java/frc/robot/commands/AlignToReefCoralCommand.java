@@ -63,18 +63,21 @@ public class AlignToReefCoralCommand extends Command {
                 vision.updateOdometryWithVision();
                 Pose2d currentPose = swerve.getPose();
 
-                // Try to get the detected tag ID from vision.
+                // Option 1: If you want to use fixed coordinates when a tag is detected…
                 Optional<Integer> detectedTag = vision.getDetectedTagID();
                 if (detectedTag.isPresent()) {
-                        // Use the fixed field pose from Constants based on the detected tag.
+                        // Look up the fixed field pose from constants using the detected tag.
                         targetPose = Constants.VisionConstants.Coral.getBestReefPose(detectedTag.get(), alignLeft);
                         System.out.println("[AlignToReefCoralCommand] Detected tag ID: " + detectedTag.get());
                 } else {
-                        // Fallback: use the vision-based method (or decide to abort)
-                        targetPose = vision.getBestReefPos(alignLeft);
+                        // Option 2: Otherwise, use the estimated field pose.
+                        Optional<Pose2d> estimatedPoseOpt = vision.getTargetPose();
+                        if (estimatedPoseOpt.isPresent()) {
+                                targetPose = estimatedPoseOpt.get();
+                        }
                 }
 
-                // Check for a valid target pose.
+                // If targetPose is still null or default, abort.
                 if (targetPose == null || targetPose.equals(new Pose2d())) {
                         System.out.println("[AlignToReefCoralCommand] No valid scoring pose found. Stopping.");
                         hasValidTarget = false;
@@ -84,7 +87,6 @@ public class AlignToReefCoralCommand extends Command {
 
                 hasValidTarget = true;
                 System.out.println("[AlignToReefCoralCommand] STARTED");
-                System.out.println(" - Aligning to: " + (alignLeft ? "LEFT" : "RIGHT") + " Reef");
                 System.out.println(" - Target Pose: " + targetPose);
         }
 
@@ -94,27 +96,27 @@ public class AlignToReefCoralCommand extends Command {
                         System.out.println("No valid target, exiting execute");
                         return;
                 }
-                Pose2d currentPose = swerve.getPose();
-                Pose2d targetPose = vision.getBestReefPos(alignLeft); // Pass alignLeft here
-                if (targetPose == null) {
+
+                // Use the estimated field pose as the target.
+                Optional<Pose2d> estimatedPoseOpt = vision.getTargetPose();
+                if (estimatedPoseOpt.isEmpty()) {
                         System.out.println(
                                         "[AlignToReefCoralCommand] No valid scoring pose found during execution. Stopping.");
                         hasValidTarget = false;
                         swerve.stop();
                         return;
                 }
+                targetPose = estimatedPoseOpt.get();
 
-                // Compute translation and rotation errors
+                Pose2d currentPose = swerve.getPose();
                 double targetDistance = currentPose.getTranslation().getDistance(targetPose.getTranslation());
                 double lateralOffset = currentPose.getTranslation().getY() - targetPose.getTranslation().getY();
                 double rotationError = currentPose.getRotation().getRadians() - targetPose.getRotation().getRadians();
 
-                // Compute PID outputs
                 double forwardSpeed = translationController.calculate(targetDistance, 0);
                 double strafeSpeed = strafeController.calculate(lateralOffset, 0);
                 double rotationSpeed = rotationController.calculate(rotationError, 0);
 
-                // Stop movement if within tolerance
                 if (translationController.atGoal())
                         forwardSpeed = 0;
                 if (strafeController.atGoal())
@@ -122,7 +124,6 @@ public class AlignToReefCoralCommand extends Command {
                 if (rotationController.atGoal())
                         rotationSpeed = 0;
 
-                // Clamp speeds
                 forwardSpeed = MathUtil.clamp(forwardSpeed,
                                 -Constants.VisionConstants.Coral.maxForwardSpeed,
                                 Constants.VisionConstants.Coral.maxForwardSpeed);
@@ -133,7 +134,6 @@ public class AlignToReefCoralCommand extends Command {
                                 -Constants.VisionConstants.Coral.maxRotationSpeed,
                                 Constants.VisionConstants.Coral.maxRotationSpeed);
 
-                // Log debugging info
                 System.out.println("[AlignToReefCoralCommand] EXECUTING");
                 System.out.println(" - Current Pose: " + currentPose);
                 System.out.println(" - Target Pose: " + targetPose);
@@ -143,7 +143,6 @@ public class AlignToReefCoralCommand extends Command {
                 System.out.println(" - Strafe Speed: " + strafeSpeed);
                 System.out.println(" - Rotation Speed: " + rotationSpeed);
 
-                // Send data to SmartDashboard for debugging
                 SmartDashboard.putNumber("Vision/Target Distance", targetDistance);
                 SmartDashboard.putNumber("Vision/Lateral Offset", lateralOffset);
                 SmartDashboard.putNumber("PID-Vision/Forward Speed", forwardSpeed);
@@ -151,7 +150,6 @@ public class AlignToReefCoralCommand extends Command {
                 SmartDashboard.putNumber("PID-Vision/Rotation Speed", rotationSpeed);
                 SmartDashboard.putBoolean("Vision/Has Valid Target", hasValidTarget);
 
-                // Drive the robot
                 swerve.drive(forwardSpeed, strafeSpeed, rotationSpeed);
         }
 
