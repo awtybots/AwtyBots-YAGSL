@@ -60,14 +60,22 @@ public class AlignToReefCoralCommand extends Command {
 
         @Override
         public void initialize() {
+                System.out.println("[AlignToReefCoralCommand] Initializing...");
                 vision.updateOdometryWithVision();
-                Pose2d currentPose = swerve.getPose();
 
-                // Option 1: If you want to use fixed coordinates when a tag is detected…
+                // Get current pose
+                Pose2d currentPose = swerve.getPose();
+                System.out.println("[AlignToReefCoralCommand] Current Robot Pose: " + currentPose);
+
+                // Try to get the detected AprilTag ID from vision.
                 Optional<Integer> detectedTag = vision.getDetectedTagID();
                 if (detectedTag.isPresent()) {
+                        // Look up the fixed field pose from constants using the detected tag.
                         targetPose = Constants.VisionConstants.Coral.getBestReefPose(detectedTag.get(), alignLeft);
-                        System.out.println("[AlignToReefCoralCommand] Detected tag ID: " + detectedTag.get());
+                        System.out.println("[AlignToReefCoralCommand] Detected AprilTag ID: " + detectedTag.get());
+                        System.out.println("[AlignToReefCoralCommand] Target Pose from Constants: " + targetPose);
+                } else {
+                        System.out.println("[AlignToReefCoralCommand] No AprilTag detected, cannot get target pose.");
                 }
 
                 // If targetPose is still null or default, abort.
@@ -79,29 +87,40 @@ public class AlignToReefCoralCommand extends Command {
                 }
 
                 hasValidTarget = true;
-                System.out.println("[AlignToReefCoralCommand] STARTED");
-                System.out.println(" - Target Pose: " + targetPose);
+                System.out.println("[AlignToReefCoralCommand] Target Pose Successfully Acquired.");
         }
 
         @Override
         public void execute() {
                 if (!hasValidTarget) {
-                        System.out.println("No valid target, exiting execute");
+                        System.out.println("[AlignToReefCoralCommand] No valid target, exiting execute.");
                         return;
                 }
 
+                System.out.println("[AlignToReefCoralCommand] Executing movement toward target...");
+
                 // Use the fixed targetPose determined in initialize()
                 Pose2d currentPose = swerve.getPose();
+                System.out.println("[AlignToReefCoralCommand] Current Pose: " + currentPose);
+                System.out.println("[AlignToReefCoralCommand] Target Pose: " + targetPose);
 
                 // Compute errors between current pose and the fixed targetPose.
                 double targetDistance = currentPose.getTranslation().getDistance(targetPose.getTranslation());
                 double lateralOffset = currentPose.getTranslation().getY() - targetPose.getTranslation().getY();
                 double rotationError = currentPose.getRotation().getRadians() - targetPose.getRotation().getRadians();
 
+                System.out.println("[AlignToReefCoralCommand] Target Distance: " + targetDistance);
+                System.out.println("[AlignToReefCoralCommand] Lateral Offset: " + lateralOffset);
+                System.out.println("[AlignToReefCoralCommand] Rotation Error: " + rotationError);
+
                 // Calculate PID outputs.
                 double forwardSpeed = translationController.calculate(targetDistance, 0);
                 double strafeSpeed = strafeController.calculate(lateralOffset, 0);
                 double rotationSpeed = rotationController.calculate(rotationError, 0);
+
+                // Log PID output before applying constraints
+                System.out.println("[AlignToReefCoralCommand] Raw PID Speeds: Forward=" + forwardSpeed + ", Strafe="
+                                + strafeSpeed + ", Rotation=" + rotationSpeed);
 
                 // Zero outputs if we're within tolerance.
                 if (translationController.atGoal()) {

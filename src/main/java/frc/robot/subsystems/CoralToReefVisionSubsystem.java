@@ -128,19 +128,32 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
     private Optional<Integer> lastDetectedTag = Optional.empty();
 
     public Optional<Integer> getDetectedTagID() {
+        System.out.println("[Vision] Checking for detected AprilTag...");
+
         // Look for new results.
         for (int i = 0; i < cameras.size(); i++) {
             List<PhotonPipelineResult> results = cameras.get(i).getAllUnreadResults();
+            System.out.println("[Vision] Camera " + i + " has " + results.size() + " unread results.");
+
             for (PhotonPipelineResult result : results) {
                 if (result.hasTargets()) {
-                    // Retrieve the best target’s fiducial ID and cache it.
                     PhotonTrackedTarget bestTarget = result.getBestTarget();
-                    lastDetectedTag = Optional.of(bestTarget.getFiducialId());
+                    int tagID = bestTarget.getFiducialId();
+                    lastDetectedTag = Optional.of(tagID);
+
+                    System.out.println("[Vision] Detected AprilTag ID: " + tagID);
                     return lastDetectedTag;
                 }
             }
         }
-        // Return the cached value if no new result is found.
+
+        // If no new results, return the cached value.
+        if (lastDetectedTag.isPresent()) {
+            System.out.println("[Vision] No new tags detected, using cached tag ID: " + lastDetectedTag.get());
+        } else {
+            System.out.println("[Vision] No tags detected and no cached value available.");
+        }
+
         return lastDetectedTag;
     }
 
