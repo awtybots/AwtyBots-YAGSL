@@ -145,7 +145,7 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
         Optional<Pose2d> estimatedPoseOpt = getEstimatedFieldPose();
         // When a new vision measurement is available, immediately reset odometry.
         estimatedPoseOpt.ifPresent(visionPose -> {
-            swerve.resetOdometry(visionPose);
+            swerve.updateOdometry(visionPose);
         });
     }
 

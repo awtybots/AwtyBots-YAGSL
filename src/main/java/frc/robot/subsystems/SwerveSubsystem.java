@@ -329,7 +329,12 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   public void updateOdometry(Pose2d newPose) {
-    resetOdometry(newPose);
+    swerveDrive.resetOdometry(newPose);
+    poseEstimator.resetPosition(
+        newPose.getRotation(),
+        swerveDrive.getModulePositions(),
+        newPose);
+
   }
 
   public void addVisionMeasurement(Pose2d visionPose, double timestamp) {
