@@ -65,7 +65,6 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
                         cameras.get(i).getDistCoeffs());
                 if (poseResultOpt.isPresent()) {
                     Pose2d estimatedPose = poseResultOpt.get().estimatedPose.toPose2d();
-                    System.out.println("[Vision] Estimated Field Pose: " + estimatedPose);
                     lastFieldPose = Optional.of(estimatedPose);
                     lastUpdateTimeMs = System.currentTimeMillis();
                     return lastFieldPose;
@@ -146,7 +145,6 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
         Optional<Pose2d> estimatedPoseOpt = getEstimatedFieldPose();
         // When a new vision measurement is available, immediately reset odometry.
         estimatedPoseOpt.ifPresent(visionPose -> {
-            System.out.println("[Vision] Resetting odometry to: " + visionPose);
             swerve.resetOdometry(visionPose);
         });
     }
