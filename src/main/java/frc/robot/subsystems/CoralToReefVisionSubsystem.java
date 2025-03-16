@@ -75,25 +75,23 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
                     Pose2d estimatedPose = poseResult.estimatedPose.toPose2d();
                     int tagsUsed = poseResult.targetsUsed.size(); // ✅ Use tag count
 
-                    // ✅ Choose the pose with the highest tag count
+                    // Choose the pose with the highest tag count
                     if (tagsUsed > maxTagsUsed) {
                         maxTagsUsed = tagsUsed;
                         bestPoseOpt = Optional.of(estimatedPose);
                     }
-
                 }
             }
         }
 
-        // ✅ Update the last valid pose if a better pose was found
+        // Update the last valid pose if a better pose was found
         if (bestPoseOpt.isPresent()) {
             lastFieldPose = bestPoseOpt;
             lastUpdateTimeMs = System.currentTimeMillis();
-            System.out.println("[Vision] Estimated Field Pose: " + bestPoseOpt);
-            return bestPoseOpt;
+            System.out.println("[Vision] Estimated Field Pose: " + bestPoseOpt.get()); // ✅ Cleaner log
         }
 
-        return Optional.empty();
+        return bestPoseOpt;
     }
 
     public Pose2d getBestReefPos(boolean alignLeft) {
