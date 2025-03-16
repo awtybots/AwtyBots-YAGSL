@@ -128,8 +128,8 @@ public final class Constants {
     public static final double kExtend = 0.5;
     public static final double kRetract = -0.5;
     public static final double kHold = 0.0;
-    public static final double kIn = 0.5;
-    public static final double kOut = -0.5;
+    public static final double kIn = 1;
+    public static final double kOut = -1;
   }
 
   public static final class FunnelIntakeSetpoints{
