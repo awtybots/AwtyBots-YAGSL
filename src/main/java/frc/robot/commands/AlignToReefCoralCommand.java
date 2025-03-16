@@ -41,7 +41,7 @@ public class AlignToReefCoralCommand extends Command {
                                 Constants.VisionConstants.Coral.TRANSLATION_kI,
                                 Constants.VisionConstants.Coral.TRANSLATION_kD,
                                 Constants.VisionConstants.Coral.TRANSLATION_CONSTRAINTS);
-                distanceController.setTolerance(0.0254); // ~1 inch
+                distanceController.setTolerance(Constants.VisionConstants.Coral.TRANSLATION_TOLERANCE); // ~1 inch
 
                 // Strafe PID
                 // strafeController = new ProfiledPIDController(
