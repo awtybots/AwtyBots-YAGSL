@@ -59,6 +59,9 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
      * Estimates the robot's field pose using AprilTags from **all unread results**.
      */
     public Optional<Pose2d> getEstimatedFieldPose() {
+        Optional<Pose2d> bestPoseOpt = Optional.empty();
+        int maxTagsUsed = 0; // ✅ Track the best pose based on tag count
+
         for (int i = 0; i < cameras.size(); i++) {
             List<PhotonPipelineResult> results = cameras.get(i).getAllUnreadResults();
             for (PhotonPipelineResult result : results) {
@@ -66,15 +69,30 @@ public class CoralToReefVisionSubsystem extends SubsystemBase {
                         result,
                         cameras.get(i).getCameraMatrix(),
                         cameras.get(i).getDistCoeffs());
+
                 if (poseResultOpt.isPresent()) {
-                    Pose2d estimatedPose = poseResultOpt.get().estimatedPose.toPose2d();
-                    lastFieldPose = Optional.of(estimatedPose);
-                    lastUpdateTimeMs = System.currentTimeMillis();
-                    return lastFieldPose;
+                    var poseResult = poseResultOpt.get();
+                    Pose2d estimatedPose = poseResult.estimatedPose.toPose2d();
+                    int tagsUsed = poseResult.targetsUsed.size(); // ✅ Use tag count
+
+                    // ✅ Choose the pose with the highest tag count
+                    if (tagsUsed > maxTagsUsed) {
+                        maxTagsUsed = tagsUsed;
+                        bestPoseOpt = Optional.of(estimatedPose);
+                    }
+
                 }
             }
         }
-        // If no new results, return empty so that periodic() remains unchanged.
+
+        // ✅ Update the last valid pose if a better pose was found
+        if (bestPoseOpt.isPresent()) {
+            lastFieldPose = bestPoseOpt;
+            lastUpdateTimeMs = System.currentTimeMillis();
+            System.out.println("[Vision] Estimated Field Pose: " + bestPoseOpt);
+            return bestPoseOpt;
+        }
+
         return Optional.empty();
     }
 
