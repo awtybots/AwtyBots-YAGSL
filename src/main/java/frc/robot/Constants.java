@@ -85,7 +85,7 @@ public final class Constants {
   }
 
   public static final class ElevatorSetpoints{
-    public static final int FeederStation = 10;
+    public static final int FeederStation = 0;
     public static final int L1 = 10;
     public static final int AlgaeLow = 0;
     public static final int L2 = 50;
