@@ -43,7 +43,7 @@ public class SwerveSubsystem extends SubsystemBase {
   File directory = new File(Filesystem.getDeployDirectory(), "swerve");
   private final SwerveDrive swerveDrive;
   private final SwerveDrivePoseEstimator poseEstimator;
-  private final double headingBias = -2; // set this if there is alot of drift on pathplanner
+  private final double headingBias = 0; // set this if there is alot of drift on pathplanner
   public SwerveSubsystem(File directory) {
     try {
       swerveDrive = new SwerveParser(directory)
