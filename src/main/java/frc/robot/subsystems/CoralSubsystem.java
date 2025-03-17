@@ -108,10 +108,11 @@ public class CoralSubsystem extends SubsystemBase {
     private void moveToSetpoint() {
         l_elevatorController.setReference(elevatorCurrentTarget, ControlType.kMAXMotionPositionControl);
         r_elevatorController.setReference(elevatorCurrentTarget, ControlType.kMAXMotionPositionControl);
+        
         if(runFunnelIntake){
             double elevatorPos = elevatorEncoder.getPosition();
             double elevatorError = Math.abs(elevatorCurrentTarget - elevatorPos);
-            double stopThreshold = 0.5;
+            double stopThreshold = 20;
 
             if (elevatorError > stopThreshold){
 
