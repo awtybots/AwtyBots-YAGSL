@@ -153,7 +153,9 @@ public class RobotContainer {
                 //////////////////////////////////////////////
                 /// driver controller bindings ////////////
                 ////////////////////////////////////////////
+                /// 
                 // enable slow mode
+
                 m_driverController
                                 .rightTrigger(OIConstants.kTriggerThreshold)
                                 .onTrue(
@@ -185,7 +187,7 @@ public class RobotContainer {
                                                 }));
 
                 // m_driverController.a().onTrue(Commands.runOnce(drivebase::zeroGyro));
-                m_driverController.start().onTrue(Commands.runOnce(drivebase::zeroGyro));
+                // m_driverController.start().onTrue(Commands.runOnce(drivebase:setInitialHeading));
 
                 // vision buttons
                 // align left levels 1-3
@@ -193,7 +195,7 @@ public class RobotContainer {
                                 new AlignToReefCoralCommand(drivebase, visionSubsystem, true));
                 // align right levels 1-3
                 m_driverController.rightBumper()
-                                .whileTrue(new AlignToReefCoralCommand(drivebase, visionSubsystem, false));
+                                .whileTrue(new PathPlannerMoveToFeederStation(drivebase, visionSubsystem, new Pose2d(5.33, 2.55, Rotation2d.fromDegrees(118.07))));
 
                 //////////////////////////////////////////////
                 /// operator controller bindings ////////////

@@ -81,7 +81,8 @@ public class PathPlannerMoveToFeederStation extends Command {
     }
 
     @Override
-    public void end(boolean interrupted) {
-        System.out.println("[MoveToFeeder] Path execution finished.");
-    }
+        public void end(boolean interrupted) {
+            System.out.println("[MoveToFeeder] Path execution finished.");
+                swerve.stop();
+        }
 }
