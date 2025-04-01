@@ -7,22 +7,25 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.Rotation;
 
-import edu.wpi.first.math.Pair;
-import edu.wpi.first.math.estimator.PoseEstimator;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.Constants.DrivebaseConstants.TargetSide;
+
 import com.studica.frc.AHRS;
 import com.studica.frc.AHRS.NavXComType;
 import java.io.File;
@@ -30,8 +33,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.function.IntSupplier;
 import java.util.function.Supplier;
-
 import com.ctre.phoenix6.swerve.SwerveModule;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -43,17 +46,23 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
-import com.studica.frc.AHRS.NavXComType;
-
 import swervelib.SwerveDrive;
 import swervelib.parser.SwerveParser;
+// Import the working team's Vision class:
+import frc.robot.subsystems.Vision;
 
 public class SwerveSubsystem extends SubsystemBase {
 
   File directory = new File(Filesystem.getDeployDirectory(), "swerve");
   private final SwerveDrive swerveDrive;
   private final SwerveDrivePoseEstimator poseEstimator;
-  private final double headingBias = -2; // set this if there is alot of drift on pathplanner
+  private final double headingBias = -2; // set this if there is a lot of drift on pathplanner
+
+  // --- Vision Integration Fields ---
+  private final boolean visionDriveTest = Constants.VisionConstants.DRIVEWITHVISION;
+  private Vision vision;
+  private Field2d field2d = new Field2d();
+  // ------------------------------------
 
   public SwerveSubsystem(File directory) {
     try {
@@ -77,6 +86,13 @@ public class SwerveSubsystem extends SubsystemBase {
         new Pose2d(0.0, 0.0, new Rotation2d()));
 
     setupPathPlanner();
+
+    // Setup vision if enabled.
+    if (visionDriveTest) {
+      setupPhotonVision();
+      // If available, you could stop the swerve odometry thread here:
+      // swerveDrive.stopOdometryThread();
+    }
   }
 
   public SwerveDrive getSwerveDrive() {
@@ -88,10 +104,9 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   public Command driveFieldOriented(Supplier<ChassisSpeeds> velocity) {
-    return run(
-        () -> {
-          swerveDrive.driveFieldOriented(velocity.get());
-        });
+    return run(() -> {
+      swerveDrive.driveFieldOriented(velocity.get());
+    });
   }
 
   private AHRS gyro = new AHRS(NavXComType.kMXP_SPI);
@@ -103,7 +118,7 @@ public class SwerveSubsystem extends SubsystemBase {
    * be called in order for odometry to
    * keep working.
    *
-   * @param initialHolonomicPose The pose to set the odometry to
+   * @param initialHolonomicPose The pose to set the odometry to.
    */
   public void resetOdometry(Pose2d initialHolonomicPose) {
 
@@ -201,7 +216,6 @@ public class SwerveSubsystem extends SubsystemBase {
   public PathConstraints getPathConstraintsFromSettings() {
     Path path = Path.of(Filesystem.getDeployDirectory().toString(), "pathplanner/settings.json");
     ObjectMapper objectMapper = new ObjectMapper();
-
     try {
       JsonNode rootNode = objectMapper.readTree(Files.readAllBytes(path));
 
@@ -221,14 +235,11 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   /**
-   * Get the path follower with events.
+   * Returns a path following command for autonomous routines.
    *
-   * @param pathName PathPlanner path name.
-   * @return {@link AutoBuilder#followPath(PathPlannerPath)} path command.
+   * @param TestAuto PathPlanner path name.
    */
   public Command getAutonomousCommand(String TestAuto) {
-    // Create a path following command using AutoBuilder. This will also trigger
-    // event markers.
     return new PathPlannerAuto(TestAuto);
   }
 
@@ -245,42 +256,6 @@ public class SwerveSubsystem extends SubsystemBase {
     swerveDrive.resetOdometry(new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(angleDegrees)));
   }
 
-  public void setInitialHeadingWithVision(double targetAngleDegrees, CoralToReefVisionSubsystem vision) {
-    var alliance = DriverStation.getAlliance();
-
-    // Get estimated heading from vision
-    Optional<Pose2d> visionPoseOpt = vision.getEstimatedFieldPose();
-
-    if (visionPoseOpt.isPresent()) {
-      Pose2d estimatedPose = visionPoseOpt.get(); // Extract Pose2d
-      double estimatedFieldHeading = estimatedPose.getRotation().getDegrees();
-      double gyroCurrentHeading = getGyroYaw(); // Get current gyro heading
-
-      // Flip target heading for Red Alliance AFTER applying correction
-      if (alliance.isPresent() && alliance.get() == Alliance.Red) {
-        targetAngleDegrees = 180 - targetAngleDegrees; // Flip around center
-      }
-
-      // Apply vision-based correction
-      gyro.setAngleAdjustment(estimatedFieldHeading);
-      System.out.println("[GyroReset] Adjusted with Vision Heading: " + estimatedFieldHeading + " degrees");
-
-      // Reset odometry using corrected vision pose
-      Pose2d correctedPose = new Pose2d(
-          estimatedPose.getTranslation(),
-          Rotation2d.fromDegrees(estimatedFieldHeading) // Use corrected target angle
-      );
-
-      swerveDrive.resetOdometry(correctedPose);
-      System.out.println("[GyroReset] Vision Data Used");
-    } else {
-      System.out.println("[GyroReset] No vision data available, setting based on gyro alone.");
-      gyro.setAngleAdjustment(targetAngleDegrees);
-
-      swerveDrive.resetOdometry(new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(targetAngleDegrees)));
-    }
-  }
-
   public ChassisSpeeds getRobotVelocity() {
     return swerveDrive.getRobotVelocity();
   }
@@ -294,18 +269,15 @@ public class SwerveSubsystem extends SubsystemBase {
 
   public void drive(double forwardSpeed, double strafeSpeed, double rotationSpeed) {
     ChassisSpeeds speeds = new ChassisSpeeds(forwardSpeed, strafeSpeed, rotationSpeed);
-
     if (fieldOriented) {
       // Convert to field-relative speeds if needed
       speeds = ChassisSpeeds.fromFieldRelativeSpeeds(forwardSpeed, strafeSpeed, rotationSpeed, getPose().getRotation());
     }
-
     swerveDrive.drive(speeds);
   }
 
   public void stop() {
     drive(new ChassisSpeeds(0, 0, 0));
-
     swerveDrive.setModuleStates(
         swerveDrive.kinematics.toSwerveModuleStates(new ChassisSpeeds(0, 0, 0)), true);
   }
@@ -369,9 +341,8 @@ public class SwerveSubsystem extends SubsystemBase {
     poseEstimator.update(
         Rotation2d.fromDegrees(getGyroYaw()),
         swerveDrive.getModulePositions());
-
     Pose2d estimatedPose = poseEstimator.getEstimatedPosition();
-    if (loopCounter % 10 == 0) { // Run every 10 cycle, updates every ~200 ms
+    if (loopCounter % 10 == 0) {
       SmartDashboard.putNumber("Gyro Yaw", getGyroYaw());
       SmartDashboard.putNumber("Gyro Angle", getGyroAngle());
       SmartDashboard.putNumber("Odometry X", estimatedPose.getX());
@@ -381,12 +352,65 @@ public class SwerveSubsystem extends SubsystemBase {
       SmartDashboard.putString("PathPlanner Pose ", getPose().toString());
     }
     loopCounter++;
-
     var positions = swerveDrive.getModulePositions();
     for (int i = 0; i < 4; i++) {
       SmartDashboard.putNumber("module " + i, positions[i].angle.getDegrees());
     }
 
+    // --- Vision Integration in periodic() ---
+    if (visionDriveTest && vision != null) {
+      swerveDrive.updateOdometry();
+      vision.updatePoseEstimation(swerveDrive);
+      int currAprilTagTarget = vision.getBestReefTarget();
+      SmartDashboard.putNumber("Vision/AprilTag", currAprilTagTarget);
+      SmartDashboard.putData("Field", field2d);
+
+    }
+  }
+
+  // --- Vision Setup and Commands ---
+
+  // Instantiate the Vision class.
+  public void setupPhotonVision() {
+    vision = new Vision(this::getPose, field2d);
+  }
+
+  public int getReefTargetTagID() {
+    return (vision.getBestReefTarget());
+  }
+
+  // Command that uses AutoBuilder's pathfinding to drive to a specified pose.
+  public Command driveToPose(Pose2d pose) {
+    PathConstraints constraints = new PathConstraints(
+        swerveDrive.getMaximumChassisVelocity(), 2.5,
+        swerveDrive.getMaximumChassisAngularVelocity(), Math.toRadians(720));
+    return AutoBuilder.pathfindToPose(pose, constraints, edu.wpi.first.units.Units.MetersPerSecond.of(0));
+  }
+
+  // Command to align the robot for reef scoring using a detected AprilTag ID and
+  // target side.
+  public Command alignToReefScore(int aprilTag, Constants.DrivebaseConstants.TargetSide scoringSide) {
+    Transform2d robotOffset;
+    if (scoringSide == Constants.DrivebaseConstants.TargetSide.LEFT) {
+      robotOffset = new Transform2d(
+          new Translation2d(Constants.DrivebaseConstants.ReefXDistance, Constants.DrivebaseConstants.ReefLeftYOffset),
+          Rotation2d.fromDegrees(180));
+    } else {
+      robotOffset = new Transform2d(
+          new Translation2d(Constants.DrivebaseConstants.ReefXDistance, Constants.DrivebaseConstants.ReefRightYOffset),
+          Rotation2d.fromDegrees(180));
+    }
+    if (aprilTag > 0 && vision != null && vision.isValidTargetForScoring(aprilTag)) {
+      Pose2d newPose = Vision.getAprilTagPose(aprilTag, robotOffset);
+      return driveToPose(newPose);
+    } else {
+      System.out.println("No Valid April Tag target: " + aprilTag);
+      return Commands.none();
+    }
+  }
+
+  public Command alignToReefScore(IntSupplier aprilTagSupplier, TargetSide scoringSide) {
+    return alignToReefScore(aprilTagSupplier.getAsInt(), scoringSide);
   }
 
 }

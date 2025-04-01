@@ -4,20 +4,18 @@
 
 package frc.robot;
 
+import frc.robot.Constants.DrivebaseConstants.TargetSide;
 import frc.robot.Constants.OIConstants;
-import frc.robot.commands.AlignToReefCoralCommand;
 import frc.robot.commands.Autos;
-import frc.robot.commands.PathPlannerMoveForwardCommand;
-import frc.robot.commands.PathPlannerMoveToFeederStation;
 import frc.robot.subsystems.CoralSubsystem;
 import frc.robot.subsystems.CoralSubsystem.Setpoint;
 import frc.robot.subsystems.FunnelIntake;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.SwerveSubsystem;
-import frc.robot.subsystems.CoralToReefVisionSubsystem;
 import swervelib.SwerveInputStream;
 
 import java.io.File;
+import java.util.function.IntSupplier;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -47,11 +45,6 @@ public class RobotContainer {
         // The robot's subsystems and commands are defined here...
         public final SwerveSubsystem drivebase = new SwerveSubsystem(
                         new File(Filesystem.getDeployDirectory(), "swerve"));
-        private final CoralToReefVisionSubsystem visionSubsystem = new CoralToReefVisionSubsystem(
-                        drivebase,
-                        Constants.VisionConstants.Coral.cameraNames, // List of Camera Names
-                        Constants.VisionConstants.Coral.cameraPoses // List of Camera Transforms
-        );
         private final CoralSubsystem m_coralSubsystem = new CoralSubsystem();
         private final FunnelIntake m_funnelIntakeSubsystem = new FunnelIntake();
         private final Climber m_climber = new Climber();
@@ -86,27 +79,32 @@ public class RobotContainer {
                 NamedCommands.registerCommand("ElevatorLiftL4", m_coralSubsystem.setSetpointCommand(Setpoint.L4));
                 NamedCommands.registerCommand("AlgaeLow", m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeLow));
                 NamedCommands.registerCommand("AlgaeHigh", m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeHigh));
-                NamedCommands.registerCommand("Gyroreset",
-                                new InstantCommand(() -> drivebase.setInitialHeadingWithVision(180, visionSubsystem),
-                                                drivebase));
 
-                NamedCommands.registerCommand("AlignToReefCoralLeft",
-                                new AlignToReefCoralCommand(drivebase, visionSubsystem, true));
+                NamedCommands.registerCommand("Red Align 12 Left", drivebase.alignToReefScore(7, TargetSide.LEFT));
+                NamedCommands.registerCommand("Red Align 12 Right", drivebase.alignToReefScore(7, TargetSide.RIGHT));
+                NamedCommands.registerCommand("Red Align 2 Right", drivebase.alignToReefScore(6, TargetSide.RIGHT));
+                NamedCommands.registerCommand("Red Align 2 Left", drivebase.alignToReefScore(6, TargetSide.LEFT));
+                NamedCommands.registerCommand("Red Align 4 Right", drivebase.alignToReefScore(11, TargetSide.RIGHT));
+                NamedCommands.registerCommand("Red Align 4 Left", drivebase.alignToReefScore(11, TargetSide.LEFT));
+                NamedCommands.registerCommand("Red Align 6 Right", drivebase.alignToReefScore(10, TargetSide.RIGHT));
+                NamedCommands.registerCommand("Red Align 6 Left", drivebase.alignToReefScore(10, TargetSide.LEFT));
+                NamedCommands.registerCommand("Red Align 8 Right", drivebase.alignToReefScore(9, TargetSide.RIGHT));
+                NamedCommands.registerCommand("Red Align 8 Left", drivebase.alignToReefScore(9, TargetSide.LEFT));
+                NamedCommands.registerCommand("Red Align 10 Right", drivebase.alignToReefScore(8, TargetSide.RIGHT));
+                NamedCommands.registerCommand("Red Align 10 Left", drivebase.alignToReefScore(8, TargetSide.LEFT));
 
-                NamedCommands.registerCommand("AlignToReefCoralRight",
-                                new AlignToReefCoralCommand(drivebase, visionSubsystem, false));
-                NamedCommands.registerCommand("PathPlannerMoveToLeftFeederStation",
-                                new PathPlannerMoveToFeederStation(drivebase, visionSubsystem,
-                                                new Pose2d(5.0, 3.0, Rotation2d.fromDegrees(90))));
-
-                NamedCommands.registerCommand("PathPlannerMoveToRightFeederStation",
-                                new PathPlannerMoveToFeederStation(drivebase, visionSubsystem,
-                                                new Pose2d(5.0, 3.0, Rotation2d.fromDegrees(90))));
-
-                NamedCommands.registerCommand("MoveForwardDynamic",
-                                new PathPlannerMoveForwardCommand(drivebase, visionSubsystem, 1.0) // Moves forward 1
-                                                                                                   // meter dynamically
-                );
+                NamedCommands.registerCommand("Blue Align 12 Left", drivebase.alignToReefScore(18, TargetSide.LEFT));
+                NamedCommands.registerCommand("Blue Align 12 Right", drivebase.alignToReefScore(18, TargetSide.RIGHT));
+                NamedCommands.registerCommand("Blue Align 2 Right", drivebase.alignToReefScore(19, TargetSide.RIGHT));
+                NamedCommands.registerCommand("Blue Align 2 Left", drivebase.alignToReefScore(19, TargetSide.LEFT));
+                NamedCommands.registerCommand("Blue Align 4 Right", drivebase.alignToReefScore(20, TargetSide.RIGHT));
+                NamedCommands.registerCommand("Blue Align 4 Left", drivebase.alignToReefScore(20, TargetSide.LEFT));
+                NamedCommands.registerCommand("Blue Align 6 Right", drivebase.alignToReefScore(21, TargetSide.RIGHT));
+                NamedCommands.registerCommand("Blue Align 6 Left", drivebase.alignToReefScore(21, TargetSide.LEFT));
+                NamedCommands.registerCommand("Blue Align 8 Right", drivebase.alignToReefScore(22, TargetSide.RIGHT));
+                NamedCommands.registerCommand("Blue Align 8 Left", drivebase.alignToReefScore(22, TargetSide.LEFT));
+                NamedCommands.registerCommand("Blue Align 10 Right", drivebase.alignToReefScore(17, TargetSide.RIGHT));
+                NamedCommands.registerCommand("Blue Align 10 Left", drivebase.alignToReefScore(17, TargetSide.LEFT));
 
                 autoChooser = AutoBuilder.buildAutoChooser();
 
@@ -153,7 +151,7 @@ public class RobotContainer {
                 //////////////////////////////////////////////
                 /// driver controller bindings ////////////
                 ////////////////////////////////////////////
-                /// 
+                ///
                 // enable slow mode
 
                 m_driverController
@@ -191,11 +189,14 @@ public class RobotContainer {
 
                 // vision buttons
                 // align left levels 1-3
-                m_driverController.leftBumper().whileTrue(
-                                new AlignToReefCoralCommand(drivebase, visionSubsystem, true));
-                // align right levels 1-3
-                m_driverController.rightBumper()
-                                .whileTrue(new PathPlannerMoveToFeederStation(drivebase, visionSubsystem, new Pose2d(5.33, 2.55, Rotation2d.fromDegrees(118.07))));
+                m_driverController.leftBumper().onTrue(Commands.runOnce(() -> {
+                        drivebase.alignToReefScore((IntSupplier) () -> drivebase.getReefTargetTagID(), TargetSide.LEFT)
+                                        .schedule();
+                }));
+                m_driverController.rightBumper().onTrue(Commands.runOnce(() -> {
+                        drivebase.alignToReefScore((IntSupplier) () -> drivebase.getReefTargetTagID(), TargetSide.RIGHT)
+                                        .schedule();
+                }));
 
                 //////////////////////////////////////////////
                 /// operator controller bindings ////////////

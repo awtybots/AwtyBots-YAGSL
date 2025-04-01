@@ -46,6 +46,24 @@ public final class Constants {
     public static final int kDriverControllerPort = 0;
   }
 
+  public static final class DrivebaseConstants {
+    public static double DriveFastScale = 1;
+    public static double DrivePrecisionScale = 0.35;
+    // Hold time on motor brakes when disabled
+    public static final double WHEEL_LOCK_TIME = 10.0; // seconds
+
+    public enum TargetSide {
+      LEFT, RIGHT
+    };
+
+    // robot camera offsets need to be correct with bumper so the
+    // align to reef works correctly, the reef poles are 6.5 inches from the
+    // center of the april tag
+    public static double ReefLeftYOffset = Units.inchesToMeters(-9.5);
+    public static double ReefRightYOffset = Units.inchesToMeters(4);
+    public static double ReefXDistance = Units.inchesToMeters(17.0);
+  }
+
   public static final class DriveConstants {
     // Driving Parameters - Note that these are not the maximum capable speeds of
     // the robot, rather the allowed maximum speeds
@@ -194,102 +212,9 @@ public final class Constants {
   }
 
   public static final class VisionConstants {
+    public static final boolean DRIVEWITHVISION = true;
+
     public static final class Coral {
-      public static final int[] redReefIds = { 6, 7, 8, 9, 10, 11 };
-      public static final int[] blueReefIds = { 17, 18, 19, 20, 21, 22 };
-
-      public static final int[] allReefIds = { 6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22 };
-
-      public static final int[] nonReefIds = { 1, 2, 3, 4, 5, 12, 13, 14, 15, 16 };
-
-      public static final Map<Integer, Pose2d[]> redReefScoringPoses = new HashMap<>();
-      public static final Map<Integer, Pose2d[]> blueReefScoringPoses = new HashMap<>();
-
-      static {
-        // Populate red alliance scoring positions
-        redReefScoringPoses.put(6, new Pose2d[] {
-            new Pose2d(13.690, 2.664, Rotation2d.fromDegrees(37.619)), // Tag 6 Left Bar
-            new Pose2d(13.978, 2.772, Rotation2d.fromDegrees(121.185)) // Tag 6 Right Bar
-        });
-
-        redReefScoringPoses.put(7, new Pose2d[] {
-            new Pose2d(8.5, 2.5, Rotation2d.fromDegrees(180)), // Tag 7 Left Bar
-            new Pose2d(8.5, 3.0, Rotation2d.fromDegrees(180)) // Tag 7 Right Bar
-        });
-
-        // Populate blue alliance scoring positions
-        blueReefScoringPoses.put(17, new Pose2d[] {
-            new Pose2d(2.0, 2.5, Rotation2d.fromDegrees(0)), // Tag 17 Left Bar
-            new Pose2d(2.0, 3.0, Rotation2d.fromDegrees(0)) // Tag 17 Right Bar
-        });
-
-        blueReefScoringPoses.put(18, new Pose2d[] {
-            new Pose2d(4.0, 2.5, Rotation2d.fromDegrees(0)), // Tag 18 Left Bar
-            new Pose2d(4.0, 3.0, Rotation2d.fromDegrees(0)) // Tag 18 Right Bar
-        });
-      }
-
-      public static AprilTagFieldLayout aprilTagFieldLayout;
-
-      static {
-        try {
-          aprilTagFieldLayout = AprilTagFieldLayout
-              .loadFromResource(AprilTagFields.k2025ReefscapeAndyMark.m_resourceFile);
-          aprilTagFieldLayout.setOrigin(AprilTagFieldLayout.OriginPosition.kBlueAllianceWallRightSide);
-        } catch (IOException e) {
-          e.printStackTrace();
-        }
-      }
-
-      /**
-       * Get the best scoring pose based on the detected AprilTag and bar alignment.
-       * 
-       * @param aprilTagID The detected AprilTag ID
-       * @param alignLeft  True for the left bar, False for the right bar
-       * @return The target Pose2d for alignment, or a default Pose2d if the tag isn't
-       *         found
-       */
-      public static Pose2d getBestReefPose(int tagID, boolean alignLeft) {
-        Optional<Pose3d> tagPoseOpt = aprilTagFieldLayout.getTagPose(tagID);
-
-        if (tagPoseOpt.isPresent()) {
-          Pose2d tagPose = tagPoseOpt.get().toPose2d();
-
-          // Apply an offset based on which side the robot needs to align with
-          double xOffset = -1; // negative going away, we should never set the number bigger than zero
-          double yOffset = alignLeft ? 0.3 : -0.3; // Adjust laterally based on alignment
-
-          return tagPose.plus(new Transform2d(xOffset, yOffset, new Rotation2d(Math.PI)));
-        }
-
-        // Return a default pose if the tag is not found
-        return new Pose2d();
-      }
-
-      public static final List<String> cameraNames = List.of(
-          "Limelight" // Front Camera (AprilTag Limelight)
-         //"OV9281"
-      // "Arducam_Left", // Left Camera
-      // "Arducam_Right" // Right Camera
-      );
-
-      public static final List<Transform3d> cameraPoses = List.of(
-          new Transform3d( // Front Camera (Limelight)
-              new Translation3d(0.25, -0.25, 0.381),
-              new Rotation3d(0, Units.degreesToRadians(0), 0))
-          //  new Transform3d( // Front Camera (orangePI)
-          // new Translation3d(-0.1, -1.2, 0.381),
-          //    new Rotation3d(0, Units.degreesToRadians(0), 0))  
-      // new Transform3d( // Left Camerasss
-      // new Translation3d(0.3, 0.2, 0.35),
-      // new Rotation3d(0, Units.degreesToRadians(0), Units.degreesToRadians(90))),
-      // new Transform3d( // Right Camera
-      // new Translation3d(0.3, -0.2, 0.35),
-      // new Rotation3d(0, Units.degreesToRadians(0), Units.degreesToRadians(-90)))
-      );
-
-      // Camera's
-      // public static final String limelightAprilTagCamera = "OV9281";
 
       public static final double maxForwardSpeed = 0.5; // Max forward/backward speed (m/s)
       public static final double maxStrafeSpeed = 0.5; // Max strafe speed (m/s)
