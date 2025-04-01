@@ -75,9 +75,9 @@ public final class Constants {
   }
 
   public static final class FunnelConstants{
-    public static final int FunnelWrist = 9;
-    public static final int FunnelLIntake = 15;
-    public static final int FunnelRIntake = 16;
+  
+    public static final int FunnelLIntake = 22;
+
   }
 
   public static final class ClimbConstants{
@@ -95,17 +95,18 @@ public final class Constants {
   }
 
   public static final class ArmSetpoints{
-    public static final double FeederStation = -0.5;
+    public static final double FeederStation = -1.5;
     public static final double L1 = -3;
     public static final double AlgaeLow = -9;
     public static final double L2 = -3;
     public static final double AlgaeHigh = -9;
     public static final double L3 = -6;
     public static final double L4 = -13;
+
   }
 
   public static final class WristSetpoints{
-    public static final double FeederStation = -4;
+    public static final double FeederStation = -8;
     public static final double L1 = -3;
     public static final double AlgaeLow = -15;
     public static final double L2 = -8;

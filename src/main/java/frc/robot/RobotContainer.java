@@ -223,9 +223,11 @@ public class RobotContainer {
 
     m_driverController.start().onTrue(new InstantCommand(() -> drivebase.setInitialHeading(180), drivebase));
     // A Button -> Climber Goes In
-    m_driverController.a().whileTrue(m_climber.runClimberCommand());
+    m_driverController.b().whileTrue(m_climber.runClimberCommand());
     // B Button -> Climber Goes Out
-    m_driverController.b().whileTrue(m_climber.runReverseClimberCommand());
+    m_driverController.a().whileTrue(m_climber.runReverseClimberCommand());
+    //Resets all encoders
+   // m_operatorController.start().onTrue(m_coralSubsystem.resetAllEncoders());
 
   }
 
