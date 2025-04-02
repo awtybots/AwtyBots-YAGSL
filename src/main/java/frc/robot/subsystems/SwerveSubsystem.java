@@ -390,21 +390,25 @@ public class SwerveSubsystem extends SubsystemBase {
   // Command to align the robot for reef scoring using a detected AprilTag ID and
   // target side.
   public Command alignToReefScore(int aprilTag, Constants.DrivebaseConstants.TargetSide scoringSide) {
+    System.out.println("[SwerveSubsystem] Aligning to reef. AprilTag: " + aprilTag + ", Scoring Side: " + scoringSide);
     Transform2d robotOffset;
     if (scoringSide == Constants.DrivebaseConstants.TargetSide.LEFT) {
       robotOffset = new Transform2d(
           new Translation2d(Constants.DrivebaseConstants.ReefXDistance, Constants.DrivebaseConstants.ReefLeftYOffset),
           Rotation2d.fromDegrees(180));
+      System.out.println("[SwerveSubsystem] Using LEFT robot offset: " + robotOffset);
     } else {
       robotOffset = new Transform2d(
           new Translation2d(Constants.DrivebaseConstants.ReefXDistance, Constants.DrivebaseConstants.ReefRightYOffset),
           Rotation2d.fromDegrees(180));
+      System.out.println("[SwerveSubsystem] Using RIGHT robot offset: " + robotOffset);
     }
     if (aprilTag > 0 && vision != null && vision.isValidTargetForScoring(aprilTag)) {
       Pose2d newPose = Vision.getAprilTagPose(aprilTag, robotOffset);
+      System.out.println("[SwerveSubsystem] Calculated new alignment pose: " + newPose);
       return driveToPose(newPose);
     } else {
-      System.out.println("No Valid April Tag target: " + aprilTag);
+      System.out.println("[SwerveSubsystem] No valid April Tag target for reef alignment: " + aprilTag);
       return Commands.none();
     }
   }

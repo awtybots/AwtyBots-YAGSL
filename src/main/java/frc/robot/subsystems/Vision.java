@@ -151,22 +151,24 @@ public class Vision {
     // find the latest targets april tag id from the camera
     // if no target return 0
     public int getCamerasTargetID(Cameras camera) {
+        System.out.println("[Vision] Getting camera target ID for " + camera.name());
         PhotonTrackedTarget target;
-
-        // System.out.println("Vision:getCamerasTargetID: Check Camera");
         var results = camera.getLatestResult();
         if (!results.isEmpty()) {
             var result = results.orElse(null);
-            if (result == null)
-                return (0);
+            if (result == null) {
+                System.out.println("[Vision] No result from camera " + camera.name());
+                return 0;
+            }
             if (result.hasTargets()) {
-                // System.out.println(" Camera found a result target");
                 target = result.getBestTarget();
-                // System.out.println(" Camera found a best target getting ID");
-                return (target.getFiducialId());
+                System.out.println(
+                        "[Vision] Camera " + camera.name() + " found best target with ID: " + target.getFiducialId());
+                return target.getFiducialId();
             }
         }
-        return (0);
+        System.out.println("[Vision] Camera " + camera.name() + " did not find any targets.");
+        return 0;
     }
 
     /*
@@ -174,28 +176,22 @@ public class Vision {
      * only return a target if it is on the same reef as our alliance
      */
     public int getBestReefTarget() {
+        System.out.println("[Vision] Searching for reef target...");
         for (Cameras camera : Cameras.values()) {
-            // Enable this back after testing limelight camera
-            // if (camera.equals(Cameras.FrontLeft)) {
-
-            // // System.out.println("Vision:GetBestReefTarget: Check FrontLeft Camera");
-            // targetID = getCamerasTargetID(camera);
-
-            // if (isValidTargetForScoring(targetID)) {
-            // return (targetID);
-            // }
-            // }
             if (camera.equals(Cameras.FrontRight)) {
-                // System.out.println("Vision:GetBestReefTarget: Check FrontRight Camera");
+                System.out.println("[Vision] Checking FrontRight Camera for target.");
                 targetID = getCamerasTargetID(camera);
+                System.out.println("[Vision] FrontRight Camera returned target ID: " + targetID);
                 if (isValidTargetForScoring(targetID)) {
-                    return (targetID);
+                    System.out.println("[Vision] Valid reef target found: " + targetID);
+                    return targetID;
+                } else {
+                    System.out.println("[Vision] Target ID " + targetID + " is not valid for scoring.");
                 }
             }
         }
-        // System.out.println("Vision:GetBestReefTarget: NO APRIL TAG TARGET FOUND
-        // return 0");
-        return (0);
+        System.out.println("[Vision] No valid reef target found.");
+        return 0;
     }
 
     private final Map<Cameras, Pose2d> lastLoggedPoses = new HashMap<>();
