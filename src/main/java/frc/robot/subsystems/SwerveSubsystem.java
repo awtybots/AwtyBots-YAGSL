@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.DrivebaseConstants.TargetSide;
+import frc.robot.Constants.VisionConstants;
 
 import com.studica.frc.AHRS;
 import com.studica.frc.AHRS.NavXComType;
@@ -57,6 +58,11 @@ public class SwerveSubsystem extends SubsystemBase {
   private final SwerveDrive swerveDrive;
   private final SwerveDrivePoseEstimator poseEstimator;
   private final double headingBias = 0; // set this if there is alot of drift on pathplanner
+  private final boolean visionDriveTest = VisionConstants.DRIVEWITHVISION;
+  /**
+   * PhotonVision class to keep an accurate odometry.
+   */
+  private Vision vision;
 
   public SwerveSubsystem(File directory) {
     try {
@@ -357,7 +363,7 @@ public class SwerveSubsystem extends SubsystemBase {
       vision.updatePoseEstimation(swerveDrive);
       int currAprilTagTarget = vision.getBestReefTarget();
       SmartDashboard.putNumber("Vision/AprilTag", currAprilTagTarget);
-      SmartDashboard.putData("Field", field2d);
+      SmartDashboard.putData("Field", swerveDrive.field);
 
     }
   }
@@ -366,7 +372,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
   // Instantiate the Vision class.
   public void setupPhotonVision() {
-    vision = new Vision(this::getPose, field2d);
+    vision = new Vision(swerveDrive::getPose, swerveDrive.field);
   }
 
   public int getReefTargetTagID() {
