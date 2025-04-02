@@ -150,7 +150,7 @@ public class SwerveSubsystem extends SubsystemBase {
       AutoBuilder.configure(
           () -> {
             Pose2d currentPose = getPose();
-            System.out.println("Using Pose in AutoBuilder: " + currentPose);
+            // System.out.println("Using Pose in AutoBuilder: " + currentPose);
             return currentPose;
           },
           // Robot pose supplier
