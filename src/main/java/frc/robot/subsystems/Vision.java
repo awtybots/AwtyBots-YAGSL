@@ -194,8 +194,6 @@ public class Vision {
         return 0;
     }
 
-    private final Map<Cameras, Pose2d> lastLoggedPoses = new HashMap<>();
-
     /**
      * Update the pose estimation inside of {@link SwerveDrive} with all of the
      * given poses.
@@ -221,14 +219,11 @@ public class Vision {
             if (poseEst.isPresent()) {
                 var pose = poseEst.get();
                 Pose2d pose2d = pose.estimatedPose.toPose2d();
-                Pose2d lastPose = lastLoggedPoses.get(camera);
-                if (lastPose == null || !lastPose.equals(pose2d)) {
-                    System.out.printf(
-                            "[Vision] Camera: %s | Estimated Pose: (X: %.2f, Y: %.2f, Rot: %.2f°) | Timestamp: %.2f\n",
-                            camera.name(), pose2d.getX(), pose2d.getY(), pose2d.getRotation().getDegrees(),
-                            pose.timestampSeconds);
-                    lastLoggedPoses.put(camera, pose2d);
-                }
+                System.out.printf(
+                        "[Vision] Camera: %s | Estimated Pose: (X: %.2f, Y: %.2f, Rot: %.2f°) | Timestamp: %.2f\n",
+                        camera.name(), pose2d.getX(), pose2d.getY(), pose2d.getRotation().getDegrees(),
+                        pose.timestampSeconds);
+
                 swerveDrive.addVisionMeasurement(pose.estimatedPose.toPose2d(),
                         pose.timestampSeconds,
                         camera.curStdDevs);

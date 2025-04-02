@@ -85,14 +85,15 @@ public class SwerveSubsystem extends SubsystemBase {
         swerveDrive.getModulePositions(),
         new Pose2d(0.0, 0.0, new Rotation2d()));
 
-    setupPathPlanner();
-
     // Setup vision if enabled.
     if (visionDriveTest) {
       setupPhotonVision();
-      // If available, you could stop the swerve odometry thread here:
-      // swerveDrive.stopOdometryThread();
+      // Stop the odometry thread if we are using vision that way we can synchronize
+      // updates better.
+      swerveDrive.stopOdometryThread();
     }
+
+    setupPathPlanner();
   }
 
   public SwerveDrive getSwerveDrive() {
