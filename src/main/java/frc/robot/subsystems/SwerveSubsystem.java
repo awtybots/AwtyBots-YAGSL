@@ -381,6 +381,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
   // Command that uses AutoBuilder's pathfinding to drive to a specified pose.
   public Command driveToPose(Pose2d pose) {
+    System.out.println("[SwerveSubsystem] driveToPose called with pose: " + pose);
     PathConstraints constraints = new PathConstraints(
         swerveDrive.getMaximumChassisVelocity(), 2.5,
         swerveDrive.getMaximumChassisAngularVelocity(), Math.toRadians(720));
