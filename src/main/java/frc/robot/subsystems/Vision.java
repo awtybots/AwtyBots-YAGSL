@@ -27,7 +27,9 @@ import frc.robot.Constants;
 import frc.robot.Robot;
 import java.awt.Desktop;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -173,15 +175,16 @@ public class Vision {
      */
     public int getBestReefTarget() {
         for (Cameras camera : Cameras.values()) {
-            if (camera.equals(Cameras.FrontLeft)) {
+            // Enable this back after testing limelight camera
+            // if (camera.equals(Cameras.FrontLeft)) {
 
-                // System.out.println("Vision:GetBestReefTarget: Check FrontLeft Camera");
-                targetID = getCamerasTargetID(camera);
+            // // System.out.println("Vision:GetBestReefTarget: Check FrontLeft Camera");
+            // targetID = getCamerasTargetID(camera);
 
-                if (isValidTargetForScoring(targetID)) {
-                    return (targetID);
-                }
-            }
+            // if (isValidTargetForScoring(targetID)) {
+            // return (targetID);
+            // }
+            // }
             if (camera.equals(Cameras.FrontRight)) {
                 // System.out.println("Vision:GetBestReefTarget: Check FrontRight Camera");
                 targetID = getCamerasTargetID(camera);
@@ -194,6 +197,8 @@ public class Vision {
         // return 0");
         return (0);
     }
+
+    private final Map<Cameras, Pose2d> lastLoggedPoses = new HashMap<>();
 
     /**
      * Update the pose estimation inside of {@link SwerveDrive} with all of the
@@ -219,6 +224,15 @@ public class Vision {
             Optional<EstimatedRobotPose> poseEst = getEstimatedGlobalPose(camera);
             if (poseEst.isPresent()) {
                 var pose = poseEst.get();
+                Pose2d pose2d = pose.estimatedPose.toPose2d();
+                Pose2d lastPose = lastLoggedPoses.get(camera);
+                if (lastPose == null || !lastPose.equals(pose2d)) {
+                    System.out.printf(
+                            "[Vision] Camera: %s | Estimated Pose: (X: %.2f, Y: %.2f, Rot: %.2f°) | Timestamp: %.2f\n",
+                            camera.name(), pose2d.getX(), pose2d.getY(), pose2d.getRotation().getDegrees(),
+                            pose.timestampSeconds);
+                    lastLoggedPoses.put(camera, pose2d);
+                }
                 swerveDrive.addVisionMeasurement(pose.estimatedPose.toPose2d(),
                         pose.timestampSeconds,
                         camera.curStdDevs);
@@ -343,37 +357,17 @@ public class Vision {
      * Camera to select each camera
      */
     enum Cameras {
-        /*
-         * Back Right Camera
-         * 
-         * BackRight("BackRight",
-         * new Rotation3d(0, Math.toRadians(30), Math.toRadians(160)), //new camera
-         * needs 140
-         * new Translation3d(Units.inchesToMeters(-10.6488),
-         * Units.inchesToMeters(-11.957134),
-         * Units.inchesToMeters(6.03258)),
-         * VecBuilder.fill(4, 4, 8), VecBuilder.fill(0.5, 0.5, 1)),
-         */
+
         /**
-         * /**
-         * Back Left Camera
+         * Front Left Camera // ORANGE PI CAMERA
          * 
-         * BackLeft("BackLeft",
-         * new Rotation3d(0, Math.toRadians(30), Math.toRadians(200)),
-         * new Translation3d(Units.inchesToMeters(-10.6488),
-         * Units.inchesToMeters(11.957134),
-         * Units.inchesToMeters(6.03258)),
-         * VecBuilder.fill(4, 4, 8), VecBuilder.fill(0.5, 0.5, 1)),
+         * // FrontLeft("OV9281",
+         * // new Rotation3d(0, 0, 0), // correct yaw offset
+         * // new Translation3d(-0.1,
+         * // -1.2,
+         * // 0.381),
+         * // VecBuilder.fill(4, 4, 8), VecBuilder.fill(0.5, 0.5, 1)),
          */
-        /**
-         * Front Left Camera
-         */
-        FrontLeft("OV9281",
-                new Rotation3d(0, 0, 0), // correct yaw offset
-                new Translation3d(-0.1,
-                        -1.2,
-                        0.381),
-                VecBuilder.fill(4, 4, 8), VecBuilder.fill(0.5, 0.5, 1)),
         /*
          * Front Right Camera*
          */
