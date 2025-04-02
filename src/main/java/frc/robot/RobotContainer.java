@@ -105,7 +105,12 @@ public class RobotContainer {
                 NamedCommands.registerCommand("Blue Align 8 Left", drivebase.alignToReefScore(22, TargetSide.LEFT));
                 NamedCommands.registerCommand("Blue Align 10 Right", drivebase.alignToReefScore(17, TargetSide.RIGHT));
                 NamedCommands.registerCommand("Blue Align 10 Left", drivebase.alignToReefScore(17, TargetSide.LEFT));
-
+                NamedCommands.registerCommand("align Left", Commands.run(() -> {
+                        drivebase.alignToReefScore(() -> drivebase.getReefTargetTagID(), TargetSide.LEFT).schedule();
+                }));
+                NamedCommands.registerCommand("align Left", Commands.run(() -> {
+                        drivebase.alignToReefScore(() -> drivebase.getReefTargetTagID(), TargetSide.RIGHT).schedule();
+                }));
                 autoChooser = AutoBuilder.buildAutoChooser();
 
                 SmartDashboard.putData("Auto Chooser", autoChooser);
