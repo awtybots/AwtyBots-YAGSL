@@ -372,7 +372,7 @@ public class Vision {
          * Front Right Camera*
          */
         FrontRight("Limelight",
-                new Rotation3d(0, Math.toRadians(12.5), Math.toRadians(33)), // correct yaw offset
+                new Rotation3d(0, Math.toRadians(12.5), Math.toRadians(0)), // correct yaw offset
                 new Translation3d(0.25, // 10.944
                         -0.25, // -11.2244
                         0.381),
