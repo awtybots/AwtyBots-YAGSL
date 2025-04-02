@@ -20,6 +20,7 @@ import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.ElevatorSetpoints;
 import frc.robot.Constants.IntakeSetpoints;
 import frc.robot.Constants.WristSetpoints;
+import frc.robot.subsystems.CoralSubsystem.Setpoint;
 
 public class CoralSubsystem extends SubsystemBase {
 
@@ -36,8 +37,8 @@ public class CoralSubsystem extends SubsystemBase {
     // Variable use for tracking if the elevator was raised to L4
     public static boolean ElevatorAtL4;
 
-
     public static boolean runFunnelIntake;
+    private Setpoint lastSetpoint = Setpoint.FeederStation;
 
     // arm setup
     private SparkFlex l_armMotor = new SparkFlex(ArmConstants.ArmLeftCanID, MotorType.kBrushless);
@@ -108,36 +109,34 @@ public class CoralSubsystem extends SubsystemBase {
     private void moveToSetpoint() {
         l_elevatorController.setReference(elevatorCurrentTarget, ControlType.kMAXMotionPositionControl);
         r_elevatorController.setReference(elevatorCurrentTarget, ControlType.kMAXMotionPositionControl);
-        
-        if(runFunnelIntake){
+
+        if (runFunnelIntake) {
             double elevatorPos = elevatorEncoder.getPosition();
             double elevatorError = Math.abs(elevatorCurrentTarget - elevatorPos);
             double stopThreshold = 20;
 
-            if (elevatorError > stopThreshold){
+            if (elevatorError > stopThreshold) {
 
                 return;
             }
-
-
 
         }
         l_armController.setReference(armCurrentTarget, ControlType.kMAXMotionPositionControl);
         r_armController.setReference(armCurrentTarget, ControlType.kMAXMotionPositionControl);
         wristController.setReference(wristCurrentTarget, ControlType.kMAXMotionPositionControl);
-        
+
     }
 
     // public Command manualElevatorDown() {
-    //     return Commands.startEnd(
-    //             () -> {
-    //                 l_elevatorMotor.set(0.5);
-    //                 r_elevatorMotor.set(-0.5);
-    //             },
-    //             () -> {
-    //                 l_elevatorMotor.set(0);
-    //                 r_elevatorMotor.set(0);
-    //             });
+    // return Commands.startEnd(
+    // () -> {
+    // l_elevatorMotor.set(0.5);
+    // r_elevatorMotor.set(-0.5);
+    // },
+    // () -> {
+    // l_elevatorMotor.set(0);
+    // r_elevatorMotor.set(0);
+    // });
     // }
 
     /** Zero the arm encoder when the user button is pressed on the roboRIO */
@@ -166,6 +165,21 @@ public class CoralSubsystem extends SubsystemBase {
     public Command setSetpointCommand(Setpoint setpoint) {
         return this.runOnce(
                 () -> {
+
+                    boolean isL4ToL3 = (lastSetpoint == Setpoint.L4 && setpoint == Setpoint.L3);
+
+                    if (isL4ToL3) {
+                        // Apply slow config
+                        wristMotor.configure(Configs.CoralSubsystem.slowWristMotorConfig,
+                                ResetMode.kResetSafeParameters,
+                                PersistMode.kPersistParameters);
+                    } else {
+                        // Default config
+                        wristMotor.configure(Configs.CoralSubsystem.wristMotorConfig,
+                                ResetMode.kResetSafeParameters,
+                                PersistMode.kPersistParameters);
+                    }
+
                     switch (setpoint) {
                         case FeederStation:
                             runFunnelIntake = true;
@@ -218,6 +232,7 @@ public class CoralSubsystem extends SubsystemBase {
                             elevatorCurrentTarget = ElevatorSetpoints.L4;
                             break;
                     }
+                    lastSetpoint = setpoint; // Update last setpoint
                 });
     }
 
