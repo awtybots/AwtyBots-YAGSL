@@ -72,24 +72,27 @@ public final class Configs {
                 r_armMotorConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(50).voltageCompensation(12);
                 l_armMotorConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(50).voltageCompensation(12);
                 r_armMotorConfig.inverted(true);
+              
+                
+
 
 
                 r_armMotorConfig.closedLoop.
                 feedbackSensor(FeedbackSensor.kPrimaryEncoder)
                 .p(0.1)
-                .outputRange(-1, 0.5)
+                .outputRange(-0.5, 0.5)
                 .maxMotion
-                .maxVelocity(2000)
-                .maxAcceleration(10000)
+                .maxVelocity(1500)
+                .maxAcceleration(7000)
                 .allowedClosedLoopError(.25); 
 
                 l_armMotorConfig.closedLoop.
                 feedbackSensor(FeedbackSensor.kPrimaryEncoder)
                 .p(0.1)
-                .outputRange(-1, 0.5)
+                .outputRange(-0.5, 0.5)
                 .maxMotion
-                .maxVelocity(2000)
-                .maxAcceleration(10000)
+                .maxVelocity(1500)
+                .maxAcceleration(7000)
                 .allowedClosedLoopError(.25); 
 
                 
@@ -144,7 +147,7 @@ public final class Configs {
 
         static{
 
-                funnelWristMotorConfig.idleMode(IdleMode.kCoast).smartCurrentLimit(40).voltageCompensation(12);
+                funnelWristMotorConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(40).voltageCompensation(12);
                 funnelWristMotorConfig.closedLoop.
                 feedbackSensor(FeedbackSensor.kPrimaryEncoder)
                 .p(0.1)
@@ -154,8 +157,8 @@ public final class Configs {
                 .maxAcceleration(10000)
                 .allowedClosedLoopError(.25);  
                 
-                l_funnelMotorConfig.idleMode(IdleMode.kCoast).smartCurrentLimit(50);
-                r_funnelMotorConfig.inverted(true).idleMode(IdleMode.kCoast).smartCurrentLimit(50);
+                l_funnelMotorConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(50);
+                r_funnelMotorConfig.inverted(true).idleMode(IdleMode.kBrake).smartCurrentLimit(50);
 
         }
     };

@@ -56,13 +56,7 @@ public class SwerveSubsystem extends SubsystemBase {
   File directory = new File(Filesystem.getDeployDirectory(), "swerve");
   private final SwerveDrive swerveDrive;
   private final SwerveDrivePoseEstimator poseEstimator;
-  private final double headingBias = -2; // set this if there is a lot of drift on pathplanner
-
-  // --- Vision Integration Fields ---
-  private final boolean visionDriveTest = Constants.VisionConstants.DRIVEWITHVISION;
-  private Vision vision;
-  private Field2d field2d = new Field2d();
-  // ------------------------------------
+  private final double headingBias = 0; // set this if there is alot of drift on pathplanner
 
   public SwerveSubsystem(File directory) {
     try {

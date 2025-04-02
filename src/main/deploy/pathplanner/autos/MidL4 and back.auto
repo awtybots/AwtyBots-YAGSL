@@ -48,15 +48,15 @@
           }
         },
         {
-          "type": "path",
+          "type": "wait",
           "data": {
-            "pathName": "back from l4"
+            "waitTime": 0.5
           }
         },
         {
-          "type": "named",
+          "type": "path",
           "data": {
-            "name": "ElevatorLiftL1"
+            "pathName": "back from l4"
           }
         },
         {

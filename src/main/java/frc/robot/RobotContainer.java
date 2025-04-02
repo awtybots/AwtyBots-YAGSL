@@ -254,6 +254,44 @@ public class RobotContainer {
                                                 ),
                                                 m_coralSubsystem.runIntakeCommand(), // Do nothing
                                                 () -> CoralSubsystem.runFunnelIntake || CoralSubsystem.ElevatorAtL4));
+                m_driverController.leftBumper().whileTrue(
+                                Commands.either(
+                                                Commands.either(
+                                                                Commands.parallel(
+                                                                                m_funnelIntakeSubsystem
+                                                                                                .runIntakeCommand(), // Run
+                                                                                                                     // Funnel
+                                                                                                                     // Intake
+                                                                                m_coralSubsystem.runIntakeCommand() // Run
+                                                                                                                    // Coral
+                                                                                                                    // Intake
+                                                                                                                    // at
+                                                                                                                    // the
+                                                                                                                    // same
+                                                                                                                    // time
+                                                                ),
+                                                                Commands.either(
+                                                                                m_coralSubsystem.reverseIntakeCommand(), // If
+                                                                                                                         // ElevatorAtL4
+                                                                                                                         // is
+                                                                                                                         // true,
+                                                                                                                         // run
+                                                                                                                         // Reverse
+                                                                                                                         // Intake
+                                                                                m_coralSubsystem.runIntakeCommand(), // Otherwise,
+                                                                                                                     // run
+                                                                                                                     // normal
+                                                                                                                     // intake
+                                                                                () -> CoralSubsystem.ElevatorAtL4 // Condition
+                                                                                                                  // for
+                                                                                                                  // reverse
+                                                                                                                  // intake
+                                                                ),
+                                                                () -> CoralSubsystem.runFunnelIntake // Condition for
+                                                                                                     // Funnel Intake
+                                                ),
+                                                m_coralSubsystem.runIntakeCommand(), // Do nothing
+                                                () -> CoralSubsystem.runFunnelIntake || CoralSubsystem.ElevatorAtL4));
 
                 m_operatorController.rightStick().onTrue(m_coralSubsystem.resetElevatorEncoder());
 
@@ -282,9 +320,11 @@ public class RobotContainer {
                 m_driverController.start()
                                 .onTrue(new InstantCommand(() -> drivebase.setInitialHeading(180), drivebase));
                 // A Button -> Climber Goes In
-                m_driverController.a().whileTrue(m_climber.runClimberCommand());
+                m_driverController.b().whileTrue(m_climber.runClimberCommand());
                 // B Button -> Climber Goes Out
-                m_driverController.b().whileTrue(m_climber.runReverseClimberCommand());
+                m_driverController.a().whileTrue(m_climber.runReverseClimberCommand());
+                // Resets all encoders
+                // m_operatorController.start().onTrue(m_coralSubsystem.resetAllEncoders());
 
         }
 
