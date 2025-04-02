@@ -169,7 +169,7 @@ public class CoralSubsystem extends SubsystemBase {
                     boolean isL4ToL3 = (lastSetpoint == Setpoint.L4 && setpoint == Setpoint.L3);
 
                     if (isL4ToL3) {
-                        // Apply full config first
+                        // Apply slow config
                         wristMotor.configure(Configs.CoralSubsystem.slowWristMotorConfig,
                                 ResetMode.kResetSafeParameters,
                                 PersistMode.kPersistParameters);
