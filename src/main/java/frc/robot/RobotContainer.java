@@ -108,7 +108,7 @@ public class RobotContainer {
                 NamedCommands.registerCommand("align Left", Commands.run(() -> {
                         drivebase.alignToReefScore(() -> drivebase.getReefTargetTagID(), TargetSide.LEFT).schedule();
                 }));
-                NamedCommands.registerCommand("align Left", Commands.run(() -> {
+                NamedCommands.registerCommand("align Right", Commands.run(() -> {
                         drivebase.alignToReefScore(() -> drivebase.getReefTargetTagID(), TargetSide.RIGHT).schedule();
                 }));
                 autoChooser = AutoBuilder.buildAutoChooser();
