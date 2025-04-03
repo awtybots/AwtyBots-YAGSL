@@ -7,13 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Right1"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.3
+            "pathName": "Right1B"
           }
         },
         {
@@ -37,7 +31,7 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 0.5
+            "waitTime": 0.3
           }
         },
         {
@@ -101,9 +95,27 @@
           }
         },
         {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.3
+          }
+        },
+        {
           "type": "named",
           "data": {
             "name": "outtake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Right7"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "FeederStation"
           }
         }
       ]

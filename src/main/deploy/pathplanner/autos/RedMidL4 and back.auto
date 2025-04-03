@@ -58,11 +58,17 @@
           "data": {
             "name": "FeederStation"
           }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Gyroreset1"
+          }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": "Red and Blue",
+  "folder": "Red and Blue Comp",
   "choreoAuto": false
 }
