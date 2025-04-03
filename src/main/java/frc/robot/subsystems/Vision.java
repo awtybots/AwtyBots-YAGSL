@@ -91,16 +91,16 @@ public class Vision {
         this.currentPose = currentPose;
         this.field2d = field;
 
-        if (Robot.isSimulation()) {
-            visionSim = new VisionSystemSim("Vision");
-            visionSim.addAprilTags(fieldLayout);
+        // if (Robot.isSimulation()) {
+        // visionSim = new VisionSystemSim("Vision");
+        // visionSim.addAprilTags(fieldLayout);
 
-            for (Cameras c : Cameras.values()) {
-                c.addToVisionSim(visionSim);
-            }
+        // for (Cameras c : Cameras.values()) {
+        // c.addToVisionSim(visionSim);
+        // }
 
-            openSimCameraViews();
-        }
+        // openSimCameraViews();
+        // }
     }
 
     /**
@@ -152,21 +152,27 @@ public class Vision {
     // if no target return 0
     public int getCamerasTargetID(Cameras camera) {
         System.out.println("[Vision] Getting camera target ID for " + camera.name());
-        PhotonTrackedTarget target;
-        var results = camera.getLatestResult();
-        if (!results.isEmpty()) {
-            var result = results.orElse(null);
-            if (result == null) {
-                System.out.println("[Vision] No result from camera " + camera.name());
-                return 0;
-            }
-            if (result.hasTargets()) {
-                target = result.getBestTarget();
-                System.out.println(
-                        "[Vision] Camera " + camera.name() + " found best target with ID: " + target.getFiducialId());
-                return target.getFiducialId();
-            }
+        // Force a cache update.
+        camera.updateUnreadResults();
+
+        // Try to use the cached result.
+        Optional<PhotonPipelineResult> cachedResult = camera.getLatestResult();
+        if (cachedResult.isPresent() && cachedResult.get().hasTargets()) {
+            PhotonTrackedTarget target = cachedResult.get().getBestTarget();
+            System.out.println(
+                    "[Vision] Camera " + camera.name() + " found best target with ID: " + target.getFiducialId());
+            return target.getFiducialId();
         }
+
+        // Fallback to the raw result.
+        var rawResult = camera.camera.getLatestResult();
+        System.out.println("[Vision DEBUG] Raw PhotonVision result: hasTargets = " + rawResult.hasTargets());
+        if (rawResult.hasTargets()) {
+            PhotonTrackedTarget target = rawResult.getBestTarget();
+            System.out.println("[Vision DEBUG] Best target ID (raw): " + target.getFiducialId());
+            return target.getFiducialId();
+        }
+
         System.out.println("[Vision] Camera " + camera.name() + " did not find any targets.");
         return 0;
     }
@@ -201,19 +207,21 @@ public class Vision {
      * @param swerveDrive {@link SwerveDrive} instance.
      */
     public void updatePoseEstimation(SwerveDrive swerveDrive) {
-        if (SwerveDriveTelemetry.isSimulation && swerveDrive.getSimulationDriveTrainPose().isPresent()) {
-            /*
-             * In the maple-sim, odometry is simulated using encoder values, accounting for
-             * factors like skidding and drifting.
-             * As a result, the odometry may not always be 100% accurate.
-             * However, the vision system should be able to provide a reasonably accurate
-             * pose estimation, even when odometry is incorrect.
-             * (This is why teams implement vision system to correct odometry.)
-             * Therefore, we must ensure that the actual robot pose is provided in the
-             * simulator when updating the vision simulation during the simulation.
-             */
-            visionSim.update(swerveDrive.getSimulationDriveTrainPose().get());
-        }
+        // if (SwerveDriveTelemetry.isSimulation &&
+        // swerveDrive.getSimulationDriveTrainPose().isPresent()) {
+        // /*
+        // * In the maple-sim, odometry is simulated using encoder values, accounting
+        // for
+        // * factors like skidding and drifting.
+        // * As a result, the odometry may not always be 100% accurate.
+        // * However, the vision system should be able to provide a reasonably accurate
+        // * pose estimation, even when odometry is incorrect.
+        // * (This is why teams implement vision system to correct odometry.)
+        // * Therefore, we must ensure that the actual robot pose is provided in the
+        // * simulator when updating the vision simulation during the simulation.
+        // */
+        // visionSim.update(swerveDrive.getSimulationDriveTrainPose().get());
+        // }
         for (Cameras camera : Cameras.values()) {
             Optional<EstimatedRobotPose> poseEst = getEstimatedGlobalPose(camera);
             if (poseEst.isPresent()) {
@@ -244,17 +252,17 @@ public class Vision {
      */
     public Optional<EstimatedRobotPose> getEstimatedGlobalPose(Cameras camera) {
         Optional<EstimatedRobotPose> poseEst = camera.getEstimatedGlobalPose();
-        if (Robot.isSimulation()) {
-            Field2d debugField = visionSim.getDebugField();
-            // Uncomment to enable outputting of vision targets in sim.
-            poseEst.ifPresentOrElse(
-                    est -> debugField
-                            .getObject("VisionEstimation")
-                            .setPose(est.estimatedPose.toPose2d()),
-                    () -> {
-                        debugField.getObject("VisionEstimation").setPoses();
-                    });
-        }
+        // if (Robot.isSimulation()) {
+        // Field2d debugField = visionSim.getDebugField();
+        // // Uncomment to enable outputting of vision targets in sim.
+        // poseEst.ifPresentOrElse(
+        // est -> debugField
+        // .getObject("VisionEstimation")
+        // .setPose(est.estimatedPose.toPose2d()),
+        // () -> {
+        // debugField.getObject("VisionEstimation").setPoses();
+        // });
+        // }
         return poseEst;
     }
 
@@ -296,27 +304,28 @@ public class Vision {
      *
      * @return Vision Simulation
      */
-    public VisionSystemSim getVisionSim() {
-        return visionSim;
-    }
+    // public VisionSystemSim getVisionSim() {
+    // return visionSim;
+    // }
 
     /**
      * Open up the photon vision camera streams on the localhost, assumes running
      * photon vision on localhost.
      */
-    private void openSimCameraViews() {
-        if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-            // try
-            // {
-            // Desktop.getDesktop().browse(new URI("http://localhost:1182/"));
-            // Desktop.getDesktop().browse(new URI("http://localhost:1184/"));
-            // Desktop.getDesktop().browse(new URI("http://localhost:1186/"));
-            // } catch (IOException | URISyntaxException e)
-            // {
-            // e.printStackTrace();
-            // }
-        }
-    }
+    // private void openSimCameraViews() {
+    // if (Desktop.isDesktopSupported() &&
+    // Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+    // // try
+    // // {
+    // // Desktop.getDesktop().browse(new URI("http://localhost:1182/"));
+    // // Desktop.getDesktop().browse(new URI("http://localhost:1184/"));
+    // // Desktop.getDesktop().browse(new URI("http://localhost:1186/"));
+    // // } catch (IOException | URISyntaxException e)
+    // // {
+    // // e.printStackTrace();
+    // // }
+    // }
+    // }
 
     /**
      * Update the {@link Field2d} to include tracked targets/
@@ -449,23 +458,24 @@ public class Vision {
             this.singleTagStdDevs = singleTagStdDevs;
             this.multiTagStdDevs = multiTagStdDevsMatrix;
 
-            if (Robot.isSimulation()) {
-                SimCameraProperties cameraProp = new SimCameraProperties();
-                // A 640 x 480 camera with a 100 degree diagonal FOV.
-                cameraProp.setCalibration(960, 720, Rotation2d.fromDegrees(100));
-                // Approximate detection noise with average and standard deviation error in
-                // pixels.
-                cameraProp.setCalibError(0.25, 0.08);
-                // Set the camera image capture framerate (Note: this is limited by robot loop
-                // rate).
-                cameraProp.setFPS(30);
-                // The average and standard deviation in milliseconds of image data latency.
-                cameraProp.setAvgLatencyMs(35);
-                cameraProp.setLatencyStdDevMs(5);
+            // if (Robot.isSimulation()) {
+            // SimCameraProperties cameraProp = new SimCameraProperties();
+            // // A 640 x 480 camera with a 100 degree diagonal FOV.
+            // cameraProp.setCalibration(960, 720, Rotation2d.fromDegrees(100));
+            // // Approximate detection noise with average and standard deviation error in
+            // // pixels.
+            // cameraProp.setCalibError(0.25, 0.08);
+            // // Set the camera image capture framerate (Note: this is limited by robot
+            // loop
+            // // rate).
+            // cameraProp.setFPS(30);
+            // // The average and standard deviation in milliseconds of image data latency.
+            // cameraProp.setAvgLatencyMs(35);
+            // cameraProp.setLatencyStdDevMs(5);
 
-                cameraSim = new PhotonCameraSim(camera, cameraProp);
-                cameraSim.enableDrawWireframe(true);
-            }
+            // cameraSim = new PhotonCameraSim(camera, cameraProp);
+            // cameraSim.enableDrawWireframe(true);
+            // }
         }
 
         /**
@@ -473,11 +483,11 @@ public class Vision {
          *
          * @param systemSim {@link VisionSystemSim} to use.
          */
-        public void addToVisionSim(VisionSystemSim systemSim) {
-            if (Robot.isSimulation()) {
-                systemSim.addCamera(cameraSim, robotToCamTransform);
-            }
-        }
+        // public void addToVisionSim(VisionSystemSim systemSim) {
+        // if (Robot.isSimulation()) {
+        // systemSim.addCamera(cameraSim, robotToCamTransform);
+        // }
+        // }
 
         /**
          * Get the result with the least ambiguity from the best tracked target within
@@ -540,8 +550,7 @@ public class Vision {
             }
             if ((resultsList.isEmpty() || (currentTimestamp - mostRecentTimestamp >= debounceTime)) &&
                     (currentTimestamp - lastReadTimestamp) >= debounceTime) {
-                resultsList = Robot.isReal() ? camera.getAllUnreadResults()
-                        : cameraSim.getCamera().getAllUnreadResults();
+                resultsList = camera.getAllUnreadResults();
                 lastReadTimestamp = currentTimestamp;
                 resultsList.sort((PhotonPipelineResult a, PhotonPipelineResult b) -> {
                     return a.getTimestampSeconds() >= b.getTimestampSeconds() ? 1 : -1;

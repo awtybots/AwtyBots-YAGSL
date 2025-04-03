@@ -45,7 +45,7 @@ public final class Constants {
     // center of the april tag
     public static double ReefLeftYOffset = Units.inchesToMeters(-9.5);
     public static double ReefRightYOffset = Units.inchesToMeters(4);
-    public static double ReefXDistance = Units.inchesToMeters(17.0);
+    public static double ReefXDistance = Units.inchesToMeters(25);
   }
 
   public static final class DriveConstants {

@@ -369,6 +369,38 @@ public class SwerveSubsystem extends SubsystemBase {
     }
   }
 
+  @Override
+  public void simulationPeriodic() {
+    poseEstimator.update(
+        Rotation2d.fromDegrees(getGyroYaw()),
+        swerveDrive.getModulePositions());
+    Pose2d estimatedPose = poseEstimator.getEstimatedPosition();
+    if (loopCounter % 10 == 0) {
+      SmartDashboard.putNumber("Gyro Yaw", getGyroYaw());
+      SmartDashboard.putNumber("Gyro Angle", getGyroAngle());
+      SmartDashboard.putNumber("Odometry X", estimatedPose.getX());
+      SmartDashboard.putNumber("Odometry Y", estimatedPose.getY());
+      SmartDashboard.putNumber("Odometry Heading", estimatedPose.getRotation().getDegrees());
+      SmartDashboard.putString("Odometry Pose: ", estimatedPose.toString());
+      SmartDashboard.putString("PathPlanner Pose ", getPose().toString());
+    }
+    loopCounter++;
+    var positions = swerveDrive.getModulePositions();
+    for (int i = 0; i < 4; i++) {
+      SmartDashboard.putNumber("module " + i, positions[i].angle.getDegrees());
+    }
+
+    // --- Vision Integration in periodic() ---
+    if (visionDriveTest && vision != null) {
+      swerveDrive.updateOdometry();
+      vision.updatePoseEstimation(swerveDrive);
+      int currAprilTagTarget = vision.getBestReefTarget();
+      SmartDashboard.putNumber("Vision/AprilTag", currAprilTagTarget);
+      SmartDashboard.putData("Field", swerveDrive.field);
+
+    }
+  }
+
   // --- Vision Setup and Commands ---
 
   // Instantiate the Vision class.
