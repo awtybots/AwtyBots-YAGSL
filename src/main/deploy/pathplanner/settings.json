@@ -7,7 +7,9 @@
     "Leftauto",
     "test"
   ],
-  "autoFolders": [],
+  "autoFolders": [
+    "Red and Blue"
+  ],
   "defaultMaxVel": 2.0,
   "defaultMaxAccel": 3.0,
   "defaultMaxAngVel": 180.0,
