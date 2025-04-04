@@ -1,0 +1,92 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "sequential",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "ElevatorLiftL4"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 0.5
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "actual mid l4 path"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 0.5
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "outtake"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.3
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "back from l4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AlgaeHigh"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Algae"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "aintake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Algae1"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Gyroreset"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": "Red and Blue Comp",
+  "choreoAuto": false
+}

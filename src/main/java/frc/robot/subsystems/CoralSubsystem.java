@@ -171,7 +171,9 @@ public class CoralSubsystem extends SubsystemBase {
 
                     boolean isL4ToL3 = (lastSetpoint == Setpoint.L4 && setpoint == Setpoint.L3);
                     boolean isL3ToL4 = (lastSetpoint == Setpoint.L3 && setpoint == Setpoint.L4);
-                    if (isL4ToL3 || isL3ToL4 ) {
+                    boolean isL4ToAlgaeHigh = (lastSetpoint == Setpoint.L4 && setpoint == Setpoint.AlgaeHigh);
+                    boolean isL4ToAlgaeLow = (lastSetpoint == Setpoint.L4 && setpoint == Setpoint.AlgaeLow);
+                    if (isL4ToL3 || isL3ToL4 || isL4ToAlgaeHigh || isL4ToAlgaeLow) {
                         // Apply slow config
                         r_armMotor.configure(Configs.CoralSubsystem.r_armMotorSlowConfig,
                                 ResetMode.kResetSafeParameters,

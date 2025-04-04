@@ -88,7 +88,7 @@ public final class Constants {
     public static final int FeederStation = 4;
     public static final int L1 = 10;
     public static final int AlgaeLow = 0;
-    public static final int L2 = 50;
+    public static final int L2 = 52;
     public static final int AlgaeHigh = 57;
     public static final int L3 = 95 ;
     public static final int L4 = 100;
