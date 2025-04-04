@@ -7,36 +7,50 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.Rotation;
 
-import edu.wpi.first.math.estimator.PoseEstimator;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.Constants.DrivebaseConstants.TargetSide;
+import frc.robot.Constants.VisionConstants;
+
 import com.studica.frc.AHRS;
 import com.studica.frc.AHRS.NavXComType;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Optional;
+import java.util.function.IntSupplier;
 import java.util.function.Supplier;
-
 import com.ctre.phoenix6.swerve.SwerveModule;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
-import com.studica.frc.AHRS.NavXComType;
-
 import swervelib.SwerveDrive;
 import swervelib.parser.SwerveParser;
+// Import the working team's Vision class:
+import frc.robot.subsystems.Vision;
 
 public class SwerveSubsystem extends SubsystemBase {
 
@@ -44,6 +58,12 @@ public class SwerveSubsystem extends SubsystemBase {
   private final SwerveDrive swerveDrive;
   private final SwerveDrivePoseEstimator poseEstimator;
   private final double headingBias = 0; // set this if there is alot of drift on pathplanner
+  private final boolean visionDriveTest = VisionConstants.DRIVEWITHVISION;
+  /**
+   * PhotonVision class to keep an accurate odometry.
+   */
+  private Vision vision;
+
   public SwerveSubsystem(File directory) {
     try {
       swerveDrive = new SwerveParser(directory)
@@ -59,13 +79,21 @@ public class SwerveSubsystem extends SubsystemBase {
       throw new RuntimeException(e);
     }
 
-    setupPathPlanner();
     poseEstimator = new SwerveDrivePoseEstimator(
-      getKinematics(), 
-      Rotation2d.fromDegrees(getGyroYaw()), 
-      swerveDrive.getModulePositions(), 
-      new Pose2d(0.0,0.0, new Rotation2d())
-      );
+        getKinematics(),
+        Rotation2d.fromDegrees(getGyroYaw()),
+        swerveDrive.getModulePositions(),
+        new Pose2d(0.0, 0.0, new Rotation2d()));
+
+    // Setup vision if enabled.
+    if (visionDriveTest) {
+      setupPhotonVision();
+      // Stop the odometry thread if we are using vision that way we can synchronize
+      // updates better.
+      swerveDrive.stopOdometryThread();
+    }
+
+    setupPathPlanner();
   }
 
   public SwerveDrive getSwerveDrive() {
@@ -77,10 +105,9 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   public Command driveFieldOriented(Supplier<ChassisSpeeds> velocity) {
-    return run(
-        () -> {
-          swerveDrive.driveFieldOriented(velocity.get());
-        });
+    return run(() -> {
+      swerveDrive.driveFieldOriented(velocity.get());
+    });
   }
 
   private AHRS gyro = new AHRS(NavXComType.kMXP_SPI);
@@ -92,7 +119,7 @@ public class SwerveSubsystem extends SubsystemBase {
    * be called in order for odometry to
    * keep working.
    *
-   * @param initialHolonomicPose The pose to set the odometry to
+   * @param initialHolonomicPose The pose to set the odometry to.
    */
   public void resetOdometry(Pose2d initialHolonomicPose) {
 
@@ -101,16 +128,14 @@ public class SwerveSubsystem extends SubsystemBase {
     Rotation2d correctionHeading = Rotation2d.fromDegrees(getGyroYaw() - fieldOrientedOffset + headingBias);
 
     Pose2d biasedPose = new Pose2d(
-      initialHolonomicPose.getTranslation(),
-      correctionHeading
-    );
+        initialHolonomicPose.getTranslation(),
+        correctionHeading);
 
     swerveDrive.resetOdometry(biasedPose);
     poseEstimator.resetPosition(
-      correctionHeading,
-      swerveDrive.getModulePositions(),
-      biasedPose
-    );
+        correctionHeading,
+        swerveDrive.getModulePositions(),
+        biasedPose);
     System.out.println("Odometry Reset to: " + biasedPose);
   }
 
@@ -126,7 +151,7 @@ public class SwerveSubsystem extends SubsystemBase {
       AutoBuilder.configure(
           () -> {
             Pose2d currentPose = getPose();
-            System.out.println("Using Pose in AutoBuilder: " + currentPose);
+            // System.out.println("Using Pose in AutoBuilder: " + currentPose);
             return currentPose;
           },
           // Robot pose supplier
@@ -138,10 +163,9 @@ public class SwerveSubsystem extends SubsystemBase {
             double flippedOmega = -speedsRobotRelative.omegaRadiansPerSecond;
 
             ChassisSpeeds correctedSpeeds = new ChassisSpeeds(
-              speedsRobotRelative.vxMetersPerSecond,
-              speedsRobotRelative.vyMetersPerSecond,
-              flippedOmega
-            );
+                speedsRobotRelative.vxMetersPerSecond,
+                speedsRobotRelative.vyMetersPerSecond,
+                flippedOmega);
 
             if (enableFeedforward) {
               swerveDrive.drive(
@@ -190,15 +214,33 @@ public class SwerveSubsystem extends SubsystemBase {
     PathfindingCommand.warmupCommand().schedule();
   }
 
+  public PathConstraints getPathConstraintsFromSettings() {
+    Path path = Path.of(Filesystem.getDeployDirectory().toString(), "pathplanner/settings.json");
+    ObjectMapper objectMapper = new ObjectMapper();
+    try {
+      JsonNode rootNode = objectMapper.readTree(Files.readAllBytes(path));
+
+      double maxVelocity = rootNode.get("defaultMaxVel").asDouble(2.0); // Default: 2.0 m/s
+      double maxAcceleration = rootNode.get("defaultMaxAccel").asDouble(3.0); // Default: 3.0 m/s²
+      double maxAngularVelocity = Math.toRadians(rootNode.get("defaultMaxAngVel").asDouble(180.0)); // Convert degrees
+                                                                                                    // to radians
+      double maxAngularAcceleration = Math.toRadians(rootNode.get("defaultMaxAngAccel").asDouble(360.0)); // Convert
+                                                                                                          // degrees to
+                                                                                                          // radians
+
+      return new PathConstraints(maxVelocity, maxAcceleration, maxAngularVelocity, maxAngularAcceleration);
+    } catch (IOException e) {
+      System.out.println("[ERROR] Failed to read PathPlanner settings.json: " + e.getMessage());
+      return new PathConstraints(2.0, 3.0, Math.toRadians(180.0), Math.toRadians(360.0)); // Fallback defaults
+    }
+  }
+
   /**
-   * Get the path follower with events.
+   * Returns a path following command for autonomous routines.
    *
-   * @param pathName PathPlanner path name.
-   * @return {@link AutoBuilder#followPath(PathPlannerPath)} path command.
+   * @param TestAuto PathPlanner path name.
    */
   public Command getAutonomousCommand(String TestAuto) {
-    // Create a path following command using AutoBuilder. This will also trigger
-    // event markers.
     return new PathPlannerAuto(TestAuto);
   }
 
@@ -206,17 +248,39 @@ public class SwerveSubsystem extends SubsystemBase {
     swerveDrive.drive(velocity);
   }
 
+  public void addVisionMeasurement(Pose2d visionPose) {
+    poseEstimator.addVisionMeasurement(visionPose, Timer.getFPGATimestamp());
+  }
+
   public void setInitialHeading(double angleDegrees) {
     gyro.setAngleAdjustment(angleDegrees);
     swerveDrive.resetOdometry(new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(angleDegrees)));
   }
 
-  public void stop() {
-    drive(new ChassisSpeeds(0,0,0));
+  public ChassisSpeeds getRobotVelocity() {
+    return swerveDrive.getRobotVelocity();
+  }
 
+  private boolean fieldOriented = true; // Default to field-oriented mode
+
+  public void setFieldOriented(boolean isFieldOriented) {
+    this.fieldOriented = isFieldOriented;
+    System.out.println("[SwerveSubsystem] Field-Oriented Mode: " + isFieldOriented);
+  }
+
+  public void drive(double forwardSpeed, double strafeSpeed, double rotationSpeed) {
+    ChassisSpeeds speeds = new ChassisSpeeds(forwardSpeed, strafeSpeed, rotationSpeed);
+    if (fieldOriented) {
+      // Convert to field-relative speeds if needed
+      speeds = ChassisSpeeds.fromFieldRelativeSpeeds(forwardSpeed, strafeSpeed, rotationSpeed, getPose().getRotation());
+    }
+    swerveDrive.drive(speeds);
+  }
+
+  public void stop() {
+    drive(new ChassisSpeeds(0, 0, 0));
     swerveDrive.setModuleStates(
-      swerveDrive.kinematics.toSwerveModuleStates(new ChassisSpeeds(0,0,0)), true
-      );
+        swerveDrive.kinematics.toSwerveModuleStates(new ChassisSpeeds(0, 0, 0)), true);
   }
 
   /**
@@ -231,10 +295,9 @@ public class SwerveSubsystem extends SubsystemBase {
   public Pose2d getPose() {
     Pose2d rawPose = swerveDrive.getPose();
     Pose2d baisedPose = new Pose2d(
-      rawPose.getTranslation(),
-      rawPose.getRotation().plus(Rotation2d.fromDegrees(headingBias))
-    );
-    //return swerveDrive.getPose();
+        rawPose.getTranslation(),
+        rawPose.getRotation().plus(Rotation2d.fromDegrees(headingBias)));
+    // return swerveDrive.getPose();
     return baisedPose;
   }
 
@@ -251,6 +314,19 @@ public class SwerveSubsystem extends SubsystemBase {
     swerveDrive.zeroGyro();
   }
 
+  public void updateOdometry(Pose2d newPose) {
+    swerveDrive.resetOdometry(newPose);
+    poseEstimator.resetPosition(
+        newPose.getRotation(),
+        swerveDrive.getModulePositions(),
+        newPose);
+
+  }
+
+  public void addVisionMeasurement(Pose2d visionPose, double timestamp) {
+    poseEstimator.addVisionMeasurement(visionPose, timestamp);
+  }
+
   public double getGyroYaw() {
     return gyro.getYaw();
   }
@@ -259,30 +335,120 @@ public class SwerveSubsystem extends SubsystemBase {
     return gyro.getAngle();
   }
 
+  private int loopCounter = 0;
+
   @Override
   public void periodic() {
     poseEstimator.update(
-      Rotation2d.fromDegrees(getGyroYaw()),
-      swerveDrive.getModulePositions() 
-      );
-
-    SmartDashboard.putNumber("Gyro Yaw", getGyroYaw());
-    SmartDashboard.putNumber("Gyro Angle", getGyroAngle());
-
+        Rotation2d.fromDegrees(getGyroYaw()),
+        swerveDrive.getModulePositions());
     Pose2d estimatedPose = poseEstimator.getEstimatedPosition();
-    SmartDashboard.putNumber("Odometry X", estimatedPose.getX());
-    SmartDashboard.putNumber("Odometry Y", estimatedPose.getY());
-    SmartDashboard.putNumber("Odometry Heading", estimatedPose.getRotation().getDegrees());
-    SmartDashboard.putString("Odometry Pose: ", estimatedPose.toString());
-    SmartDashboard.putString("PathPlanner Pose ", getPose().toString());
-
-
-
+    if (loopCounter % 10 == 0) {
+      SmartDashboard.putNumber("Gyro Yaw", getGyroYaw());
+      SmartDashboard.putNumber("Gyro Angle", getGyroAngle());
+      SmartDashboard.putNumber("Odometry X", estimatedPose.getX());
+      SmartDashboard.putNumber("Odometry Y", estimatedPose.getY());
+      SmartDashboard.putNumber("Odometry Heading", estimatedPose.getRotation().getDegrees());
+      SmartDashboard.putString("Odometry Pose: ", estimatedPose.toString());
+      SmartDashboard.putString("PathPlanner Pose ", getPose().toString());
+    }
+    loopCounter++;
     var positions = swerveDrive.getModulePositions();
     for (int i = 0; i < 4; i++) {
       SmartDashboard.putNumber("module " + i, positions[i].angle.getDegrees());
     }
 
+    // --- Vision Integration in periodic() ---
+    if (visionDriveTest && vision != null) {
+      swerveDrive.updateOdometry();
+      vision.updatePoseEstimation(swerveDrive);
+      int currAprilTagTarget = vision.getBestReefTarget();
+      SmartDashboard.putNumber("Vision/AprilTag", currAprilTagTarget);
+      SmartDashboard.putData("Field", swerveDrive.field);
+
+    }
+  }
+
+  @Override
+  public void simulationPeriodic() {
+    poseEstimator.update(
+        Rotation2d.fromDegrees(getGyroYaw()),
+        swerveDrive.getModulePositions());
+    Pose2d estimatedPose = poseEstimator.getEstimatedPosition();
+    if (loopCounter % 10 == 0) {
+      SmartDashboard.putNumber("Gyro Yaw", getGyroYaw());
+      SmartDashboard.putNumber("Gyro Angle", getGyroAngle());
+      SmartDashboard.putNumber("Odometry X", estimatedPose.getX());
+      SmartDashboard.putNumber("Odometry Y", estimatedPose.getY());
+      SmartDashboard.putNumber("Odometry Heading", estimatedPose.getRotation().getDegrees());
+      SmartDashboard.putString("Odometry Pose: ", estimatedPose.toString());
+      SmartDashboard.putString("PathPlanner Pose ", getPose().toString());
+    }
+    loopCounter++;
+    var positions = swerveDrive.getModulePositions();
+    for (int i = 0; i < 4; i++) {
+      SmartDashboard.putNumber("module " + i, positions[i].angle.getDegrees());
+    }
+
+    // --- Vision Integration in periodic() ---
+    if (visionDriveTest && vision != null) {
+      swerveDrive.updateOdometry();
+      vision.updatePoseEstimation(swerveDrive);
+      int currAprilTagTarget = vision.getBestReefTarget();
+      SmartDashboard.putNumber("Vision/AprilTag", currAprilTagTarget);
+      SmartDashboard.putData("Field", swerveDrive.field);
+
+    }
+  }
+
+  // --- Vision Setup and Commands ---
+
+  // Instantiate the Vision class.
+  public void setupPhotonVision() {
+    vision = new Vision(swerveDrive::getPose, swerveDrive.field);
+  }
+
+  public int getReefTargetTagID() {
+    return (vision.getBestReefTarget());
+  }
+
+  // Command that uses AutoBuilder's pathfinding to drive to a specified pose.
+  public Command driveToPose(Pose2d pose) {
+    System.out.println("[SwerveSubsystem] driveToPose called with pose: " + pose);
+    PathConstraints constraints = new PathConstraints(
+        swerveDrive.getMaximumChassisVelocity(), 2.5,
+        swerveDrive.getMaximumChassisAngularVelocity(), Math.toRadians(720));
+    return AutoBuilder.pathfindToPose(pose, constraints, edu.wpi.first.units.Units.MetersPerSecond.of(0));
+  }
+
+  // Command to align the robot for reef scoring using a detected AprilTag ID and
+  // target side.
+  public Command alignToReefScore(int aprilTag, Constants.DrivebaseConstants.TargetSide scoringSide) {
+    System.out.println("[SwerveSubsystem] Aligning to reef. AprilTag: " + aprilTag + ", Scoring Side: " + scoringSide);
+    Transform2d robotOffset;
+    if (scoringSide == Constants.DrivebaseConstants.TargetSide.LEFT) {
+      robotOffset = new Transform2d(
+          new Translation2d(Constants.DrivebaseConstants.ReefXDistance, Constants.DrivebaseConstants.ReefLeftYOffset),
+          Rotation2d.fromDegrees(180));
+      System.out.println("[SwerveSubsystem] Using LEFT robot offset: " + robotOffset);
+    } else {
+      robotOffset = new Transform2d(
+          new Translation2d(Constants.DrivebaseConstants.ReefXDistance, Constants.DrivebaseConstants.ReefRightYOffset),
+          Rotation2d.fromDegrees(180));
+      System.out.println("[SwerveSubsystem] Using RIGHT robot offset: " + robotOffset);
+    }
+    if (aprilTag > 0 && vision != null && vision.isValidTargetForScoring(aprilTag)) {
+      Pose2d newPose = Vision.getAprilTagPose(aprilTag, robotOffset);
+      System.out.println("[SwerveSubsystem] Calculated new alignment pose: " + newPose);
+      return driveToPose(newPose);
+    } else {
+      System.out.println("[SwerveSubsystem] No valid April Tag target for reef alignment: " + aprilTag);
+      return Commands.none();
+    }
+  }
+
+  public Command alignToReefScore(IntSupplier aprilTagSupplier, TargetSide scoringSide) {
+    return alignToReefScore(aprilTagSupplier.getAsInt(), scoringSide);
   }
 
 }

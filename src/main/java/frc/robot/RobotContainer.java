@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import frc.robot.Constants.DrivebaseConstants.TargetSide;
 import frc.robot.Constants.OIConstants;
 import frc.robot.commands.Autos;
 import frc.robot.subsystems.CoralSubsystem;
@@ -14,10 +15,13 @@ import frc.robot.subsystems.SwerveSubsystem;
 import swervelib.SwerveInputStream;
 
 import java.io.File;
+import java.util.function.IntSupplier;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -38,206 +42,301 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
-  // The robot's subsystems and commands are defined here...
-  public final SwerveSubsystem drivebase = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(), "swerve"));
-  private final CoralSubsystem m_coralSubsystem = new CoralSubsystem();
-  private final FunnelIntake m_funnelIntakeSubsystem = new FunnelIntake();
-  private final Climber m_climber = new Climber();
-  private final SendableChooser<Command> autoChooser;
+        // The robot's subsystems and commands are defined here...
+        public final SwerveSubsystem drivebase = new SwerveSubsystem(
+                        new File(Filesystem.getDeployDirectory(), "swerve"));
+        private final CoralSubsystem m_coralSubsystem = new CoralSubsystem();
+        private final FunnelIntake m_funnelIntakeSubsystem = new FunnelIntake();
+        private final Climber m_climber = new Climber();
+        private final SendableChooser<Command> autoChooser;
+        // Replace with CommandPS4Controller or CommandJoystick if needed
+        private final CommandXboxController m_driverController = new CommandXboxController(
+                        OIConstants.kDriverControllerPort);
+        private final CommandXboxController m_operatorController = new CommandXboxController(
+                        OIConstants.kOperatorControllerPort);
 
-  // Replace with CommandPS4Controller or CommandJoystick if needed
-  private final CommandXboxController m_driverController = new CommandXboxController(OIConstants.kDriverControllerPort);
-  private final CommandXboxController m_operatorController = new CommandXboxController(
-      OIConstants.kOperatorControllerPort);
+        /**
+         * The container for the robot. Contains subsystems, OI devices, and commands.
+         */
+        public RobotContainer() {
+                // Default to 0° (assuming forward should be field-oriented default)
+                double startingAngle = 0;
 
-  /**
-   * The container for the robot. Contains subsystems, OI devices, and commands.
-   */
-  public RobotContainer() {
-    // Default to 0° (assuming forward should be field-oriented default)
-    double startingAngle = 0;
+                // Set the correct initial heading for field-oriented driving
+                drivebase.setInitialHeading(startingAngle);
 
-    // var alliance = DriverStation.getAlliance();
+                // Configure the trigger bindings
+                drivebase.setDefaultCommand(driveFieldOrientedAngluarVelocity);
+                NamedCommands.registerCommand("Stop", Commands.runOnce(() -> drivebase.stop()));
+                NamedCommands.registerCommand("test", Commands.print("Hello World"));
+                NamedCommands.registerCommand("outtake", m_coralSubsystem.reverseIntakeCommand().withTimeout(1));
+                NamedCommands.registerCommand("fintake", m_funnelIntakeSubsystem.runIntakeCommand().withTimeout(1));
+                NamedCommands.registerCommand("sintake", m_coralSubsystem.runIntakeCommand().withTimeout(0.5));
+                NamedCommands.registerCommand("FeederStation",
+                                m_coralSubsystem.setSetpointCommand(Setpoint.FeederStation));
+                NamedCommands.registerCommand("ElevatorLiftL1", m_coralSubsystem.setSetpointCommand(Setpoint.L1));
+                NamedCommands.registerCommand("ElevatorLiftL2", m_coralSubsystem.setSetpointCommand(Setpoint.L2));
+                NamedCommands.registerCommand("ElevatorLiftL3", m_coralSubsystem.setSetpointCommand(Setpoint.L3));
+                NamedCommands.registerCommand("ElevatorLiftL4", m_coralSubsystem.setSetpointCommand(Setpoint.L4));
+                NamedCommands.registerCommand("AlgaeLow", m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeLow));
+                NamedCommands.registerCommand("AlgaeHigh", m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeHigh));
 
-    // if (alliance.isPresent() && alliance.get() == DriverStation.Alliance.Red) {
-    // // If on Red Alliance, adjust heading to 180°
-    // startingAngle = 180;
-    // } else if (!DriverStation.isFMSAttached() && !DriverStation.isDSAttached()) {
-    // // If NOT connected to FMS or Driver Station (testing mode), allow manual
-    // // setting
-    // startingAngle = 0;
-    // System.out.println("Practice Mode: Setting starting heading to " +
-    // startingAngle);
-    // }
+                NamedCommands.registerCommand("Red Align 12 Left", drivebase.alignToReefScore(7, TargetSide.LEFT));
+                NamedCommands.registerCommand("Red Align 12 Right", drivebase.alignToReefScore(7, TargetSide.RIGHT));
+                NamedCommands.registerCommand("Red Align 2 Right", drivebase.alignToReefScore(6, TargetSide.RIGHT));
+                NamedCommands.registerCommand("Red Align 2 Left", drivebase.alignToReefScore(6, TargetSide.LEFT));
+                NamedCommands.registerCommand("Red Align 4 Right", drivebase.alignToReefScore(11, TargetSide.RIGHT));
+                NamedCommands.registerCommand("Red Align 4 Left", drivebase.alignToReefScore(11, TargetSide.LEFT));
+                NamedCommands.registerCommand("Red Align 6 Right", drivebase.alignToReefScore(10, TargetSide.RIGHT));
+                NamedCommands.registerCommand("Red Align 6 Left", drivebase.alignToReefScore(10, TargetSide.LEFT));
+                NamedCommands.registerCommand("Red Align 8 Right", drivebase.alignToReefScore(9, TargetSide.RIGHT));
+                NamedCommands.registerCommand("Red Align 8 Left", drivebase.alignToReefScore(9, TargetSide.LEFT));
+                NamedCommands.registerCommand("Red Align 10 Right", drivebase.alignToReefScore(8, TargetSide.RIGHT));
+                NamedCommands.registerCommand("Red Align 10 Left", drivebase.alignToReefScore(8, TargetSide.LEFT));
 
-    // Set the correct initial heading for field-oriented driving
-    drivebase.setInitialHeading(startingAngle);
+                NamedCommands.registerCommand("Blue Align 12 Left", drivebase.alignToReefScore(18, TargetSide.LEFT));
+                NamedCommands.registerCommand("Blue Align 12 Right", drivebase.alignToReefScore(18, TargetSide.RIGHT));
+                NamedCommands.registerCommand("Blue Align 2 Right", drivebase.alignToReefScore(19, TargetSide.RIGHT));
+                NamedCommands.registerCommand("Blue Align 2 Left", drivebase.alignToReefScore(19, TargetSide.LEFT));
+                NamedCommands.registerCommand("Blue Align 4 Right", drivebase.alignToReefScore(20, TargetSide.RIGHT));
+                NamedCommands.registerCommand("Blue Align 4 Left", drivebase.alignToReefScore(20, TargetSide.LEFT));
+                NamedCommands.registerCommand("Blue Align 6 Right", drivebase.alignToReefScore(21, TargetSide.RIGHT));
+                NamedCommands.registerCommand("Blue Align 6 Left", drivebase.alignToReefScore(21, TargetSide.LEFT));
+                NamedCommands.registerCommand("Blue Align 8 Right", drivebase.alignToReefScore(22, TargetSide.RIGHT));
+                NamedCommands.registerCommand("Blue Align 8 Left", drivebase.alignToReefScore(22, TargetSide.LEFT));
+                NamedCommands.registerCommand("Blue Align 10 Right", drivebase.alignToReefScore(17, TargetSide.RIGHT));
+                NamedCommands.registerCommand("Blue Align 10 Left", drivebase.alignToReefScore(17, TargetSide.LEFT));
+                NamedCommands.registerCommand("align Left", Commands.run(() -> {
+                        drivebase.alignToReefScore(() -> drivebase.getReefTargetTagID(), TargetSide.LEFT).schedule();
+                }));
+                NamedCommands.registerCommand("align Right", Commands.run(() -> {
+                        drivebase.alignToReefScore(() -> drivebase.getReefTargetTagID(), TargetSide.RIGHT).schedule();
+                }));
+                NamedCommands.registerCommand("Gyroreset1",
+                                new InstantCommand(() -> drivebase.setInitialHeading(0), drivebase));
+                autoChooser = AutoBuilder.buildAutoChooser();
 
-    // Configure the trigger bindings
-    drivebase.setDefaultCommand(driveFieldOrientedAngluarVelocity);
-    NamedCommands.registerCommand("Stop", Commands.runOnce(() -> drivebase.stop()));
-    NamedCommands.registerCommand("test", Commands.print("Hello World"));
-    NamedCommands.registerCommand("outtake", m_coralSubsystem.reverseIntakeCommand().withTimeout(1));
-    NamedCommands.registerCommand("fintake", m_funnelIntakeSubsystem.runIntakeCommand().withTimeout(1));
-    NamedCommands.registerCommand("sintake", m_coralSubsystem.runIntakeCommand().withTimeout(0.5));
-    NamedCommands.registerCommand("FeederStation", m_coralSubsystem.setSetpointCommand(Setpoint.FeederStation));
-    NamedCommands.registerCommand("ElevatorLiftL1", m_coralSubsystem.setSetpointCommand(Setpoint.L1));
-    NamedCommands.registerCommand("ElevatorLiftL2", m_coralSubsystem.setSetpointCommand(Setpoint.L2));
-    NamedCommands.registerCommand("ElevatorLiftL3", m_coralSubsystem.setSetpointCommand(Setpoint.L3));
-    NamedCommands.registerCommand("ElevatorLiftL4", m_coralSubsystem.setSetpointCommand(Setpoint.L4));
-    NamedCommands.registerCommand("AlgaeLow", m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeLow));
-    NamedCommands.registerCommand("AlgaeHigh", m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeHigh));
-    NamedCommands.registerCommand("Gyroreset", new InstantCommand(() -> drivebase.setInitialHeading(180), drivebase));
-    NamedCommands.registerCommand("Gyroreset1", new InstantCommand(() -> drivebase.setInitialHeading(0), drivebase));
-    autoChooser = AutoBuilder.buildAutoChooser();
+                SmartDashboard.putData("Auto Chooser", autoChooser);
 
-    SmartDashboard.putData("Auto Chooser", autoChooser);
+                DriverStation.silenceJoystickConnectionWarning(true);
 
-    DriverStation.silenceJoystickConnectionWarning(true);
+                configureBindings();
+        }
 
-    configureBindings();
-  }
+        SwerveInputStream driveAngulareVelocity = SwerveInputStream.of(
+                        drivebase.getSwerveDrive(),
+                        () -> m_driverController.getLeftY() * 1,
+                        () -> m_driverController.getLeftX() * 1)
+                        .withControllerRotationAxis(m_driverController::getRightX)
+                        .deadband(OIConstants.DEADBAND)
+                        .scaleTranslation(0.8)
+                        .allianceRelativeControl(true);
 
-  SwerveInputStream driveAngulareVelocity = SwerveInputStream.of(
-      drivebase.getSwerveDrive(),
-      () -> m_driverController.getLeftY() * 1,
-      () -> m_driverController.getLeftX() * 1)
-      .withControllerRotationAxis(m_driverController::getRightX)
-      .deadband(OIConstants.DEADBAND)
-      .scaleTranslation(0.8)
-      .allianceRelativeControl(true);
+        SwerveInputStream driveDirectAngle = driveAngulareVelocity
+                        .copy()
+                        .withControllerHeadingAxis(m_driverController::getRightY, m_driverController::getRightX)
+                        .headingWhile(false);
 
-  SwerveInputStream driveDirectAngle = driveAngulareVelocity
-      .copy()
-      .withControllerHeadingAxis(m_driverController::getRightY, m_driverController::getRightX)
-      .headingWhile(false);
+        Command driveFieldOrietedDirectAngle = drivebase.driveFieldOriented(driveDirectAngle);
 
-  Command driveFieldOrietedDirectAngle = drivebase.driveFieldOriented(driveDirectAngle);
+        Command driveFieldOrientedAngluarVelocity = drivebase.driveFieldOriented(driveAngulareVelocity);
 
-  Command driveFieldOrientedAngluarVelocity = drivebase.driveFieldOriented(driveAngulareVelocity);
+        /**
+         * Use this method to define your trigger->command mappings. Triggers can be
+         * created via the
+         * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with
+         * an arbitrary
+         * predicate, or via the named factories in {@link
+         * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for
+         * {@link
+         * CommandXboxController
+         * Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
+         * PS4} controllers or
+         * {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
+         * joysticks}.
+         */
+        private void configureBindings() {
+                //////////////////////////////////////////////
+                /// driver controller bindings ////////////
+                ////////////////////////////////////////////
+                ///
+                // enable slow mode
 
-  /**
-   * Use this method to define your trigger->command mappings. Triggers can be
-   * created via the
-   * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with
-   * an arbitrary
-   * predicate, or via the named factories in {@link
-   * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for
-   * {@link
-   * CommandXboxController
-   * Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
-   * PS4} controllers or
-   * {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
-   * joysticks}.
-   */
-  private void configureBindings() {
-    // enable slow mode
-    m_driverController
-        .rightTrigger(OIConstants.kTriggerThreshold)
-        .onTrue(
-            Commands.runOnce(() -> {
-              driveAngulareVelocity.scaleTranslation(0.2); // Scale translation speed
-              driveAngulareVelocity.withControllerRotationAxis(() -> {
-                double rotationValue = m_driverController.getRightX();
-                if (Math.abs(rotationValue) >= 0.5) {
-                  return 0.5 * Math.signum(rotationValue); // Cap at 50% power
-                } else {
-                  return rotationValue; // Send actual value if under 50%
-                }
-              });
+                m_driverController
+                                .rightTrigger(OIConstants.kTriggerThreshold)
+                                .onTrue(
+                                                Commands.runOnce(() -> {
+                                                        driveAngulareVelocity.scaleTranslation(0.2); // Scale
+                                                                                                     // translation
+                                                                                                     // speed
+                                                        driveAngulareVelocity.withControllerRotationAxis(() -> {
+                                                                double rotationValue = m_driverController.getRightX();
+                                                                if (Math.abs(rotationValue) >= 0.5) {
+                                                                        return 0.5 * Math.signum(rotationValue); // Cap
+                                                                                                                 // at
+                                                                                                                 // 50%
+                                                                                                                 // power
+                                                                } else {
+                                                                        return rotationValue; // Send actual value if
+                                                                                              // under 50%
+                                                                }
+                                                        });
 
-            }))
-        .onFalse(
-            Commands.runOnce(() -> {
-              driveAngulareVelocity.scaleTranslation(1.0); // Restore normal translation speed
-              driveAngulareVelocity.withControllerRotationAxis(m_driverController::getRightX); // Restore normal
-                                                                                               // rotation speed
+                                                }))
+                                .onFalse(
+                                                Commands.run(() -> {
+                                                        driveAngulareVelocity.scaleTranslation(1.0)
+                                                                        .withControllerRotationAxis(
+                                                                                        m_driverController::getRightX); // Restore
+                                                                                                                        // normal
+                                                                                                                        // rotation
+                                                }));
 
-            }));
+                // m_driverController.a().onTrue(Commands.runOnce(drivebase::zeroGyro));
+                // m_driverController.start().onTrue(Commands.runOnce(drivebase:setInitialHeading));
 
-    // Left Bumper -> Run tube intake
-    m_operatorController.leftBumper().whileTrue(Commands.either(
-        m_coralSubsystem.runIntakeCommand(), // If ElevatorAtL4 is true, run Reverse Intake
-        m_coralSubsystem.reverseIntakeCommand(), // Otherwise, run normal intake
-        () -> CoralSubsystem.ElevatorAtL4 // Condition for reverse intake
-    ));
+                // vision buttons
+                // align left levels 1-3
+                m_driverController.leftBumper().onTrue(Commands.runOnce(() -> {
+                        drivebase.alignToReefScore((IntSupplier) () -> drivebase.getReefTargetTagID(), TargetSide.LEFT)
+                                        .schedule();
+                }));
+                m_driverController.rightBumper().onTrue(Commands.runOnce(() -> {
+                        drivebase.alignToReefScore((IntSupplier) () -> drivebase.getReefTargetTagID(), TargetSide.RIGHT)
+                                        .schedule();
+                }));
 
-    // m_operatorController.start().whileTrue(m_coralSubsystem.manualElevatorDown());
-    // Right Bumper -> Run tube intake in reverse
+                //////////////////////////////////////////////
+                /// operator controller bindings ////////////
+                ////////////////////////////////////////////
+                // Left Bumper -> Run tube intake
+                m_operatorController.leftBumper().whileTrue(Commands.either(
+                                m_coralSubsystem.runIntakeCommand(), // If ElevatorAtL4 is true, run Reverse Intake
+                                m_coralSubsystem.reverseIntakeCommand(), // Otherwise, run normal intake
+                                () -> CoralSubsystem.ElevatorAtL4 // Condition for reverse intake
+                ));
 
-    m_operatorController.rightBumper().whileTrue(
-        Commands.either(
-            Commands.either(
-                Commands.parallel(
-                    m_funnelIntakeSubsystem.runIntakeCommand(), // Run Funnel Intake
-                    m_coralSubsystem.runIntakeCommand() // Run Coral Intake at the same time
-                ),
-                Commands.either(
-                    m_coralSubsystem.reverseIntakeCommand(), // If ElevatorAtL4 is true, run Reverse Intake
-                    m_coralSubsystem.runIntakeCommand(), // Otherwise, run normal intake
-                    () -> CoralSubsystem.ElevatorAtL4 // Condition for reverse intake
-                ),
-                () -> CoralSubsystem.runFunnelIntake // Condition for Funnel Intake
-            ),
-            m_coralSubsystem.runIntakeCommand(), // Do nothing
-            () -> CoralSubsystem.runFunnelIntake || CoralSubsystem.ElevatorAtL4));
-    m_driverController.leftBumper().whileTrue(
-        Commands.either(
-            Commands.either(
-                Commands.parallel(
-                    m_funnelIntakeSubsystem.runIntakeCommand(), // Run Funnel Intake
-                    m_coralSubsystem.runIntakeCommand() // Run Coral Intake at the same time
-                ),
-                Commands.either(
-                    m_coralSubsystem.reverseIntakeCommand(), // If ElevatorAtL4 is true, run Reverse Intake
-                    m_coralSubsystem.runIntakeCommand(), // Otherwise, run normal intake
-                    () -> CoralSubsystem.ElevatorAtL4 // Condition for reverse intake
-                ),
-                () -> CoralSubsystem.runFunnelIntake // Condition for Funnel Intake
-            ),
-            m_coralSubsystem.runIntakeCommand(), // Do nothing
-            () -> CoralSubsystem.runFunnelIntake || CoralSubsystem.ElevatorAtL4));
+                // m_operatorController.start().whileTrue(m_coralSubsystem.manualElevatorDown());
+                // Right Bumper -> Run tube intake in reverse
 
-    m_operatorController.rightStick().onTrue(m_coralSubsystem.resetElevatorEncoder());
+                m_operatorController.rightBumper().whileTrue(
+                                Commands.either(
+                                                Commands.either(
+                                                                Commands.parallel(
+                                                                                m_funnelIntakeSubsystem
+                                                                                                .runIntakeCommand(), // Run
+                                                                                                                     // Funnel
+                                                                                                                     // Intake
+                                                                                m_coralSubsystem.runIntakeCommand() // Run
+                                                                                                                    // Coral
+                                                                                                                    // Intake
+                                                                                                                    // at
+                                                                                                                    // the
+                                                                                                                    // same
+                                                                                                                    // time
+                                                                ),
+                                                                Commands.either(
+                                                                                m_coralSubsystem.reverseIntakeCommand(), // If
+                                                                                                                         // ElevatorAtL4
+                                                                                                                         // is
+                                                                                                                         // true,
+                                                                                                                         // run
+                                                                                                                         // Reverse
+                                                                                                                         // Intake
+                                                                                m_coralSubsystem.runIntakeCommand(), // Otherwise,
+                                                                                                                     // run
+                                                                                                                     // normal
+                                                                                                                     // intake
+                                                                                () -> CoralSubsystem.ElevatorAtL4 // Condition
+                                                                                                                  // for
+                                                                                                                  // reverse
+                                                                                                                  // intake
+                                                                ),
+                                                                () -> CoralSubsystem.runFunnelIntake // Condition for
+                                                                                                     // Funnel Intake
+                                                ),
+                                                m_coralSubsystem.runIntakeCommand(), // Do nothing
+                                                () -> CoralSubsystem.runFunnelIntake || CoralSubsystem.ElevatorAtL4));
+                m_driverController.leftBumper().whileTrue(
+                                Commands.either(
+                                                Commands.either(
+                                                                Commands.parallel(
+                                                                                m_funnelIntakeSubsystem
+                                                                                                .runIntakeCommand(), // Run
+                                                                                                                     // Funnel
+                                                                                                                     // Intake
+                                                                                m_coralSubsystem.runIntakeCommand() // Run
+                                                                                                                    // Coral
+                                                                                                                    // Intake
+                                                                                                                    // at
+                                                                                                                    // the
+                                                                                                                    // same
+                                                                                                                    // time
+                                                                ),
+                                                                Commands.either(
+                                                                                m_coralSubsystem.reverseIntakeCommand(), // If
+                                                                                                                         // ElevatorAtL4
+                                                                                                                         // is
+                                                                                                                         // true,
+                                                                                                                         // run
+                                                                                                                         // Reverse
+                                                                                                                         // Intake
+                                                                                m_coralSubsystem.runIntakeCommand(), // Otherwise,
+                                                                                                                     // run
+                                                                                                                     // normal
+                                                                                                                     // intake
+                                                                                () -> CoralSubsystem.ElevatorAtL4 // Condition
+                                                                                                                  // for
+                                                                                                                  // reverse
+                                                                                                                  // intake
+                                                                ),
+                                                                () -> CoralSubsystem.runFunnelIntake // Condition for
+                                                                                                     // Funnel Intake
+                                                ),
+                                                m_coralSubsystem.runIntakeCommand(), // Do nothing
+                                                () -> CoralSubsystem.runFunnelIntake || CoralSubsystem.ElevatorAtL4));
 
-    // B Button -> Elevator/Arm to human player position, set ball intake to stow
-    // when idle
-    m_operatorController.back().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.FeederStation));
+                m_operatorController.rightStick().onTrue(m_coralSubsystem.resetElevatorEncoder());
 
-    // A Button -> Elevator/Arm to level 1 position
-    m_operatorController.a().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.L1));
+                // B Button -> Elevator/Arm to human player position, set ball intake to stow
+                // when idle
+                m_operatorController.back().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.FeederStation));
 
-    // B Button -> Elevator/Arm to level 2 position
-    m_operatorController.b().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.L2));
+                // A Button -> Elevator/Arm to level 1 position
+                m_operatorController.a().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.L1));
 
-    // X Button -> Elevator/Arm to level 3 position
-    m_operatorController.x().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.L3));
+                // B Button -> Elevator/Arm to level 2 position
+                m_operatorController.b().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.L2));
 
-    // Y Button -> Elevator/Arm to level 4 position
-    m_operatorController.y().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.L4));
+                // X Button -> Elevator/Arm to level 3 position
+                m_operatorController.x().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.L3));
 
-    // D-Pad Up -> Elevator to 2st Algae pickup position
-    m_operatorController.povUp().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeHigh));
+                // Y Button -> Elevator/Arm to level 4 position
+                m_operatorController.y().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.L4));
 
-    // D-Pad Down -> Elevator to 1st Algae pickup position
-    m_operatorController.povDown().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeLow));
+                // D-Pad Up -> Elevator to 2st Algae pickup position
+                m_operatorController.povUp().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeHigh));
 
-    m_driverController.start().onTrue(new InstantCommand(() -> drivebase.setInitialHeading(180), drivebase));
-    // A Button -> Climber Goes In
-    m_driverController.b().whileTrue(m_climber.runClimberCommand());
-    // B Button -> Climber Goes Out
-    m_driverController.a().whileTrue(m_climber.runReverseClimberCommand());
-    //Resets all encoders
-   // m_operatorController.start().onTrue(m_coralSubsystem.resetAllEncoders());
+                // D-Pad Down -> Elevator to 1st Algae pickup position
+                m_operatorController.povDown().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeLow));
 
-  }
+                m_driverController.start()
+                                .onTrue(new InstantCommand(() -> drivebase.setInitialHeading(180), drivebase));
+                // A Button -> Climber Goes In
+                m_driverController.b().whileTrue(m_climber.runClimberCommand());
+                // B Button -> Climber Goes Out
+                m_driverController.a().whileTrue(m_climber.runReverseClimberCommand());
+                // Resets all encoders
+                // m_operatorController.start().onTrue(m_coralSubsystem.resetAllEncoders());
 
-  /**
-   * Use this to pass the autonomous command to the main {@link Robot} class.
-   *
-   * @return the command to run in autonomous
-   */
-  public Command getAutonomousCommand() {
-    return autoChooser.getSelected();
-  }
+        }
+
+        /**
+         * Use this to pass the autonomous command to the main {@link Robot} class.
+         *
+         * @return the command to run in autonomous
+         */
+        public Command getAutonomousCommand() {
+                return autoChooser.getSelected();
+        }
 }
