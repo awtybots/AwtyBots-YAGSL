@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.RelativeEncoder;
 
 import com.revrobotics.spark.SparkBase.ControlType;
@@ -8,6 +9,8 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+
+import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -36,10 +39,8 @@ public class CoralSubsystem extends SubsystemBase {
     // Variable use for tracking if the elevator was raised to L4
     public static boolean ElevatorAtL4;
 
-
     public static boolean runFunnelIntake;
     private Setpoint lastSetpoint = Setpoint.FeederStation;
-
 
     // arm setup
     private SparkFlex l_armMotor = new SparkFlex(ArmConstants.ArmLeftCanID, MotorType.kBrushless);
@@ -58,6 +59,7 @@ public class CoralSubsystem extends SubsystemBase {
     // wrist setup
     private SparkFlex wristMotor = new SparkFlex(ArmConstants.WristCanID, MotorType.kBrushless);
     private SparkClosedLoopController wristController = wristMotor.getClosedLoopController();
+    private AbsoluteEncoder wristAbsoluteEncoder = wristMotor.getAbsoluteEncoder();
     private RelativeEncoder wristEncoder = wristMotor.getEncoder();
 
     // intake setup
@@ -107,39 +109,75 @@ public class CoralSubsystem extends SubsystemBase {
         wristEncoder.setPosition(0);
     }
 
+    public class UnwrappedAbsoluteEncoder {
+        private final AbsoluteEncoder encoder;
+        private double lastRawReading;
+        private int rotationCount;
+        private static final String PREFS_KEY = "WristRotationCount";
+
+        public UnwrappedAbsoluteEncoder(AbsoluteEncoder encoder) {
+            this.encoder = encoder;
+            lastRawReading = encoder.getPosition();
+            rotationCount = Preferences.getInt(PREFS_KEY, 0);
+        }
+
+        public double getContinuousPosition() {
+            double currentRaw = encoder.getPosition();
+            double delta = currentRaw - lastRawReading;
+
+            if (delta < -0.5) {
+                rotationCount++;
+            } else if (delta > 0.5) {
+                rotationCount--;
+            }
+
+            lastRawReading = currentRaw;
+            return rotationCount + currentRaw;
+        }
+
+        public double getDegrees() {
+            return getContinuousPosition() * 360.0;
+        }
+
+        // Call this periodically (or at shutdown) to save the rotation count
+        public void saveRotationCount() {
+            Preferences.initInt(PREFS_KEY, rotationCount);
+        }
+    }
+
+    UnwrappedAbsoluteEncoder unwrappedEncoder = new UnwrappedAbsoluteEncoder(wristAbsoluteEncoder);
+
     private void moveToSetpoint() {
         l_elevatorController.setReference(elevatorCurrentTarget, ControlType.kMAXMotionPositionControl);
         r_elevatorController.setReference(elevatorCurrentTarget, ControlType.kMAXMotionPositionControl);
-        
-        if(runFunnelIntake){
+
+        if (runFunnelIntake) {
             double elevatorPos = elevatorEncoder.getPosition();
             double elevatorError = Math.abs(elevatorCurrentTarget - elevatorPos);
             double stopThreshold = 20;
 
-            if (elevatorError > stopThreshold){
+            if (elevatorError > stopThreshold) {
 
                 return;
             }
-
-
 
         }
         l_armController.setReference(armCurrentTarget, ControlType.kMAXMotionPositionControl);
         r_armController.setReference(armCurrentTarget, ControlType.kMAXMotionPositionControl);
         wristController.setReference(wristCurrentTarget, ControlType.kMAXMotionPositionControl);
-        
+
     }
 
     // public Command manualElevatorDown() {
-    //     return Commands.startEnd(
-    //             () -> {
-    //                 l_elevatorMotor.set(0.5);
-    //                 r_elevatorMotor.set(-0.5);
-    //             },
-    //             () -> {
-    //                 l_elevatorMotor.set(0);
-    //                 r_elevatorMotor.set(0);
-    //             });
+    // return Commands.startEnd(
+    // () -> {
+    // l_elevatorMotor.set(0.5);
+    // r_elevatorMotor.set(-0.5);
+    // },
+    // () -> {
+    // l_elevatorMotor.set(0);
+    // r_elevatorMotor.set(0);
+    // });
     // }
 
     /** Zero the arm encoder when the user button is pressed on the roboRIO */
@@ -171,7 +209,7 @@ public class CoralSubsystem extends SubsystemBase {
 
                     boolean isL4ToL3 = (lastSetpoint == Setpoint.L4 && setpoint == Setpoint.L3);
                     boolean isL3ToL4 = (lastSetpoint == Setpoint.L3 && setpoint == Setpoint.L4);
-                    if (isL4ToL3 || isL3ToL4 ) {
+                    if (isL4ToL3 || isL3ToL4) {
                         // Apply slow config
                         r_armMotor.configure(Configs.CoralSubsystem.r_armMotorSlowConfig,
                                 ResetMode.kResetSafeParameters,
@@ -191,7 +229,6 @@ public class CoralSubsystem extends SubsystemBase {
                                 ResetMode.kResetSafeParameters,
                                 PersistMode.kNoPersistParameters);
                     }
-
 
                     switch (setpoint) {
                         case FeederStation:
@@ -246,7 +283,7 @@ public class CoralSubsystem extends SubsystemBase {
                             break;
 
                     }
-                    lastSetpoint = setpoint; 
+                    lastSetpoint = setpoint;
                 });
     }
 
@@ -263,6 +300,10 @@ public class CoralSubsystem extends SubsystemBase {
     public void periodic() {
         moveToSetpoint();
         zeroOnUserButton();
+        double continuousPosition = unwrappedEncoder.getContinuousPosition();
+        double wristDegrees = unwrappedEncoder.getDegrees();
+        SmartDashboard.putNumber("Wrist Degrees", wristDegrees);
+        unwrappedEncoder.saveRotationCount();
 
         // Display subsystem values
 
