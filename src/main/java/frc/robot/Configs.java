@@ -167,15 +167,8 @@ public final class Configs {
         public static final SparkFlexConfig climberMotorConfig = new SparkFlexConfig();
 
         static{
-            climberMotorConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(40).voltageCompensation(12);
-            climberMotorConfig.closedLoop.
-            feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-            .p(0.1)
-            .outputRange(-1, 1)
-            .maxMotion
-            .maxVelocity(2000)
-            .maxAcceleration(10000)
-            .allowedClosedLoopError(.25);  
+            climberMotorConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(50);
+            
         }
     };
 }
