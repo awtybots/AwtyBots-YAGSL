@@ -108,7 +108,7 @@ public final class Constants {
   }
 
   public static final class ElevatorSetpoints {
-    public static final int FeederStation = 0;
+    public static final int FeederStation = 4;
     public static final int L1 = 10;
     public static final int AlgaeLow = 0;
     public static final int L2 = 50;
@@ -129,7 +129,7 @@ public final class Constants {
   }
 
   public static final class WristSetpoints {
-    public static final double FeederStation = -8;
+    public static final double FeederStation = -8.2;
     public static final double L1 = -3;
     public static final double AlgaeLow = -15;
     public static final double L2 = -8;

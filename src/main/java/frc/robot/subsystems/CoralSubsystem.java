@@ -38,6 +38,8 @@ public class CoralSubsystem extends SubsystemBase {
 
 
     public static boolean runFunnelIntake;
+    private Setpoint lastSetpoint = Setpoint.FeederStation;
+
 
     // arm setup
     private SparkFlex l_armMotor = new SparkFlex(ArmConstants.ArmLeftCanID, MotorType.kBrushless);
@@ -166,6 +168,31 @@ public class CoralSubsystem extends SubsystemBase {
     public Command setSetpointCommand(Setpoint setpoint) {
         return this.runOnce(
                 () -> {
+
+                    boolean isL4ToL3 = (lastSetpoint == Setpoint.L4 && setpoint == Setpoint.L3);
+                    boolean isL3ToL4 = (lastSetpoint == Setpoint.L3 && setpoint == Setpoint.L4);
+                    if (isL4ToL3 || isL3ToL4 ) {
+                        // Apply slow config
+                        r_armMotor.configure(Configs.CoralSubsystem.r_armMotorSlowConfig,
+                                ResetMode.kResetSafeParameters,
+                                PersistMode.kNoPersistParameters);
+                        l_armMotor.configure(Configs.CoralSubsystem.l_armMotorSlowConfig,
+                                ResetMode.kResetSafeParameters,
+                                PersistMode.kNoPersistParameters);
+                    } else {
+                        // Default config
+                        r_armMotor.configure(
+                                Configs.CoralSubsystem.r_armMotorConfig,
+                                ResetMode.kResetSafeParameters,
+                                PersistMode.kNoPersistParameters);
+
+                        l_armMotor.configure(
+                                Configs.CoralSubsystem.l_armMotorConfig,
+                                ResetMode.kResetSafeParameters,
+                                PersistMode.kNoPersistParameters);
+                    }
+
+
                     switch (setpoint) {
                         case FeederStation:
                             runFunnelIntake = true;
@@ -217,7 +244,9 @@ public class CoralSubsystem extends SubsystemBase {
                             wristCurrentTarget = WristSetpoints.L4;
                             elevatorCurrentTarget = ElevatorSetpoints.L4;
                             break;
+
                     }
+                    lastSetpoint = setpoint; 
                 });
     }
 

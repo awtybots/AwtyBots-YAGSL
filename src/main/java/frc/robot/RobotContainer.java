@@ -70,7 +70,8 @@ public class RobotContainer {
                 NamedCommands.registerCommand("Stop", Commands.runOnce(() -> drivebase.stop()));
                 NamedCommands.registerCommand("test", Commands.print("Hello World"));
                 NamedCommands.registerCommand("outtake", m_coralSubsystem.reverseIntakeCommand().withTimeout(1));
-                NamedCommands.registerCommand("intake", m_funnelIntakeSubsystem.runIntakeCommand());
+                NamedCommands.registerCommand("fintake", m_funnelIntakeSubsystem.runIntakeCommand().withTimeout(1));
+                NamedCommands.registerCommand("sintake", m_coralSubsystem.runIntakeCommand().withTimeout(0.5));
                 NamedCommands.registerCommand("FeederStation",
                                 m_coralSubsystem.setSetpointCommand(Setpoint.FeederStation));
                 NamedCommands.registerCommand("ElevatorLiftL1", m_coralSubsystem.setSetpointCommand(Setpoint.L1));
@@ -111,6 +112,8 @@ public class RobotContainer {
                 NamedCommands.registerCommand("align Right", Commands.run(() -> {
                         drivebase.alignToReefScore(() -> drivebase.getReefTargetTagID(), TargetSide.RIGHT).schedule();
                 }));
+                NamedCommands.registerCommand("Gyroreset1",
+                                new InstantCommand(() -> drivebase.setInitialHeading(0), drivebase));
                 autoChooser = AutoBuilder.buildAutoChooser();
 
                 SmartDashboard.putData("Auto Chooser", autoChooser);

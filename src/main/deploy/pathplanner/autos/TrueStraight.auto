@@ -7,13 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Angle"
+            "pathName": "TrueStright"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "ElevatorLiftL1"
+            "name": "Gyroreset"
           }
         }
       ]

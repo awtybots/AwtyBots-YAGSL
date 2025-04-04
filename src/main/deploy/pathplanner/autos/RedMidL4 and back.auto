@@ -15,12 +15,6 @@
                 }
               },
               {
-                "type": "path",
-                "data": {
-                  "pathName": "New Path"
-                }
-              },
-              {
                 "type": "wait",
                 "data": {
                   "waitTime": 0.5
@@ -68,13 +62,13 @@
         {
           "type": "named",
           "data": {
-            "name": "Gyroreset"
+            "name": "Gyroreset1"
           }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": null,
+  "folder": "Red and Blue Comp",
   "choreoAuto": false
 }
