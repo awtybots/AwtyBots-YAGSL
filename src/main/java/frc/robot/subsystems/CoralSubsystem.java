@@ -171,9 +171,15 @@ public class CoralSubsystem extends SubsystemBase {
 
                     boolean isL4ToL3 = (lastSetpoint == Setpoint.L4 && setpoint == Setpoint.L3);
                     boolean isL3ToL4 = (lastSetpoint == Setpoint.L3 && setpoint == Setpoint.L4);
+                    boolean isL2ToL4 = (lastSetpoint == Setpoint.L2 && setpoint == Setpoint.L4);
+                    boolean isL1ToL4 = (lastSetpoint == Setpoint.L1 && setpoint == Setpoint.L4);
+                    boolean isFeederToL4 = (lastSetpoint == Setpoint.FeederStation && setpoint == Setpoint.L4);
+                    boolean isFeederToL3 = (lastSetpoint == Setpoint.FeederStation && setpoint == Setpoint.L3);
                     boolean isL4ToAlgaeHigh = (lastSetpoint == Setpoint.L4 && setpoint == Setpoint.AlgaeHigh);
                     boolean isL4ToAlgaeLow = (lastSetpoint == Setpoint.L4 && setpoint == Setpoint.AlgaeLow);
-                    if (isL4ToL3 || isL3ToL4 || isL4ToAlgaeHigh || isL4ToAlgaeLow) {
+                    boolean isL3ToL2 = (lastSetpoint == Setpoint.L3 && setpoint == Setpoint.L2);
+                    boolean isL4ToL2 = (lastSetpoint == Setpoint.L4 && setpoint == Setpoint.L2);
+                    if (isL4ToL3 || isL3ToL4 || isL4ToAlgaeHigh || isL4ToAlgaeLow || isL3ToL2 || isL4ToL2 || isFeederToL4 || isL2ToL4 ||isFeederToL3 ||isL1ToL4) {
                         // Apply slow config
                         r_armMotor.configure(Configs.CoralSubsystem.r_armMotorSlowConfig,
                                 ResetMode.kResetSafeParameters,
