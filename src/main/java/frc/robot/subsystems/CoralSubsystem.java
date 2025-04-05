@@ -233,7 +233,7 @@ public class CoralSubsystem extends SubsystemBase {
                             elevatorCurrentTarget = ElevatorSetpoints.L2;
                             break;
                         case L3:
-                            ElevatorAtL4 = false;
+                            ElevatorAtL4 = true;
                             runFunnelIntake = false;
                             armCurrentTarget = ArmSetpoints.L3;
                             wristCurrentTarget = WristSetpoints.L3;
