@@ -1,13 +1,13 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.RelativeEncoder;
-
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -273,13 +273,26 @@ public class CoralSubsystem extends SubsystemBase {
         zeroOnUserButton();
 
         // Display subsystem values
-
-        // SmartDashboard.putNumber("Coral/Arm/Target Position", armCurrentTarget);
-        // SmartDashboard.putNumber("Coral/Arm/Actual Position",
-        // armEncoder.getPosition());
         SmartDashboard.putNumber("Coral/Elevator/Target Position", elevatorCurrentTarget);
         SmartDashboard.putNumber("Coral/Elevator/Actual Position", elevatorEncoder.getPosition());
-        // SmartDashboard.putNumber("Coral/Intake/Applied Output",
-        // intakeMotor.getAppliedOutput());
+        SmartDashboard.putNumber("Coral/Elevator/Current", l_elevatorMotor.getOutputCurrent());
+        SmartDashboard.putNumber("Coral/Elevator/Temperature", l_elevatorMotor.getMotorTemperature());
+        
+        SmartDashboard.putNumber("Coral/Arm/Target Position", armCurrentTarget);
+        SmartDashboard.putNumber("Coral/Arm/Actual Position", armEncoder.getPosition());
+        SmartDashboard.putNumber("Coral/Arm/Current", l_armMotor.getOutputCurrent());
+        SmartDashboard.putNumber("Coral/Arm/Temperature", l_armMotor.getMotorTemperature());
+        
+        SmartDashboard.putNumber("Coral/Wrist/Target Position", wristCurrentTarget);
+        SmartDashboard.putNumber("Coral/Wrist/Actual Position", wristEncoder.getPosition());
+        SmartDashboard.putNumber("Coral/Wrist/Current", wristMotor.getOutputCurrent());
+        SmartDashboard.putNumber("Coral/Wrist/Temperature", wristMotor.getMotorTemperature());
+        
+        SmartDashboard.putNumber("Coral/Intake/Current", intakeMotor.getOutputCurrent());
+        SmartDashboard.putNumber("Coral/Intake/Temperature", intakeMotor.getMotorTemperature());
+        
+        SmartDashboard.putBoolean("Coral/ElevatorAtL4", ElevatorAtL4);
+        SmartDashboard.putBoolean("Coral/RunFunnelIntake", runFunnelIntake);
+        SmartDashboard.putString("Coral/LastSetpoint", lastSetpoint.toString());
     }
 }

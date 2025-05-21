@@ -4,28 +4,9 @@
 
 package frc.robot.subsystems;
 
-import static edu.wpi.first.units.Units.Meter;
-import static edu.wpi.first.units.Units.Rotation;
-
-import edu.wpi.first.math.estimator.PoseEstimator;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Filesystem;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
-import com.studica.frc.AHRS;
-import com.studica.frc.AHRS.NavXComType;
 import java.io.File;
 import java.util.function.Supplier;
 
-import com.ctre.phoenix6.swerve.SwerveModule;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.commands.PathfindingCommand;
@@ -33,8 +14,23 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathPlannerPath;
+import com.studica.frc.AHRS;
 import com.studica.frc.AHRS.NavXComType;
 
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import static edu.wpi.first.units.Units.Meter;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import swervelib.SwerveDrive;
 import swervelib.parser.SwerveParser;
 
@@ -266,23 +262,26 @@ public class SwerveSubsystem extends SubsystemBase {
       swerveDrive.getModulePositions() 
       );
 
-    SmartDashboard.putNumber("Gyro Yaw", getGyroYaw());
-    SmartDashboard.putNumber("Gyro Angle", getGyroAngle());
-
     Pose2d estimatedPose = poseEstimator.getEstimatedPosition();
-    SmartDashboard.putNumber("Odometry X", estimatedPose.getX());
-    SmartDashboard.putNumber("Odometry Y", estimatedPose.getY());
-    SmartDashboard.putNumber("Odometry Heading", estimatedPose.getRotation().getDegrees());
-    SmartDashboard.putString("Odometry Pose: ", estimatedPose.toString());
-    SmartDashboard.putString("PathPlanner Pose ", getPose().toString());
 
+    // Robot Position and Orientation
+    SmartDashboard.putNumber("Robot/Gyro/Yaw", getGyroYaw());
+    SmartDashboard.putNumber("Robot/Gyro/Angle", getGyroAngle());
+    SmartDashboard.putNumber("Robot/Odometry/X", estimatedPose.getX());
+    SmartDashboard.putNumber("Robot/Odometry/Y", estimatedPose.getY());
+    SmartDashboard.putNumber("Robot/Odometry/Heading", estimatedPose.getRotation().getDegrees());
+    SmartDashboard.putString("Robot/Odometry/Pose", estimatedPose.toString());
+    SmartDashboard.putString("Robot/PathPlanner/Pose", getPose().toString());
 
-
+    // Module States
     var positions = swerveDrive.getModulePositions();
     for (int i = 0; i < 4; i++) {
-      SmartDashboard.putNumber("module " + i, positions[i].angle.getDegrees());
+      SmartDashboard.putNumber("Robot/Module" + i + "/Angle", positions[i].angle.getDegrees());
+      SmartDashboard.putNumber("Robot/Module" + i + "/Distance", positions[i].distanceMeters);
     }
 
+    // Battery and System Status
+    SmartDashboard.putNumber("Robot/Battery/Voltage", RobotController.getBatteryVoltage());
   }
 
 }

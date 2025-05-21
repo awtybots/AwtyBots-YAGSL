@@ -4,8 +4,13 @@
 
 package frc.robot;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
+
 import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
@@ -18,15 +23,21 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
   private final RobotContainer m_robotContainer;
+  private final MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
+  private UsbCamera camera;
 
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
    */
   public Robot() {
+    // Initialize camera with optimized settings
+    camera = CameraServer.startAutomaticCapture();
+    camera.setResolution(320, 240); // Lower resolution for better performance
+    camera.setFPS(15); // Lower FPS for better performance
+    
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
-    CameraServer.startAutomaticCapture();
     m_robotContainer = new RobotContainer();
   }
 
@@ -44,11 +55,34 @@ public class Robot extends TimedRobot {
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
+
+    // Update performance metrics
+    updatePerformanceMetrics();
+    
+    // Update camera status
+    SmartDashboard.putNumber("Camera/FPS", camera.getActualFPS());
+    SmartDashboard.putNumber("Camera/Resolution/Width", 320);
+    SmartDashboard.putNumber("Camera/Resolution/Height", 240);
+  }
+
+  private void updatePerformanceMetrics() {
+    // Update CPU usage (approximate)
+    double cpuUsage = ManagementFactory.getOperatingSystemMXBean().getSystemLoadAverage();
+    SmartDashboard.putNumber("Robot/Performance/CPU_Usage", cpuUsage);
+
+    // Update memory usage
+    long usedMemory = memoryBean.getHeapMemoryUsage().getUsed();
+    long maxMemory = memoryBean.getHeapMemoryUsage().getMax();
+    double memoryUsagePercent = (double) usedMemory / maxMemory * 100;
+    SmartDashboard.putNumber("Robot/Performance/Memory_Usage", memoryUsagePercent);
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    // Reduce camera FPS when disabled to save resources
+    camera.setFPS(5);
+  }
 
   @Override
   public void disabledPeriodic() {}
@@ -63,6 +97,9 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
+
+    // Set camera to normal FPS for autonomous
+    camera.setFPS(15);
   }
 
   /** This function is called periodically during autonomous. */
@@ -78,6 +115,9 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
+
+    // Set camera to normal FPS for teleop
+    camera.setFPS(15);
   }
 
   /** This function is called periodically during operator control. */

@@ -4,15 +4,6 @@
 
 package frc.robot;
 
-import frc.robot.Constants.OIConstants;
-import frc.robot.commands.Autos;
-import frc.robot.subsystems.CoralSubsystem;
-import frc.robot.subsystems.CoralSubsystem.Setpoint;
-import frc.robot.subsystems.FunnelIntake;
-import frc.robot.subsystems.Climber;
-import frc.robot.subsystems.SwerveSubsystem;
-import swervelib.SwerveInputStream;
-
 import java.io.File;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -24,9 +15,16 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.robot.Constants.OIConstants;
+import frc.robot.subsystems.Climber;
+import frc.robot.subsystems.CoralSubsystem;
+import frc.robot.subsystems.CoralSubsystem.Setpoint;
+import frc.robot.subsystems.FunnelIntake;
+import frc.robot.subsystems.SwerveSubsystem;
+import swervelib.SwerveInputStream;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -75,6 +73,25 @@ public class RobotContainer {
 
     // Configure the trigger bindings
     drivebase.setDefaultCommand(driveFieldOrientedAngluarVelocity);
+    
+    // Register named commands for PathPlanner
+    registerNamedCommands();
+    
+    // Configure auto chooser
+    autoChooser = AutoBuilder.buildAutoChooser();
+    SmartDashboard.putData("Auto Chooser", autoChooser);
+
+    // Silence joystick connection warnings
+    DriverStation.silenceJoystickConnectionWarning(true);
+
+    // Configure bindings
+    configureBindings();
+    
+    // Initialize SmartDashboard with default values
+    initializeSmartDashboard();
+  }
+
+  private void registerNamedCommands() {
     NamedCommands.registerCommand("Stop", Commands.runOnce(() -> drivebase.stop()));
     NamedCommands.registerCommand("test", Commands.print("Hello World"));
     NamedCommands.registerCommand("outtake", m_coralSubsystem.reverseIntakeCommand().withTimeout(1));
@@ -88,13 +105,17 @@ public class RobotContainer {
     NamedCommands.registerCommand("AlgaeHigh", m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeHigh));
     NamedCommands.registerCommand("Gyroreset", new InstantCommand(() -> drivebase.setInitialHeading(180), drivebase));
     NamedCommands.registerCommand("Gyroreset1", new InstantCommand(() -> drivebase.setInitialHeading(0), drivebase));
-    autoChooser = AutoBuilder.buildAutoChooser();
+  }
 
-    SmartDashboard.putData("Auto Chooser", autoChooser);
-
-    DriverStation.silenceJoystickConnectionWarning(true);
-
-    configureBindings();
+  private void initializeSmartDashboard() {
+    // Robot Status
+    SmartDashboard.putBoolean("Robot/Status/Enabled", true);
+    SmartDashboard.putString("Robot/Status/Alliance", DriverStation.getAlliance().isPresent() ? 
+        DriverStation.getAlliance().get().toString() : "Unknown");
+    
+    // Performance Monitoring
+    SmartDashboard.putNumber("Robot/Performance/CPU_Usage", 0);
+    SmartDashboard.putNumber("Robot/Performance/Memory_Usage", 0);
   }
 
   SwerveInputStream driveAngulareVelocity = SwerveInputStream.of(
