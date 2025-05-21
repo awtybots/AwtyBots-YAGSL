@@ -359,10 +359,21 @@ public class SwerveSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("Robot/Simulation/Module" + i + "/EncoderNoise", encoderNoise);
       }
       
-      // Update physics simulation
-     
+      // Get current chassis speeds
+      ChassisSpeeds speeds = swerveDrive.getRobotVelocity();
       
-    
+      // Update simulation data directly from chassis speeds
+      SmartDashboard.putNumber("Robot/Simulation/SimulatedVx", speeds.vxMetersPerSecond);
+      SmartDashboard.putNumber("Robot/Simulation/SimulatedVy", speeds.vyMetersPerSecond);
+      SmartDashboard.putNumber("Robot/Simulation/SimulatedOmega", speeds.omegaRadiansPerSecond);
+      
+      // Update module states in simulation
+      SwerveModuleState[] states = swerveDrive.getStates();
+      for (int i = 0; i < states.length; i++) {
+        String prefix = "Robot/Simulation/Module" + i;
+        SmartDashboard.putNumber(prefix + "/SimSpeed", states[i].speedMetersPerSecond);
+        SmartDashboard.putNumber(prefix + "/SimAngle", states[i].angle.getDegrees());
+      }
     }
     
     // Update telemetry with simulation data
@@ -370,13 +381,7 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   private void setupSimulation() {
-    // Create a linear system for the drivetrain
-    drivetrainSystem = LinearSystemId.identifyDrivetrainSystem(
-        Constants.ModuleConstants.Simulation.kMotorKt,
-        Constants.ModuleConstants.Simulation.kMotorResistance,
-        Constants.ModuleConstants.Simulation.kMotorInertia,
-        Constants.ModuleConstants.Simulation.kRobotMassKg);
-    
+    // Initialize simulation timing
     lastSimTime = Timer.getFPGATimestamp();
   }
 

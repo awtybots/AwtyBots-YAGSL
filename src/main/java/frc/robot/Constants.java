@@ -180,22 +180,9 @@ public final class Constants {
       // Simulation update frequency
       public static final double kSimUpdateFrequency = 50.0; // Hz
       
-      // Simulated physical properties
-      public static final double kRobotMassKg = 45.0;  // Robot mass in kg
-      public static final double kMomentOfInertia = 7.5;  // Robot moment of inertia
-      
       // Simulation noise parameters (for realistic behavior)
       public static final double kGyroNoiseStdDev = 0.01;  // Standard deviation for gyro noise
       public static final double kEncoderNoiseStdDev = 0.001;  // Standard deviation for encoder noise
-      
-      // Friction coefficients
-      public static final double kStaticFriction = 0.1;
-      public static final double kDynamicFriction = 0.05;
-      
-      // Motor simulation parameters
-      public static final double kMotorKt = 0.0225;  // Motor torque constant
-      public static final double kMotorResistance = 0.0139;  // Motor resistance
-      public static final double kMotorInertia = 0.0001;  // Motor inertia
     }
   }
 
