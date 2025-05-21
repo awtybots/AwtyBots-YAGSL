@@ -25,13 +25,10 @@ public final class Constants {
   }
 
   public static final class DriveConstants {
-    // Optimized speeds for Reefscape game
-    public static final double kMaxSpeedMetersPerSecond = 5.2; // Increased for better maneuverability
-    public static final double kMaxAngularSpeed = 2.5 * Math.PI; // Increased rotation speed for faster orientation changes
-
-    // Optimized acceleration limits
-    public static final double kMaxAccelerationMetersPerSecondSquared = 3.0;
-    public static final double kMaxAngularAccelerationRadPerSecondSquared = 3.0 * Math.PI;
+    // Driving Parameters - Note that these are not the maximum capable speeds of
+    // the robot, rather the allowed maximum speeds
+    public static final double kMaxSpeedMetersPerSecond = 4.8;
+    public static final double kMaxAngularSpeed = 2 * Math.PI; // radians per second
 
     // Chassis configuration
     public static final double kTrackWidth = Units.inchesToMeters(28);
@@ -65,13 +62,13 @@ public final class Constants {
     public static final boolean kGyroReversed = false;
 
     // Enhanced PID values for better control
-    public static final double kPTranslation = 1.5;  // Translation PID proportional gain
+    public static final double kPTranslation = 1.2;  // Translation PID proportional gain
     public static final double kITranslation = 0.0;  // Translation PID integral gain
-    public static final double kDTranslation = 0.1;  // Translation PID derivative gain
+    public static final double kDTranslation = 0.0;  // Translation PID derivative gain
     
-    public static final double kPRotation = 2.0;     // Rotation PID proportional gain
+    public static final double kPRotation = 0.9;     // Rotation PID proportional gain
     public static final double kIRotation = 0.0;     // Rotation PID integral gain
-    public static final double kDRotation = 0.2;     // Rotation PID derivative gain
+    public static final double kDRotation = 0.0;     // Rotation PID derivative gain
   } 
 
   public static final class ElevatorConstants{

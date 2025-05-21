@@ -136,20 +136,16 @@ public class SwerveSubsystem extends SubsystemBase {
 
       final boolean enableFeedforward = true;
       
-      // Optimized PID constants for Reefscape
       AutoBuilder.configure(
           this::getPose,
           swerveDrive::resetOdometry,
           swerveDrive::getRobotVelocity,
           (speedsRobotRelative, moduleFeedForwards) -> {
-            // Apply acceleration limiting for smoother control
-            ChassisSpeeds limitedSpeeds = limitAcceleration(speedsRobotRelative);
-            
             // Correct for drift and apply feedforward
-            double flippedOmega = -limitedSpeeds.omegaRadiansPerSecond;
+            double flippedOmega = -speedsRobotRelative.omegaRadiansPerSecond;
             ChassisSpeeds correctedSpeeds = new ChassisSpeeds(
-                limitedSpeeds.vxMetersPerSecond,
-                limitedSpeeds.vyMetersPerSecond,
+                speedsRobotRelative.vxMetersPerSecond,
+                speedsRobotRelative.vyMetersPerSecond,
                 flippedOmega);
 
             if (enableFeedforward) {
@@ -185,38 +181,6 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     PathfindingCommand.warmupCommand().schedule();
-  }
-
-  // Add acceleration limiting method
-  private ChassisSpeeds limitAcceleration(ChassisSpeeds desiredSpeeds) {
-    double dt = 0.02; // 20ms loop time
-    
-    // Get current speeds
-    ChassisSpeeds currentSpeeds = swerveDrive.getRobotVelocity();
-    
-    // Calculate maximum allowed changes
-    double maxDeltaVx = Constants.DriveConstants.kMaxAccelerationMetersPerSecondSquared * dt;
-    double maxDeltaVy = Constants.DriveConstants.kMaxAccelerationMetersPerSecondSquared * dt;
-    double maxDeltaOmega = Constants.DriveConstants.kMaxAngularAccelerationRadPerSecondSquared * dt;
-    
-    // Limit acceleration
-    double limitedVx = limitChange(desiredSpeeds.vxMetersPerSecond, 
-                                 currentSpeeds.vxMetersPerSecond, 
-                                 maxDeltaVx);
-    double limitedVy = limitChange(desiredSpeeds.vyMetersPerSecond,
-                                 currentSpeeds.vyMetersPerSecond,
-                                 maxDeltaVy);
-    double limitedOmega = limitChange(desiredSpeeds.omegaRadiansPerSecond,
-                                    currentSpeeds.omegaRadiansPerSecond,
-                                    maxDeltaOmega);
-                                    
-    return new ChassisSpeeds(limitedVx, limitedVy, limitedOmega);
-  }
-  
-  private double limitChange(double desired, double current, double maxChange) {
-    double change = desired - current;
-    change = Math.min(maxChange, Math.max(-maxChange, change));
-    return current + change;
   }
 
   /**
@@ -359,29 +323,20 @@ public class SwerveSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("Robot/Simulation/Module" + i + "/EncoderNoise", encoderNoise);
       }
       
-      // Get current chassis speeds
+      // Get current chassis speeds directly
       ChassisSpeeds speeds = swerveDrive.getRobotVelocity();
       
-      // Update simulation data directly from chassis speeds
+      // Update simulation data
       SmartDashboard.putNumber("Robot/Simulation/SimulatedVx", speeds.vxMetersPerSecond);
       SmartDashboard.putNumber("Robot/Simulation/SimulatedVy", speeds.vyMetersPerSecond);
       SmartDashboard.putNumber("Robot/Simulation/SimulatedOmega", speeds.omegaRadiansPerSecond);
-      
-      // Update module states in simulation
-      SwerveModuleState[] states = swerveDrive.getStates();
-      for (int i = 0; i < states.length; i++) {
-        String prefix = "Robot/Simulation/Module" + i;
-        SmartDashboard.putNumber(prefix + "/SimSpeed", states[i].speedMetersPerSecond);
-        SmartDashboard.putNumber(prefix + "/SimAngle", states[i].angle.getDegrees());
-      }
     }
     
-    // Update telemetry with simulation data
+    // Update telemetry
     updateTelemetry();
   }
 
   private void setupSimulation() {
-    // Initialize simulation timing
     lastSimTime = Timer.getFPGATimestamp();
   }
 
