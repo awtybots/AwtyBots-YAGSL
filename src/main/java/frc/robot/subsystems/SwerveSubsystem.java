@@ -41,9 +41,9 @@ import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.math.system.LinearSystem;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import java.util.Random;
-import edu.wpi.first.math.system.plant.VecBuilder;
+import edu.wpi.first.math.system.plant.struct.DCMotorStruct;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.Robot;
+import frc.robot.Robot;
 
 public class SwerveSubsystem extends SubsystemBase {
 
@@ -360,22 +360,9 @@ public class SwerveSubsystem extends SubsystemBase {
       }
       
       // Update physics simulation
-      var chassisSpeeds = swerveDrive.getRobotVelocity();
-      var currentState = drivetrainSystem.calculateX(
-          VecBuilder.fill(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond),
-          VecBuilder.fill(0, 0),
-          dt);
-          
-      // Apply friction
-      double speed = Math.hypot(currentState.get(0, 0), currentState.get(1, 0));
-      if (speed > 0.01) {
-        double frictionForce = Constants.ModuleConstants.Simulation.kDynamicFriction;
-        currentState = currentState.times(1.0 - (frictionForce * dt));
-      }
+     
       
-      // Update simulation data
-      SmartDashboard.putNumber("Robot/Simulation/SimulatedVx", currentState.get(0, 0));
-      SmartDashboard.putNumber("Robot/Simulation/SimulatedVy", currentState.get(1, 0));
+    
     }
     
     // Update telemetry with simulation data

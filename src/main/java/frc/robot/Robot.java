@@ -5,12 +5,17 @@
 package frc.robot;
 
 import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.seasonspecific.crescendo2024.CrescendoNoteOnField;
+import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeAlgaeOnField;
+import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralOnField;
 
 import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-
+import frc.robot.RobotContainer;
 /**
  * The methods in this class are called automatically corresponding to each
  * mode, as described in
@@ -120,6 +125,10 @@ public class Robot extends TimedRobot {
   /** This function is called once when the robot is first started up. */
   @Override
   public void simulationInit() {
+    Translation2d Initial = new Translation2d(3.0, 3.0);
+    SimulatedArena.getInstance();
+
+    SimulatedArena.getInstance().addGamePiece(new CrescendoNoteOnField(new Translation2d(3, -3)));
   }
 
   /** This function is called periodically whilst in simulation. */

@@ -15,9 +15,12 @@ import swervelib.SwerveInputStream;
 
 import java.io.File;
 
+import org.ironmaple.simulation.SimulatedArena;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -72,7 +75,7 @@ public class RobotContainer {
 
     // Set the correct initial heading for field-oriented driving
     drivebase.setInitialHeading(startingAngle);
-
+    
     // Configure the trigger bindings
     drivebase.setDefaultCommand(driveFieldOrientedAngluarVelocity);
     NamedCommands.registerCommand("Stop", Commands.runOnce(() -> drivebase.stop()));
@@ -231,7 +234,7 @@ public class RobotContainer {
    // m_operatorController.start().onTrue(m_coralSubsystem.resetAllEncoders());
 
   }
-
+  
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
@@ -239,5 +242,10 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     return autoChooser.getSelected();
+
+  
+  
+  
+
   }
 }
