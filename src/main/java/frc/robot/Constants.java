@@ -25,10 +25,13 @@ public final class Constants {
   }
 
   public static final class DriveConstants {
-    // Driving Parameters - Note that these are not the maximum capable speeds of
-    // the robot, rather the allowed maximum speeds
-    public static final double kMaxSpeedMetersPerSecond = 4.8;
-    public static final double kMaxAngularSpeed = 2 * Math.PI; // radians per second
+    // Optimized speeds for Reefscape game
+    public static final double kMaxSpeedMetersPerSecond = 5.2; // Increased for better maneuverability
+    public static final double kMaxAngularSpeed = 2.5 * Math.PI; // Increased rotation speed for faster orientation changes
+
+    // Optimized acceleration limits
+    public static final double kMaxAccelerationMetersPerSecondSquared = 3.0;
+    public static final double kMaxAngularAccelerationRadPerSecondSquared = 3.0 * Math.PI;
 
     // Chassis configuration
     public static final double kTrackWidth = Units.inchesToMeters(28);
@@ -60,6 +63,15 @@ public final class Constants {
     public static final int kRearRightTurningCanId = 8;
 
     public static final boolean kGyroReversed = false;
+
+    // Enhanced PID values for better control
+    public static final double kPTranslation = 1.5;  // Translation PID proportional gain
+    public static final double kITranslation = 0.0;  // Translation PID integral gain
+    public static final double kDTranslation = 0.1;  // Translation PID derivative gain
+    
+    public static final double kPRotation = 2.0;     // Rotation PID proportional gain
+    public static final double kIRotation = 0.0;     // Rotation PID integral gain
+    public static final double kDRotation = 0.2;     // Rotation PID derivative gain
   } 
 
   public static final class ElevatorConstants{
@@ -162,6 +174,29 @@ public final class Constants {
     public static final double kDrivingMotorReduction = (45.0 * 22) / (kDrivingMotorPinionTeeth * 15);
     public static final double kDriveWheelFreeSpeedRps = (kDrivingMotorFreeSpeedRps * kWheelCircumferenceMeters)
         / kDrivingMotorReduction;
+
+    // Simulation constants
+    public static final class Simulation {
+      // Simulation update frequency
+      public static final double kSimUpdateFrequency = 50.0; // Hz
+      
+      // Simulated physical properties
+      public static final double kRobotMassKg = 45.0;  // Robot mass in kg
+      public static final double kMomentOfInertia = 7.5;  // Robot moment of inertia
+      
+      // Simulation noise parameters (for realistic behavior)
+      public static final double kGyroNoiseStdDev = 0.01;  // Standard deviation for gyro noise
+      public static final double kEncoderNoiseStdDev = 0.001;  // Standard deviation for encoder noise
+      
+      // Friction coefficients
+      public static final double kStaticFriction = 0.1;
+      public static final double kDynamicFriction = 0.05;
+      
+      // Motor simulation parameters
+      public static final double kMotorKt = 0.0225;  // Motor torque constant
+      public static final double kMotorResistance = 0.0139;  // Motor resistance
+      public static final double kMotorInertia = 0.0001;  // Motor inertia
+    }
   }
 
   public static final class OIConstants {
