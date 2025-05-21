@@ -104,29 +104,18 @@ public class SwerveSubsystem extends SubsystemBase {
 
   /**
    * Resets odometry to the given pose. Gyro angle and module positions do not
-   * need to be reset when calling this
-   * method. However, if either gyro angle or module position is reset, this must
-   * be called in order for odometry to
-   * keep working.
+   * need to be reset when calling this method.
    *
    * @param initialHolonomicPose The pose to set the odometry to
    */
   public void resetOdometry(Pose2d initialHolonomicPose) {
-
-    double fieldOrientedOffset = 0;
-
-    Rotation2d correctionHeading = Rotation2d.fromDegrees(getGyroYaw() - fieldOrientedOffset + headingBias);
-
-    Pose2d biasedPose = new Pose2d(
-        initialHolonomicPose.getTranslation(),
-        correctionHeading);
-
-    swerveDrive.resetOdometry(biasedPose);
+    // Don't modify the heading when resetting odometry for path following
+    swerveDrive.resetOdometry(initialHolonomicPose);
     poseEstimator.resetPosition(
-        correctionHeading,
+        initialHolonomicPose.getRotation(),
         swerveDrive.getModulePositions(),
-        biasedPose);
-    System.out.println("Odometry Reset to: " + biasedPose);
+        initialHolonomicPose);
+    System.out.println("Odometry Reset to: " + initialHolonomicPose);
   }
 
   public void setupPathPlanner() {
@@ -138,32 +127,35 @@ public class SwerveSubsystem extends SubsystemBase {
       
       AutoBuilder.configure(
           this::getPose,
-          swerveDrive::resetOdometry,
-          swerveDrive::getRobotVelocity,
-          (speedsRobotRelative, moduleFeedForwards) -> {
-            // Correct for drift and apply feedforward
-            double flippedOmega = -speedsRobotRelative.omegaRadiansPerSecond;
-            ChassisSpeeds correctedSpeeds = new ChassisSpeeds(
-                speedsRobotRelative.vxMetersPerSecond,
-                speedsRobotRelative.vyMetersPerSecond,
-                flippedOmega);
+          this::resetOdometry,  // Use the class method directly
+          () -> {
+            // Get robot relative speeds - this is critical for proper path following
+            ChassisSpeeds chassisSpeeds = swerveDrive.getRobotVelocity();
+            // Don't flip omega here - PathPlanner expects robot-relative speeds
+            return chassisSpeeds;
+          },
+          (speeds, feedforward) -> {
+            // Convert to field relative if needed
+            ChassisSpeeds targetSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+                speeds.vxMetersPerSecond,
+                speeds.vyMetersPerSecond,
+                speeds.omegaRadiansPerSecond,
+                getPose().getRotation()
+            );
 
             if (enableFeedforward) {
-              swerveDrive.drive(
-                  correctedSpeeds,
-                  swerveDrive.kinematics.toSwerveModuleStates(correctedSpeeds),
-                  moduleFeedForwards.linearForces());
+              swerveDrive.drive(targetSpeeds, swerveDrive.kinematics.toSwerveModuleStates(targetSpeeds),
+                  feedforward.linearForces());
             } else {
-              swerveDrive.setChassisSpeeds(correctedSpeeds);
+              swerveDrive.drive(targetSpeeds);
             }
           },
           new PPHolonomicDriveController(
-              new PIDConstants(Constants.DriveConstants.kPTranslation, 
-                             Constants.DriveConstants.kITranslation,
-                             Constants.DriveConstants.kDTranslation),
-              new PIDConstants(Constants.DriveConstants.kPRotation,
-                             Constants.DriveConstants.kIRotation,
-                             Constants.DriveConstants.kDRotation)
+              // Increase P gains for better path following
+              new PIDConstants(3.0, 0.0, 0.0),  // Translation PID
+              new PIDConstants(3.0, 0.0, 0.0),  // Rotation PID
+              Constants.DriveConstants.kMaxSpeedMetersPerSecond,  // Max module speed
+              0.4  // Drive base radius in meters (approximate)
           ),
           config,
           () -> {
