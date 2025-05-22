@@ -92,10 +92,12 @@ public class RobotContainer {
   }
 
   private void registerNamedCommands() {
+    // Register essential commands
     NamedCommands.registerCommand("Stop", Commands.runOnce(() -> drivebase.stop()));
-    NamedCommands.registerCommand("test", Commands.print("Hello World"));
     NamedCommands.registerCommand("outtake", m_coralSubsystem.reverseIntakeCommand().withTimeout(1));
     NamedCommands.registerCommand("fintake", m_funnelIntakeSubsystem.runIntakeCommand().withTimeout(1));
+    
+    // Register position commands
     NamedCommands.registerCommand("FeederStation", m_coralSubsystem.setSetpointCommand(Setpoint.FeederStation));
     NamedCommands.registerCommand("ElevatorLiftL1", m_coralSubsystem.setSetpointCommand(Setpoint.L1));
     NamedCommands.registerCommand("ElevatorLiftL2", m_coralSubsystem.setSetpointCommand(Setpoint.L2));
@@ -103,19 +105,22 @@ public class RobotContainer {
     NamedCommands.registerCommand("ElevatorLiftL4", m_coralSubsystem.setSetpointCommand(Setpoint.L4));
     NamedCommands.registerCommand("AlgaeLow", m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeLow));
     NamedCommands.registerCommand("AlgaeHigh", m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeHigh));
+    
+    // Register gyro reset commands
     NamedCommands.registerCommand("Gyroreset", new InstantCommand(() -> drivebase.setInitialHeading(180), drivebase));
     NamedCommands.registerCommand("Gyroreset1", new InstantCommand(() -> drivebase.setInitialHeading(0), drivebase));
   }
 
   private void initializeSmartDashboard() {
-    // Robot Status
-    SmartDashboard.putBoolean("Robot/Status/Enabled", true);
+    // Robot Status - Only update when alliance changes
     SmartDashboard.putString("Robot/Status/Alliance", DriverStation.getAlliance().isPresent() ? 
         DriverStation.getAlliance().get().toString() : "Unknown");
     
-    // Performance Monitoring
-    SmartDashboard.putNumber("Robot/Performance/CPU_Usage", 0);
-    SmartDashboard.putNumber("Robot/Performance/Memory_Usage", 0);
+    // Performance Monitoring - Only update in test mode
+    if (DriverStation.isTest()) {
+      SmartDashboard.putNumber("Robot/Performance/CPU_Usage", 0);
+      SmartDashboard.putNumber("Robot/Performance/Memory_Usage", 0);
+    }
   }
 
   SwerveInputStream driveAngulareVelocity = SwerveInputStream.of(

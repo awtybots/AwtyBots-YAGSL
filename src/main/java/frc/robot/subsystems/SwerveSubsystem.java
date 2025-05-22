@@ -257,31 +257,39 @@ public class SwerveSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
+    // Update pose estimator with current measurements
     poseEstimator.update(
       Rotation2d.fromDegrees(getGyroYaw()),
       swerveDrive.getModulePositions() 
-      );
+    );
 
     Pose2d estimatedPose = poseEstimator.getEstimatedPosition();
 
-    // Robot Position and Orientation
-    SmartDashboard.putNumber("Robot/Gyro/Yaw", getGyroYaw());
-    SmartDashboard.putNumber("Robot/Gyro/Angle", getGyroAngle());
-    SmartDashboard.putNumber("Robot/Odometry/X", estimatedPose.getX());
-    SmartDashboard.putNumber("Robot/Odometry/Y", estimatedPose.getY());
-    SmartDashboard.putNumber("Robot/Odometry/Heading", estimatedPose.getRotation().getDegrees());
-    SmartDashboard.putString("Robot/Odometry/Pose", estimatedPose.toString());
-    SmartDashboard.putString("Robot/PathPlanner/Pose", getPose().toString());
+    // Only update essential values during normal operation
+    if (DriverStation.isEnabled()) {
+      SmartDashboard.putNumber("Robot/Gyro/Yaw", getGyroYaw());
+      SmartDashboard.putNumber("Robot/Odometry/X", estimatedPose.getX());
+      SmartDashboard.putNumber("Robot/Odometry/Y", estimatedPose.getY());
+      SmartDashboard.putNumber("Robot/Odometry/Heading", estimatedPose.getRotation().getDegrees());
+    }
+    
+    // Only update detailed pose information in test mode
+    if (DriverStation.isTest()) {
+      SmartDashboard.putString("Robot/Odometry/Pose", estimatedPose.toString());
+      SmartDashboard.putString("Robot/PathPlanner/Pose", getPose().toString());
 
-    // Module States
-    var positions = swerveDrive.getModulePositions();
-    for (int i = 0; i < 4; i++) {
-      SmartDashboard.putNumber("Robot/Module" + i + "/Angle", positions[i].angle.getDegrees());
-      SmartDashboard.putNumber("Robot/Module" + i + "/Distance", positions[i].distanceMeters);
+      // Module States - Only update in test mode
+      var positions = swerveDrive.getModulePositions();
+      for (int i = 0; i < 4; i++) {
+        SmartDashboard.putNumber("Robot/Module" + i + "/Angle", positions[i].angle.getDegrees());
+        SmartDashboard.putNumber("Robot/Module" + i + "/Distance", positions[i].distanceMeters);
+      }
     }
 
-    // Battery and System Status
-    SmartDashboard.putNumber("Robot/Battery/Voltage", RobotController.getBatteryVoltage());
+    // Battery Status - Update only when voltage is low or in test mode
+    if (DriverStation.isTest() || RobotController.getBatteryVoltage() < 11.0) {
+      SmartDashboard.putNumber("Robot/Battery/Voltage", RobotController.getBatteryVoltage());
+    }
   }
 
 }

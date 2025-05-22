@@ -8,6 +8,7 @@ import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -268,29 +269,52 @@ public class CoralSubsystem extends SubsystemBase {
                 () -> this.setIntakePower(IntakeSetpoints.kReverse), () -> this.setIntakePower(0.0));
     }
 
+    @Override
     public void periodic() {
+        // Only update essential values during normal operation
+        if (DriverStation.isEnabled()) {
+            SmartDashboard.putNumber("Coral/Elevator/LeftPosition", l_elevatorMotor.getEncoder().getPosition());
+            SmartDashboard.putNumber("Coral/Elevator/RightPosition", r_elevatorMotor.getEncoder().getPosition());
+            SmartDashboard.putNumber("Coral/Arm/LeftPosition", l_armMotor.getEncoder().getPosition());
+            SmartDashboard.putNumber("Coral/Arm/RightPosition", r_armMotor.getEncoder().getPosition());
+            SmartDashboard.putNumber("Coral/Wrist/Position", wristMotor.getEncoder().getPosition());
+            SmartDashboard.putNumber("Coral/Intake/Position", intakeMotor.getEncoder().getPosition());
+        }
+
+        // Only update detailed status in test mode
+        if (DriverStation.isTest()) {
+            // Velocity updates
+            SmartDashboard.putNumber("Coral/Elevator/LeftVelocity", l_elevatorMotor.getEncoder().getVelocity());
+            SmartDashboard.putNumber("Coral/Elevator/RightVelocity", r_elevatorMotor.getEncoder().getVelocity());
+            SmartDashboard.putNumber("Coral/Arm/LeftVelocity", l_armMotor.getEncoder().getVelocity());
+            SmartDashboard.putNumber("Coral/Arm/RightVelocity", r_armMotor.getEncoder().getVelocity());
+            SmartDashboard.putNumber("Coral/Wrist/Velocity", wristMotor.getEncoder().getVelocity());
+            SmartDashboard.putNumber("Coral/Intake/Velocity", intakeMotor.getEncoder().getVelocity());
+
+            // Target and actual positions
+            SmartDashboard.putNumber("Coral/Elevator/Target Position", elevatorCurrentTarget);
+            SmartDashboard.putNumber("Coral/Elevator/Actual Position", elevatorEncoder.getPosition());
+            SmartDashboard.putNumber("Coral/Arm/Target Position", armCurrentTarget);
+            SmartDashboard.putNumber("Coral/Arm/Actual Position", armEncoder.getPosition());
+            SmartDashboard.putNumber("Coral/Wrist/Target Position", wristCurrentTarget);
+            SmartDashboard.putNumber("Coral/Wrist/Actual Position", wristEncoder.getPosition());
+
+            // Current and temperature monitoring
+            SmartDashboard.putNumber("Coral/Elevator/Current", l_elevatorMotor.getOutputCurrent());
+            SmartDashboard.putNumber("Coral/Elevator/Temperature", l_elevatorMotor.getMotorTemperature());
+            SmartDashboard.putNumber("Coral/Arm/Current", l_armMotor.getOutputCurrent());
+            SmartDashboard.putNumber("Coral/Arm/Temperature", l_armMotor.getMotorTemperature());
+            SmartDashboard.putNumber("Coral/Wrist/Current", wristMotor.getOutputCurrent());
+            SmartDashboard.putNumber("Coral/Wrist/Temperature", wristMotor.getMotorTemperature());
+            SmartDashboard.putNumber("Coral/Intake/Current", intakeMotor.getOutputCurrent());
+            SmartDashboard.putNumber("Coral/Intake/Temperature", intakeMotor.getMotorTemperature());
+        }
+
+        // Update state and control
         moveToSetpoint();
         zeroOnUserButton();
 
-        // Display subsystem values
-        SmartDashboard.putNumber("Coral/Elevator/Target Position", elevatorCurrentTarget);
-        SmartDashboard.putNumber("Coral/Elevator/Actual Position", elevatorEncoder.getPosition());
-        SmartDashboard.putNumber("Coral/Elevator/Current", l_elevatorMotor.getOutputCurrent());
-        SmartDashboard.putNumber("Coral/Elevator/Temperature", l_elevatorMotor.getMotorTemperature());
-        
-        SmartDashboard.putNumber("Coral/Arm/Target Position", armCurrentTarget);
-        SmartDashboard.putNumber("Coral/Arm/Actual Position", armEncoder.getPosition());
-        SmartDashboard.putNumber("Coral/Arm/Current", l_armMotor.getOutputCurrent());
-        SmartDashboard.putNumber("Coral/Arm/Temperature", l_armMotor.getMotorTemperature());
-        
-        SmartDashboard.putNumber("Coral/Wrist/Target Position", wristCurrentTarget);
-        SmartDashboard.putNumber("Coral/Wrist/Actual Position", wristEncoder.getPosition());
-        SmartDashboard.putNumber("Coral/Wrist/Current", wristMotor.getOutputCurrent());
-        SmartDashboard.putNumber("Coral/Wrist/Temperature", wristMotor.getMotorTemperature());
-        
-        SmartDashboard.putNumber("Coral/Intake/Current", intakeMotor.getOutputCurrent());
-        SmartDashboard.putNumber("Coral/Intake/Temperature", intakeMotor.getMotorTemperature());
-        
+        // Always update critical state information
         SmartDashboard.putBoolean("Coral/ElevatorAtL4", ElevatorAtL4);
         SmartDashboard.putBoolean("Coral/RunFunnelIntake", runFunnelIntake);
         SmartDashboard.putString("Coral/LastSetpoint", lastSetpoint.toString());
