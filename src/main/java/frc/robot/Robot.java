@@ -9,6 +9,7 @@ import java.lang.management.MemoryMXBean;
 
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.UsbCamera;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -59,10 +60,19 @@ public class Robot extends TimedRobot {
     // Update performance metrics
     updatePerformanceMetrics();
     
-    // Update camera status
-    SmartDashboard.putNumber("Camera/FPS", camera.getActualFPS());
-    SmartDashboard.putNumber("Camera/Resolution/Width", 320);
-    SmartDashboard.putNumber("Camera/Resolution/Height", 240);
+    // Update camera telemetry with error handling
+    try {
+      if (camera != null) {
+        SmartDashboard.putNumber("Camera/FPS", camera.getActualFPS());
+        SmartDashboard.putNumber("Camera/Resolution/Width", camera.getVideoMode().width);
+        SmartDashboard.putNumber("Camera/Resolution/Height", camera.getVideoMode().height);
+      }
+    } catch (Exception e) {
+      // Only log the error if we're in test mode
+      if (DriverStation.isTest()) {
+        System.out.println("Camera telemetry error: " + e.getMessage());
+      }
+    }
   }
 
   private void updatePerformanceMetrics() {

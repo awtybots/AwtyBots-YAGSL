@@ -73,10 +73,10 @@ public class RobotContainer {
 
     // Configure the trigger bindings
     drivebase.setDefaultCommand(driveFieldOrientedAngluarVelocity);
-    
+
     // Register named commands for PathPlanner
     registerNamedCommands();
-    
+
     // Configure auto chooser
     autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Chooser", autoChooser);
@@ -86,7 +86,7 @@ public class RobotContainer {
 
     // Configure bindings
     configureBindings();
-    
+
     // Initialize SmartDashboard with default values
     initializeSmartDashboard();
   }
@@ -96,7 +96,10 @@ public class RobotContainer {
     NamedCommands.registerCommand("Stop", Commands.runOnce(() -> drivebase.stop()));
     NamedCommands.registerCommand("outtake", m_coralSubsystem.reverseIntakeCommand().withTimeout(1));
     NamedCommands.registerCommand("fintake", m_funnelIntakeSubsystem.runIntakeCommand().withTimeout(1));
-    
+    NamedCommands.registerCommand("intake", m_coralSubsystem.runIntakeCommand().withTimeout(1));
+    NamedCommands.registerCommand("sintake", m_coralSubsystem.runIntakeCommand().withTimeout(0.5));
+    NamedCommands.registerCommand("aintake", m_coralSubsystem.runIntakeCommand().withTimeout(2));
+
     // Register position commands
     NamedCommands.registerCommand("FeederStation", m_coralSubsystem.setSetpointCommand(Setpoint.FeederStation));
     NamedCommands.registerCommand("ElevatorLiftL1", m_coralSubsystem.setSetpointCommand(Setpoint.L1));
@@ -105,7 +108,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("ElevatorLiftL4", m_coralSubsystem.setSetpointCommand(Setpoint.L4));
     NamedCommands.registerCommand("AlgaeLow", m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeLow));
     NamedCommands.registerCommand("AlgaeHigh", m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeHigh));
-    
+
     // Register gyro reset commands
     NamedCommands.registerCommand("Gyroreset", new InstantCommand(() -> drivebase.setInitialHeading(180), drivebase));
     NamedCommands.registerCommand("Gyroreset1", new InstantCommand(() -> drivebase.setInitialHeading(0), drivebase));
@@ -113,9 +116,9 @@ public class RobotContainer {
 
   private void initializeSmartDashboard() {
     // Robot Status - Only update when alliance changes
-    SmartDashboard.putString("Robot/Status/Alliance", DriverStation.getAlliance().isPresent() ? 
-        DriverStation.getAlliance().get().toString() : "Unknown");
-    
+    SmartDashboard.putString("Robot/Status/Alliance",
+        DriverStation.getAlliance().isPresent() ? DriverStation.getAlliance().get().toString() : "Unknown");
+
     // Performance Monitoring - Only update in test mode
     if (DriverStation.isTest()) {
       SmartDashboard.putNumber("Robot/Performance/CPU_Usage", 0);
@@ -252,8 +255,8 @@ public class RobotContainer {
     m_driverController.b().whileTrue(m_climber.runClimberCommand());
     // B Button -> Climber Goes Out
     m_driverController.a().whileTrue(m_climber.runReverseClimberCommand());
-    //Resets all encoders
-   // m_operatorController.start().onTrue(m_coralSubsystem.resetAllEncoders());
+    // Resets all encoders
+    // m_operatorController.start().onTrue(m_coralSubsystem.resetAllEncoders());
 
   }
 
