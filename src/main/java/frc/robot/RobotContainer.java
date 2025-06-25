@@ -220,6 +220,8 @@ public class RobotContainer {
 
     // D-Pad Down -> Elevator to 1st Algae pickup position
     m_operatorController.povDown().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeLow));
+    // D-Pad Left -> Elevator to Barge position
+    m_operatorController.povLeft().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.Barge));
 
     m_driverController.start().onTrue(new InstantCommand(() -> drivebase.setInitialHeading(180), drivebase));
     // A Button -> Climber Goes In

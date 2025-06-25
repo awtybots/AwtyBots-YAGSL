@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.RelativeEncoder;
 
 import com.revrobotics.spark.SparkBase.ControlType;
@@ -30,7 +31,8 @@ public class CoralSubsystem extends SubsystemBase {
         L3,
         L4,
         AlgaeLow,
-        AlgaeHigh;
+        AlgaeHigh, 
+        Barge;
     }
 
     // Variable use for tracking if the elevator was raised to L4
@@ -53,12 +55,13 @@ public class CoralSubsystem extends SubsystemBase {
     private SparkFlex r_elevatorMotor = new SparkFlex(ElevatorConstants.RightElevatorCanID, MotorType.kBrushless);
     private SparkClosedLoopController l_elevatorController = l_elevatorMotor.getClosedLoopController();
     private SparkClosedLoopController r_elevatorController = r_elevatorMotor.getClosedLoopController();
-    private RelativeEncoder elevatorEncoder = l_elevatorMotor.getEncoder();
+    private RelativeEncoder elevatorEncoder = r_elevatorMotor.getEncoder();
 
     // wrist setup
     private SparkFlex wristMotor = new SparkFlex(ArmConstants.WristCanID, MotorType.kBrushless);
     private SparkClosedLoopController wristController = wristMotor.getClosedLoopController();
     private RelativeEncoder wristEncoder = wristMotor.getEncoder();
+    private AbsoluteEncoder wristAbsoluteEncoder = wristMotor.getAbsoluteEncoder();
 
     // intake setup
     private SparkFlex intakeMotor = new SparkFlex(ArmConstants.IntakeCanID, MotorType.kBrushless);
@@ -179,7 +182,11 @@ public class CoralSubsystem extends SubsystemBase {
                     boolean isL4ToAlgaeLow = (lastSetpoint == Setpoint.L4 && setpoint == Setpoint.AlgaeLow);
                     boolean isL3ToL2 = (lastSetpoint == Setpoint.L3 && setpoint == Setpoint.L2);
                     boolean isL4ToL2 = (lastSetpoint == Setpoint.L4 && setpoint == Setpoint.L2);
-                    if (isL4ToL3 || isL3ToL4 || isL4ToAlgaeHigh || isL4ToAlgaeLow || isL3ToL2 || isL4ToL2 || isFeederToL4 || isL2ToL4 ||isFeederToL3 ||isL1ToL4) {
+                    boolean isBargeToL3 = (lastSetpoint == Setpoint.Barge && setpoint == Setpoint.L3);
+                    boolean isBargeToL2 = (lastSetpoint == Setpoint.Barge && setpoint == Setpoint.L2);
+                    boolean isBargeToL1 = (lastSetpoint == Setpoint.Barge && setpoint == Setpoint.L1);
+                    boolean isBargeToFeeder = (lastSetpoint == Setpoint.Barge && setpoint == Setpoint.FeederStation);
+                    if (isL4ToL3 || isL3ToL4 || isL4ToAlgaeHigh || isL4ToAlgaeLow || isL3ToL2 || isL4ToL2 || isFeederToL4 || isL2ToL4 ||isFeederToL3 ||isL1ToL4 || isBargeToL3 || isBargeToL2 || isBargeToL1 || isBargeToFeeder) {
                         // Apply slow config
                         r_armMotor.configure(Configs.CoralSubsystem.r_armMotorSlowConfig,
                                 ResetMode.kResetSafeParameters,
@@ -252,6 +259,13 @@ public class CoralSubsystem extends SubsystemBase {
                             wristCurrentTarget = WristSetpoints.L4;
                             elevatorCurrentTarget = ElevatorSetpoints.L4;
                             break;
+                        case Barge:
+                            ElevatorAtL4 = true;
+                            runFunnelIntake = false;
+                            armCurrentTarget = ArmSetpoints.Barge;
+                            wristCurrentTarget = WristSetpoints.Barge;
+                            elevatorCurrentTarget = ElevatorSetpoints.Barge;
+                            break;
 
                     }
                     lastSetpoint = setpoint; 
@@ -279,6 +293,9 @@ public class CoralSubsystem extends SubsystemBase {
         // armEncoder.getPosition());
         SmartDashboard.putNumber("Coral/Elevator/Target Position", elevatorCurrentTarget);
         SmartDashboard.putNumber("Coral/Elevator/Actual Position", elevatorEncoder.getPosition());
+        SmartDashboard.putNumber("Coral/Wrist/Target Position", wristAbsoluteEncoder.getPosition());
+        
+        System.out.println("Wrist Encoder Position: " + wristAbsoluteEncoder.getPosition());
         // SmartDashboard.putNumber("Coral/Intake/Applied Output",
         // intakeMotor.getAppliedOutput());
     }
