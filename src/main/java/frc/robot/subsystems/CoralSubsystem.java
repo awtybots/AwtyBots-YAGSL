@@ -107,12 +107,12 @@ public class CoralSubsystem extends SubsystemBase {
 
         armEncoder.setPosition(0);
         elevatorEncoder.setPosition(0);
-        wristEncoder.setPosition(0);
+        
     }
 
     private void moveToSetpoint() {
-        l_elevatorController.setReference(elevatorCurrentTarget, ControlType.kMAXMotionPositionControl);
-        r_elevatorController.setReference(elevatorCurrentTarget, ControlType.kMAXMotionPositionControl);
+        //l_elevatorController.setReference(elevatorCurrentTarget, ControlType.kMAXMotionPositionControl);
+        //r_elevatorController.setReference(elevatorCurrentTarget, ControlType.kMAXMotionPositionControl);
         
         if(runFunnelIntake){
             double elevatorPos = elevatorEncoder.getPosition();
@@ -127,8 +127,8 @@ public class CoralSubsystem extends SubsystemBase {
 
 
         }
-        l_armController.setReference(armCurrentTarget, ControlType.kMAXMotionPositionControl);
-        r_armController.setReference(armCurrentTarget, ControlType.kMAXMotionPositionControl);
+        //l_armController.setReference(armCurrentTarget, ControlType.kMAXMotionPositionControl);
+        //r_armController.setReference(armCurrentTarget, ControlType.kMAXMotionPositionControl);
         wristController.setReference(wristCurrentTarget, ControlType.kMAXMotionPositionControl);
         
     }

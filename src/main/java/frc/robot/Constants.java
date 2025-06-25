@@ -110,8 +110,8 @@ public final class Constants {
 
   
   public static final class WristSetpoints{
-    public static final double FeederStation = -8.2;
-    public static final double L1 = -3;
+    public static final double FeederStation = 0;
+    public static final double L1 = 0.3;
     public static final double AlgaeLow = -15;
     public static final double L2 = -8;
     public static final double AlgaeHigh = -15;
