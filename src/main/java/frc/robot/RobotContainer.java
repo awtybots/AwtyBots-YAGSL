@@ -214,7 +214,7 @@ public class RobotContainer {
 
     // Y Button -> Elevator/Arm to level 4 position
     m_operatorController.y().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.L4));
-
+        
     // D-Pad Up -> Elevator to 2st Algae pickup position
     m_operatorController.povUp().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeHigh));
 
@@ -222,7 +222,8 @@ public class RobotContainer {
     m_operatorController.povDown().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeLow));
     // D-Pad Left -> Elevator to Barge position
     m_operatorController.povLeft().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.Barge));
-
+    
+    //m_driverController.start().onTrue(new InstantCommand(() -> drivebase.zeroNavxGyroAuto(), drivebase));
     m_driverController.start().onTrue(new InstantCommand(() -> drivebase.setInitialHeading(180), drivebase));
     // A Button -> Climber Goes In
     m_driverController.b().whileTrue(m_climber.runClimberCommand());
