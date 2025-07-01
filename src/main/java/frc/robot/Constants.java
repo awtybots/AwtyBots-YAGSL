@@ -205,19 +205,21 @@ public final class Constants {
       public static final double maxStrafeSpeed = 0.5; // Max strafe speed (m/s)
       public static final double maxRotationSpeed = 0.5; // Max rotation speed (rad/s)
       // PID Constants for Forward/Backward Translation
-      public static final double TRANSLATION_kP = 0.8;
-      public static final double TRANSLATION_kI = 0.08;
-      public static final double TRANSLATION_kD = 0.05;
+      public static final double TRANSLATION_kP = 2.3;
+      public static final double TRANSLATION_kI = 0.0;
+      public static final double TRANSLATION_kD = 0.001;
 
       // PID Constants for Strafing (Side-to-Side Movement)
-      public static final double STRAFE_kP = 1.2;
+      public static final double STRAFE_kP = 0.1;
       public static final double STRAFE_kI = 0.0;
-      public static final double STRAFE_kD = 0.03;
+      public static final double STRAFE_kD = 0.001;
 
       // PID Constants for Rotation (Turning to Face Target)
-      public static final double ROTATION_kP = 0.1;
+      public static final double ROTATION_kP = 0.08;
       public static final double ROTATION_kI = 0.0;
-      public static final double ROTATION_kD = 0.01;
+      public static final double ROTATION_kD = 0.001;
+      
+   
 
       // Distance Thresholds (How Close Should the Robot Get?)
       public static final double DISTANCE_THRESHOLD = 0.5; // Target distance from AprilTag
