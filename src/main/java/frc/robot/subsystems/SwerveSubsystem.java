@@ -37,16 +37,23 @@ import com.studica.frc.AHRS.NavXComType;
 
 import swervelib.SwerveDrive;
 import swervelib.parser.SwerveParser;
+import swervelib.telemetry.SwerveDriveTelemetry;
+import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 
 public class SwerveSubsystem extends SubsystemBase {
 
-  File directory = new File(Filesystem.getDeployDirectory(), "swerve");
+  File directory = new File(Filesystem.getDeployDirectory(), "swerve" );
+  
   private final SwerveDrive swerveDrive;
   private final SwerveDrivePoseEstimator poseEstimator;
   private final double headingBias = 0; // set this if there is alot of drift on pathplanner
   public SwerveSubsystem(File directory) {
     try {
+      SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
       swerveDrive = new SwerveParser(directory)
+              // Create a swerve drive with the maximum speed and an initial pose.
+              // The initial pose is used to set the initial position of the robot on the field.
+              // This is useful for resetting odometry or starting autonomous routines.
           .createSwerveDrive(
               Constants.maxSpeed,
               new Pose2d(
@@ -58,7 +65,7 @@ public class SwerveSubsystem extends SubsystemBase {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
-
+   
     setupPathPlanner();
     poseEstimator = new SwerveDrivePoseEstimator(
       getKinematics(), 
