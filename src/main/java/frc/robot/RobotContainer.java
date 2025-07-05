@@ -6,7 +6,7 @@ package frc.robot;
 
 import frc.robot.Constants.DrivebaseConstants.TargetSide;
 import frc.robot.Constants.OIConstants;
-import frc.robot.commands.Autos;
+//import frc.robot.commands.Autos;
 import frc.robot.subsystems.CoralSubsystem;
 import frc.robot.subsystems.CoralSubsystem.Setpoint;
 import frc.robot.subsystems.FunnelIntake;
@@ -15,13 +15,13 @@ import frc.robot.subsystems.SwerveSubsystem;
 import swervelib.SwerveInputStream;
 
 import java.io.File;
-import java.util.function.IntSupplier;
+//import java.util.function.IntSupplier;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
+//import edu.wpi.first.math.geometry.Pose2d;
+//import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -54,6 +54,7 @@ public class RobotContainer {
                         OIConstants.kDriverControllerPort);
         private final CommandXboxController m_operatorController = new CommandXboxController(
                         OIConstants.kOperatorControllerPort);
+        
 
         /**
          * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -197,15 +198,16 @@ public class RobotContainer {
 
                 // vision buttons
                 // align left levels 1-3
-                m_driverController.leftBumper().onTrue(Commands.runOnce(() -> {
-                        drivebase.alignToReefScore((IntSupplier) () -> drivebase.getReefTargetTagID(), TargetSide.LEFT)
-                                        .schedule();
-                }));
-                m_driverController.rightBumper().onTrue(Commands.runOnce(() -> {
-                        drivebase.alignToReefScore((IntSupplier) () -> drivebase.getReefTargetTagID(), TargetSide.RIGHT)
-                                        .schedule();
-                }));
-
+                // m_driverController.leftBumper().onTrue(Commands.runOnce(() -> {
+                //         drivebase.alignToReefScore((IntSupplier) () -> drivebase.getReefTargetTagID(), TargetSide.LEFT)
+                //                         .schedule();
+                // }));
+                // m_driverController.rightBumper().onTrue(Commands.runOnce(() -> {
+                //         drivebase.alignToReefScore((IntSupplier) () -> drivebase.getReefTargetTagID(), TargetSide.RIGHT)
+                //                         .schedule();
+                // }));
+                m_driverController.leftBumper().onTrue(drivebase.alignToReefScore(() -> drivebase.getReefTargetTagID(), TargetSide.LEFT));
+                m_driverController.rightBumper().onTrue(drivebase.alignToReefScore(drivebase::getReefTargetTagID, TargetSide.RIGHT));
                 //////////////////////////////////////////////
                 /// operator controller bindings ////////////
                 ////////////////////////////////////////////

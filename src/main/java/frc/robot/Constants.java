@@ -4,28 +4,28 @@
 
 package frc.robot;
 
-import java.util.ArrayList;
-import java.util.List;
+// import java.util.ArrayList;
+// import java.util.List;
 
-import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+// import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
-import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.Pair;
-import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
+// import edu.wpi.first.math.Matrix;
+// import edu.wpi.first.math.Pair;
+// import edu.wpi.first.math.VecBuilder;
+// import edu.wpi.first.math.geometry.Pose2d;
+// import edu.wpi.first.math.geometry.Pose3d;
+// import edu.wpi.first.math.geometry.Rotation2d;
+// import edu.wpi.first.math.geometry.Rotation3d;
+// import edu.wpi.first.math.geometry.Transform2d;
+// import edu.wpi.first.math.geometry.Transform3d;
+// import edu.wpi.first.math.geometry.Translation3d;
+// import edu.wpi.first.math.numbers.N1;
+//import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.math.geometry.Pose2d;
+//import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.util.Units;
+//import edu.wpi.first.math.util.Units;
 
 import java.lang.String;
 
@@ -62,8 +62,8 @@ public final class Constants {
     // robot camera offsets need to be correct with bumper so the
     // align to reef works correctly, the reef poles are 6.5 inches from the
     // center of the april tag
-    public static double ReefLeftYOffset = Units.inchesToMeters(-9.5);
-    public static double ReefRightYOffset = Units.inchesToMeters(4);
+    public static double ReefLeftYOffset = Units.inchesToMeters(-6.5);
+    public static double ReefRightYOffset = Units.inchesToMeters(6.5);
     public static double ReefXDistance = Units.inchesToMeters(25);
   }
 
@@ -319,20 +319,9 @@ public final class Constants {
     }
 
     
-public static final class DrivebaseConstants {
-  // Distance to stay away from reef (in meters)
-  public static final double ReefXDistance = 1.0; // Adjust based on your robot size
-  
-  // Y-axis offsets for left and right scoring positions (in meters)
-  public static final double ReefLeftYOffset = 0.5;   // Adjust based on reef layout
-  public static final double ReefRightYOffset = -0.5; // Adjust based on reef layout
-  
-  public enum TargetSide {
-      LEFT,
-      RIGHT
-  }
+
 }
   }
 
 
-}
+
