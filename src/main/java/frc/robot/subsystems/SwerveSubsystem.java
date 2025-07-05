@@ -85,14 +85,14 @@ public class SwerveSubsystem extends SubsystemBase {
         swerveDrive.getModulePositions(),
         new Pose2d(0.0, 0.0, new Rotation2d()));
 
-    // Setup vision if enabled.
+
+    // Always setup vision for alignment commands to work
+    setupPhotonVision();
+    
+    // Only stop odometry thread if using vision for drive testing
     if (visionDriveTest) {
-      setupPhotonVision();
-      // Stop the odometry thread if we are using vision that way we can synchronize
-      // updates better.
       swerveDrive.stopOdometryThread();
     }
-
     setupPathPlanner();
   }
 
@@ -423,32 +423,81 @@ public class SwerveSubsystem extends SubsystemBase {
 
   // Command to align the robot for reef scoring using a detected AprilTag ID and
   // target side.
-  public Command alignToReefScore(int aprilTag, Constants.DrivebaseConstants.TargetSide scoringSide) {
-    System.out.println("[SwerveSubsystem] Aligning to reef. AprilTag: " + aprilTag + ", Scoring Side: " + scoringSide);
-    Transform2d robotOffset;
-    if (scoringSide == Constants.DrivebaseConstants.TargetSide.LEFT) {
-      robotOffset = new Transform2d(
-          new Translation2d(Constants.DrivebaseConstants.ReefXDistance, Constants.DrivebaseConstants.ReefLeftYOffset),
-          Rotation2d.fromDegrees(180));
-      System.out.println("[SwerveSubsystem] Using LEFT robot offset: " + robotOffset);
-    } else {
-      robotOffset = new Transform2d(
-          new Translation2d(Constants.DrivebaseConstants.ReefXDistance, Constants.DrivebaseConstants.ReefRightYOffset),
-          Rotation2d.fromDegrees(180));
-      System.out.println("[SwerveSubsystem] Using RIGHT robot offset: " + robotOffset);
-    }
-    if (aprilTag > 0 && vision != null && vision.isValidTargetForScoring(aprilTag)) {
-      Pose2d newPose = Vision.getAprilTagPose(aprilTag, robotOffset);
-      System.out.println("[SwerveSubsystem] Calculated new alignment pose: " + newPose);
-      return driveToPose(newPose);
-    } else {
-      System.out.println("[SwerveSubsystem] No valid April Tag target for reef alignment: " + aprilTag);
-      return Commands.none();
-    }
-  }
+// Command to align the robot for reef scoring using a detected AprilTag ID and target side.
+public Command alignToReefScore(int aprilTag, Constants.DrivebaseConstants.TargetSide scoringSide) {
+  return Commands.deferredProxy(() -> {
+      System.out.println("[SwerveSubsystem] Starting reef alignment. AprilTag: " + aprilTag + ", Scoring Side: " + scoringSide);
+      
+      // Check if vision system is available
+      if (vision == null) {
+          System.out.println("[SwerveSubsystem] ERROR: Vision system not initialized!");
+          return Commands.none();
+      }
+      
+      // Use current target if aprilTag is 0 or invalid
+      int targetTag = aprilTag;
+      if (aprilTag <= 0) {
+          targetTag = vision.getBestReefTarget();
+          System.out.println("[SwerveSubsystem] Using best reef target: " + targetTag);
+      }
+      
+      // Validate target
+      if (targetTag <= 0 || !vision.isValidTargetForScoring(targetTag)) {
+          System.out.println("[SwerveSubsystem] No valid AprilTag target for reef alignment: " + targetTag);
+          return Commands.none();
+      }
+      
+      // Calculate robot offset based on scoring side
+      Transform2d robotOffset;
+      if (scoringSide == Constants.DrivebaseConstants.TargetSide.LEFT) {
+          robotOffset = new Transform2d(
+              new Translation2d(Constants.DrivebaseConstants.ReefXDistance, Constants.DrivebaseConstants.ReefLeftYOffset),
+              Rotation2d.fromDegrees(180));
+          System.out.println("[SwerveSubsystem] Using LEFT robot offset: " + robotOffset);
+      } else {
+          robotOffset = new Transform2d(
+              new Translation2d(Constants.DrivebaseConstants.ReefXDistance, Constants.DrivebaseConstants.ReefRightYOffset),
+              Rotation2d.fromDegrees(180));
+          System.out.println("[SwerveSubsystem] Using RIGHT robot offset: " + robotOffset);
+      }
+      
+      try {
+          Pose2d targetPose = Vision.getAprilTagPose(targetTag, robotOffset);
+          System.out.println("[SwerveSubsystem] Calculated target pose: " + targetPose);
+          System.out.println("[SwerveSubsystem] Current pose: " + getPose());
+          
+          return driveToPose(targetPose);
+      } catch (Exception e) {
+          System.out.println("[SwerveSubsystem] ERROR calculating target pose: " + e.getMessage());
+          return Commands.none();
+      }
+  });
+}
 
   public Command alignToReefScore(IntSupplier aprilTagSupplier, TargetSide scoringSide) {
     return alignToReefScore(aprilTagSupplier.getAsInt(), scoringSide);
   }
-
+  public void debugVisionSystem() {
+    if (vision == null) {
+        System.out.println("[DEBUG] Vision system is NULL!");
+        return;
+    }
+    
+    int reefTarget = vision.getBestReefTarget();
+    System.out.println("[DEBUG] Best reef target: " + reefTarget);
+    
+    if (reefTarget > 0) {
+        boolean isValid = vision.isValidTargetForScoring(reefTarget);
+        System.out.println("[DEBUG] Target " + reefTarget + " is valid: " + isValid);
+        
+        double distance = vision.getDistanceFromAprilTag(reefTarget);
+        System.out.println("[DEBUG] Distance to target: " + distance);
+    }
+    
+    // Check camera connectivity
+    for (Vision.Cameras camera : Vision.Cameras.values()) {
+        boolean connected = camera.camera.isConnected();
+        System.out.println("[DEBUG] Camera " + camera.name() + " connected: " + connected);
+    }
+}
 }

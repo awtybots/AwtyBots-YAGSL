@@ -318,6 +318,20 @@ public final class Constants {
 
     }
 
+    
+public static final class DrivebaseConstants {
+  // Distance to stay away from reef (in meters)
+  public static final double ReefXDistance = 1.0; // Adjust based on your robot size
+  
+  // Y-axis offsets for left and right scoring positions (in meters)
+  public static final double ReefLeftYOffset = 0.5;   // Adjust based on reef layout
+  public static final double ReefRightYOffset = -0.5; // Adjust based on reef layout
+  
+  public enum TargetSide {
+      LEFT,
+      RIGHT
+  }
+}
   }
 
 
