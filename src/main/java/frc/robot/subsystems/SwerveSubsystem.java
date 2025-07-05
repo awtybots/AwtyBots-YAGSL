@@ -452,12 +452,12 @@ public Command alignToReefScore(int aprilTag, Constants.DrivebaseConstants.Targe
       if (scoringSide == Constants.DrivebaseConstants.TargetSide.LEFT) {
           robotOffset = new Transform2d(
               new Translation2d(Constants.DrivebaseConstants.ReefXDistance, Constants.DrivebaseConstants.ReefLeftYOffset),
-              Rotation2d.fromDegrees(180));
+              Rotation2d.kPi);
           System.out.println("[SwerveSubsystem] Using LEFT robot offset: " + robotOffset);
       } else {
           robotOffset = new Transform2d(
               new Translation2d(Constants.DrivebaseConstants.ReefXDistance, Constants.DrivebaseConstants.ReefRightYOffset),
-              Rotation2d.fromDegrees(180));
+              Rotation2d.kPi);
           System.out.println("[SwerveSubsystem] Using RIGHT robot offset: " + robotOffset);
       }
       
