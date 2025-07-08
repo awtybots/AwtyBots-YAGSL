@@ -89,35 +89,40 @@ public final class Constants {
     public static final int L1 = 5;
     public static final int AlgaeLow = 0;
     public static final int L2 = 15;
-    public static final int AlgaeHigh = 12;
+    public static final int AlgaeHigh = 14;
     public static final int L3 = 0 ;
-    public static final int L4 = 25;
+    public static final int L4 = 26;
     public static final int Barge = 27;
   }
 
   public static final class ArmSetpoints{
-    public static final double FeederStation = -1.5;
-    public static final double L1 = -3;
+    public static final double FeederStation = -1.9;//-1.9 //
+    public static final double L1 = -3; //-3
     public static final double AlgaeLow = -9;
     public static final double L2 = -3;
     public static final double AlgaeHigh = -9;
-    public static final double L3 = -12.5;
+    public static final double L3 = -13.583; //-12.5
     public static final double L4 = -13;
     public static final double Barge = -14;
+    // public static final double FeederStation = 1.375;//-1.9 //
+    // public static final double L1 = 0.224; //-3
+    // public static final double AlgaeLow = 0.1;
+    // public static final double L2 = 0.224;
+    // public static final double AlgaeHigh = 0.1;
+    // public static final double L3 = 0.954;
+    // public static final double L4 = 0.9775;
+    // public static final double Barge = 0.1;
 
   }
-
-
-  
   public static final class WristSetpoints{
-    public static final double FeederStation = 0;
-    public static final double L1 = 0.3;
-    public static final double AlgaeLow = -15;
-    public static final double L2 = -8;
-    public static final double AlgaeHigh = -15;
-    public static final double L3 = -3;
-    public static final double L4 = -8;
-    public static final double Barge = -6;
+    public static final double FeederStation = 0.55;
+    public static final double L1 = 0.8;
+    public static final double AlgaeLow = .27;
+    public static final double L2 = .5;
+    public static final double AlgaeHigh = .27;
+    public static final double L3 = .66;
+    public static final double L4 = .56;
+    public static final double Barge = .9;
   }
 
   public static final class FunnelWristSetpoints{

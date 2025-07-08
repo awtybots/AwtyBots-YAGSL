@@ -21,6 +21,7 @@ import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.ElevatorSetpoints;
 import frc.robot.Constants.IntakeSetpoints;
 import frc.robot.Constants.WristSetpoints;
+import au.grapplerobotics.LaserCan;
 
 public class CoralSubsystem extends SubsystemBase {
 
@@ -35,6 +36,10 @@ public class CoralSubsystem extends SubsystemBase {
         Barge;
     }
 
+    //LaserCan setup
+    private LaserCan lc = new LaserCan(29);
+    LaserCan.Measurement measurement = lc.getMeasurement();
+
     // Variable use for tracking if the elevator was raised to L4
     public static boolean ElevatorAtL4;
 
@@ -44,11 +49,14 @@ public class CoralSubsystem extends SubsystemBase {
 
 
     // arm setup
-    private SparkFlex l_armMotor = new SparkFlex(ArmConstants.ArmLeftCanID, MotorType.kBrushless);
     private SparkFlex r_armMotor = new SparkFlex(ArmConstants.ArmRightCanID, MotorType.kBrushless);
-    private SparkClosedLoopController l_armController = l_armMotor.getClosedLoopController();
+    private SparkFlex l_armMotor = new SparkFlex(ArmConstants.ArmLeftCanID, MotorType.kBrushless);
     private SparkClosedLoopController r_armController = r_armMotor.getClosedLoopController();
+    private SparkClosedLoopController l_armController = l_armMotor.getClosedLoopController();
+    
     private RelativeEncoder armEncoder = l_armMotor.getEncoder();
+    //private AbsoluteEncoder armEncoder = l_armMotor.getAbsoluteEncoder();
+    
 
     // elevator setup
     private SparkFlex l_elevatorMotor = new SparkFlex(ElevatorConstants.LeftElevatorCanID, MotorType.kBrushless);
@@ -60,7 +68,7 @@ public class CoralSubsystem extends SubsystemBase {
     // wrist setup
     private SparkFlex wristMotor = new SparkFlex(ArmConstants.WristCanID, MotorType.kBrushless);
     private SparkClosedLoopController wristController = wristMotor.getClosedLoopController();
-    private RelativeEncoder wristEncoder = wristMotor.getEncoder();
+   // private RelativeEncoder wristEncoder = wristMotor.getEncoder();
     private AbsoluteEncoder wristAbsoluteEncoder = wristMotor.getAbsoluteEncoder();
 
     // intake setup
@@ -105,14 +113,16 @@ public class CoralSubsystem extends SubsystemBase {
                 ResetMode.kResetSafeParameters,
                 PersistMode.kPersistParameters);
 
-        armEncoder.setPosition(0);
+        
         elevatorEncoder.setPosition(0);
+        armEncoder.setPosition(0);
+       
         
     }
 
     private void moveToSetpoint() {
-        //l_elevatorController.setReference(elevatorCurrentTarget, ControlType.kMAXMotionPositionControl);
-        //r_elevatorController.setReference(elevatorCurrentTarget, ControlType.kMAXMotionPositionControl);
+        l_elevatorController.setReference(elevatorCurrentTarget, ControlType.kMAXMotionPositionControl);
+        
         
         if(runFunnelIntake){
             double elevatorPos = elevatorEncoder.getPosition();
@@ -127,8 +137,9 @@ public class CoralSubsystem extends SubsystemBase {
 
 
         }
-        //l_armController.setReference(armCurrentTarget, ControlType.kMAXMotionPositionControl);
-        //r_armController.setReference(armCurrentTarget, ControlType.kMAXMotionPositionControl);
+        
+    
+        l_armController.setReference(armCurrentTarget, ControlType.kMAXMotionPositionControl);
         wristController.setReference(wristCurrentTarget, ControlType.kMAXMotionPositionControl);
         
     }
@@ -273,6 +284,14 @@ public class CoralSubsystem extends SubsystemBase {
     }
 
     public Command runIntakeCommand() {
+
+        /*if(measurement.status > 10){
+            return Commands.startEnd(
+                () -> setIntakePower(IntakeSetpoints.kForward), () -> setIntakePower(0.0));
+        }else{
+            return Commands.startEnd(
+                () -> setIntakePower(0.0), () -> setIntakePower(0.0));
+        }*/
         return Commands.startEnd(
                 () -> setIntakePower(IntakeSetpoints.kForward), () -> setIntakePower(0.0));
     }
@@ -291,11 +310,15 @@ public class CoralSubsystem extends SubsystemBase {
         // SmartDashboard.putNumber("Coral/Arm/Target Position", armCurrentTarget);
         // SmartDashboard.putNumber("Coral/Arm/Actual Position",
         // armEncoder.getPosition());
-        SmartDashboard.putNumber("Coral/Elevator/Target Position", elevatorCurrentTarget);
-        SmartDashboard.putNumber("Coral/Elevator/Actual Position", elevatorEncoder.getPosition());
-        SmartDashboard.putNumber("Coral/Wrist/Target Position", wristAbsoluteEncoder.getPosition());
+        //SmartDashboard.putNumber("Coral/Elevator/Target Position", elevatorCurrentTarget);
+        //SmartDashboard.putNumber("Coral/Elevator/Actual Position", elevatorEncoder.getPosition());
+        //SmartDashboard.putNumber("Coral/Wrist/Target Position", wristAbsoluteEncoder.getPosition());
         
-        System.out.println("Wrist Encoder Position: " + wristAbsoluteEncoder.getPosition());
+        //SmartDashboard.putNumber("Coral/Arm/Target Position", armEncoder.getPosition());
+        
+       // System.out.println("Wrist Encoder Position: " + wristAbsoluteEncoder.getPosition());
+        //System.out.println("LaserCan value: " + measurement.status);
+        //System.out.println("Normal Arm Position: " + armEncoder.getPosition()+ " Absolute Arm Position: ");
         // SmartDashboard.putNumber("Coral/Intake/Applied Output",
         // intakeMotor.getAppliedOutput());
     }
