@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.RelativeEncoder;
 
 import com.revrobotics.spark.SparkBase.ControlType;
@@ -58,7 +59,8 @@ public class CoralSubsystem extends SubsystemBase {
     // wrist setup
     private SparkFlex wristMotor = new SparkFlex(ArmConstants.WristCanID, MotorType.kBrushless);
     private SparkClosedLoopController wristController = wristMotor.getClosedLoopController();
-    private RelativeEncoder wristEncoder = wristMotor.getEncoder();
+    //private RelativeEncoder wristEncoder = wristMotor.getEncoder();
+    private AbsoluteEncoder wristEncoder = wristMotor.getAbsoluteEncoder();
 
     // intake setup
     private SparkFlex intakeMotor = new SparkFlex(ArmConstants.IntakeCanID, MotorType.kBrushless);
@@ -104,7 +106,7 @@ public class CoralSubsystem extends SubsystemBase {
 
         armEncoder.setPosition(0);
         elevatorEncoder.setPosition(0);
-        wristEncoder.setPosition(0);
+        
     }
 
     private void moveToSetpoint() {
