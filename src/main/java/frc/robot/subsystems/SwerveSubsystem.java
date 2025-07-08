@@ -6,7 +6,7 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Meter;
 
-
+import edu.wpi.first.math.estimator.PoseEstimator;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 //import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 //import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -59,6 +60,7 @@ public class SwerveSubsystem extends SubsystemBase {
   private final SwerveDrivePoseEstimator poseEstimator;
   private final double headingBias = 0; // set this if there is alot of drift on pathplanner
   private final boolean visionDriveTest = VisionConstants.DRIVEWITHVISION;
+  private final Field2d field2d = new Field2d();
   /**
    * PhotonVision class to keep an accurate odometry.
    */
@@ -85,7 +87,7 @@ public class SwerveSubsystem extends SubsystemBase {
         swerveDrive.getModulePositions(),
         new Pose2d(0.0, 0.0, new Rotation2d()));
 
-
+    
     // Always setup vision for alignment commands to work
     setupPhotonVision();
     
@@ -94,6 +96,70 @@ public class SwerveSubsystem extends SubsystemBase {
       swerveDrive.stopOdometryThread();
     }
     setupPathPlanner();
+  }
+  @Override
+  public void periodic() {
+    poseEstimator.update(
+        Rotation2d.fromDegrees(getGyroYaw()),
+        swerveDrive.getModulePositions());
+    Pose2d estimatedPose = poseEstimator.getEstimatedPosition();
+    field2d.setRobotPose(getPose());
+    if (loopCounter % 10 == 0) {
+      SmartDashboard.putNumber("Gyro Yaw", getGyroYaw());
+      SmartDashboard.putNumber("Gyro Angle", getGyroAngle());
+      SmartDashboard.putNumber("Odometry X", estimatedPose.getX());
+      SmartDashboard.putNumber("Odometry Y", estimatedPose.getY());
+      SmartDashboard.putNumber("Odometry Heading", estimatedPose.getRotation().getDegrees());
+      SmartDashboard.putString("Odometry Pose: ", estimatedPose.toString());
+      SmartDashboard.putString("PathPlanner Pose ", getPose().toString());
+    }
+    loopCounter++;
+    var positions = swerveDrive.getModulePositions();
+    for (int i = 0; i < 4; i++) {
+      SmartDashboard.putNumber("module " + i, positions[i].angle.getDegrees());
+    }
+
+    // --- Vision Integration in periodic() ---
+    if (visionDriveTest && vision != null) {
+      swerveDrive.updateOdometry();
+      vision.updatePoseEstimation(swerveDrive);
+      int currAprilTagTarget = vision.getBestReefTarget();
+      SmartDashboard.putNumber("Vision/AprilTag", currAprilTagTarget);
+      SmartDashboard.putData("Field", swerveDrive.field);
+
+    }
+  }
+
+  @Override
+  public void simulationPeriodic() {
+    poseEstimator.update(
+        Rotation2d.fromDegrees(getGyroYaw()),
+        swerveDrive.getModulePositions());
+    Pose2d estimatedPose = poseEstimator.getEstimatedPosition();
+    if (loopCounter % 10 == 0) {
+      SmartDashboard.putNumber("Gyro Yaw", getGyroYaw());
+      SmartDashboard.putNumber("Gyro Angle", getGyroAngle());
+      SmartDashboard.putNumber("Odometry X", estimatedPose.getX());
+      SmartDashboard.putNumber("Odometry Y", estimatedPose.getY());
+      SmartDashboard.putNumber("Odometry Heading", estimatedPose.getRotation().getDegrees());
+      SmartDashboard.putString("Odometry Pose: ", estimatedPose.toString());
+      SmartDashboard.putString("PathPlanner Pose ", getPose().toString());
+    }
+    loopCounter++;
+    var positions = swerveDrive.getModulePositions();
+    for (int i = 0; i < 4; i++) {
+      SmartDashboard.putNumber("module " + i, positions[i].angle.getDegrees());
+    }
+
+    // --- Vision Integration in periodic() ---
+    if (visionDriveTest && vision != null) {
+      swerveDrive.updateOdometry();
+      vision.updatePoseEstimation(swerveDrive);
+      int currAprilTagTarget = vision.getBestReefTarget();
+      SmartDashboard.putNumber("Vision/AprilTag", currAprilTagTarget);
+      SmartDashboard.putData("Field", swerveDrive.field);
+
+    }
   }
 
   public SwerveDrive getSwerveDrive() {
@@ -149,6 +215,7 @@ public class SwerveSubsystem extends SubsystemBase {
       final boolean enableFeedforward = true;
       // Configure AutoBuilder last
       AutoBuilder.configure(
+      
           () -> {
             Pose2d currentPose = getPose();
             // System.out.println("Using Pose in AutoBuilder: " + currentPose);
@@ -293,7 +360,8 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   public Pose2d getPose() {
-    Pose2d rawPose = swerveDrive.getPose();
+    Pose2d rawPose =  poseEstimator.getEstimatedPosition();
+    Pose2d nicepose= swerveDrive.getPose();
     Pose2d baisedPose = new Pose2d(
         rawPose.getTranslation(),
         rawPose.getRotation().plus(Rotation2d.fromDegrees(headingBias)));
@@ -320,7 +388,7 @@ public class SwerveSubsystem extends SubsystemBase {
         newPose.getRotation(),
         swerveDrive.getModulePositions(),
         newPose);
-
+    
   }
 
   public void addVisionMeasurement(Pose2d visionPose, double timestamp) {
@@ -337,69 +405,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
   private int loopCounter = 0;
 
-  @Override
-  public void periodic() {
-    poseEstimator.update(
-        Rotation2d.fromDegrees(getGyroYaw()),
-        swerveDrive.getModulePositions());
-    Pose2d estimatedPose = poseEstimator.getEstimatedPosition();
-    if (loopCounter % 10 == 0) {
-      SmartDashboard.putNumber("Gyro Yaw", getGyroYaw());
-      SmartDashboard.putNumber("Gyro Angle", getGyroAngle());
-      SmartDashboard.putNumber("Odometry X", estimatedPose.getX());
-      SmartDashboard.putNumber("Odometry Y", estimatedPose.getY());
-      SmartDashboard.putNumber("Odometry Heading", estimatedPose.getRotation().getDegrees());
-      SmartDashboard.putString("Odometry Pose: ", estimatedPose.toString());
-      SmartDashboard.putString("PathPlanner Pose ", getPose().toString());
-    }
-    loopCounter++;
-    var positions = swerveDrive.getModulePositions();
-    for (int i = 0; i < 4; i++) {
-      SmartDashboard.putNumber("module " + i, positions[i].angle.getDegrees());
-    }
-
-    // --- Vision Integration in periodic() ---
-    if (visionDriveTest && vision != null) {
-      swerveDrive.updateOdometry();
-      vision.updatePoseEstimation(swerveDrive);
-      int currAprilTagTarget = vision.getBestReefTarget();
-      SmartDashboard.putNumber("Vision/AprilTag", currAprilTagTarget);
-      SmartDashboard.putData("Field", swerveDrive.field);
-
-    }
-  }
-
-  @Override
-  public void simulationPeriodic() {
-    poseEstimator.update(
-        Rotation2d.fromDegrees(getGyroYaw()),
-        swerveDrive.getModulePositions());
-    Pose2d estimatedPose = poseEstimator.getEstimatedPosition();
-    if (loopCounter % 10 == 0) {
-      SmartDashboard.putNumber("Gyro Yaw", getGyroYaw());
-      SmartDashboard.putNumber("Gyro Angle", getGyroAngle());
-      SmartDashboard.putNumber("Odometry X", estimatedPose.getX());
-      SmartDashboard.putNumber("Odometry Y", estimatedPose.getY());
-      SmartDashboard.putNumber("Odometry Heading", estimatedPose.getRotation().getDegrees());
-      SmartDashboard.putString("Odometry Pose: ", estimatedPose.toString());
-      SmartDashboard.putString("PathPlanner Pose ", getPose().toString());
-    }
-    loopCounter++;
-    var positions = swerveDrive.getModulePositions();
-    for (int i = 0; i < 4; i++) {
-      SmartDashboard.putNumber("module " + i, positions[i].angle.getDegrees());
-    }
-
-    // --- Vision Integration in periodic() ---
-    if (visionDriveTest && vision != null) {
-      swerveDrive.updateOdometry();
-      vision.updatePoseEstimation(swerveDrive);
-      int currAprilTagTarget = vision.getBestReefTarget();
-      SmartDashboard.putNumber("Vision/AprilTag", currAprilTagTarget);
-      SmartDashboard.putData("Field", swerveDrive.field);
-
-    }
-  }
+ 
 
   // --- Vision Setup and Commands ---
 
