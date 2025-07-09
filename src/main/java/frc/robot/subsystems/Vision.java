@@ -22,6 +22,7 @@ import edu.wpi.first.networktables.NetworkTablesJNI;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import frc.robot.Constants;
 import frc.robot.Robot;
@@ -237,11 +238,15 @@ public class Vision {
                 System.out.printf(
                         "[Vision] Camera: %s | Estimated Pose: (X: %.2f, Y: %.2f, Rot: %.2f°) | Timestamp: %.2f\n",
                         camera.name(), pose2d.getX(), pose2d.getY(), pose2d.getRotation().getDegrees(),
-                        pose.timestampSeconds);
+                        Timer.getFPGATimestamp());
 
                 swerveDrive.addVisionMeasurement(pose.estimatedPose.toPose2d(),
-                        pose.timestampSeconds,
+                        Timer.getFPGATimestamp(),
                         camera.curStdDevs);
+            } else {
+                System.out.printf(
+                        "[Vision] Camera %s: no global pose available\n",
+                        camera.name());
             }
         }
 
@@ -356,13 +361,22 @@ public class Vision {
 
         // Front Left Camera // ORANGE PI CAMERA
 
-        FrontLeft("Arducam_OV9782_USB_Camera",
-                new Rotation3d(0, 0, 0), // correct yaw offset
-                new Translation3d(-0.1,
-                        -1.2,
-                        0.381),
-                VecBuilder.fill(4, 4, 8), VecBuilder.fill(0.5, 0.5, 1)),
-
+        FrontLeft(
+                "Arducam_OV9782_USB_Camera", // name
+                new Rotation3d(0, 0, 0), // camera-to-robot rotation
+                new Translation3d(-0.10, -1.20, 0.381), // camera-to-robot translation
+                // --- 4th arg: SINGLE-TAG covariance (tight) ---
+                VecBuilder.fill(
+                        0.05, // σ-X (m)
+                        0.05, // σ-Y (m)
+                        Units.degreesToRadians(3) // σ-θ (rad ≈ 3°)
+                ),
+                // --- 5th arg: MULTI-TAG covariance (often even tighter) ---
+                VecBuilder.fill(
+                        0.03, // σ-X
+                        0.03, // σ-Y
+                        Units.degreesToRadians(2) // σ-θ
+                )),
         /*
          * Front Right Camera*
          */
