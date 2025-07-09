@@ -134,6 +134,8 @@ public class Vision {
 
         var alliance = DriverStation.getAlliance();
         if (!alliance.isPresent()) {
+            System.out.println(
+                    "[Vision] Error: Unable to retrieve alliance selection from driverStation. Make sure driverStation is open");
             return false;
         }
 
@@ -184,19 +186,24 @@ public class Vision {
     public int getBestReefTarget() {
         System.out.println("[Vision] Searching for reef target...");
         for (Cameras camera : Cameras.values()) {
-            if (camera.equals(Cameras.FrontRight)) {
-                System.out.println("[Vision] Checking FrontRight Camera for target.");
-                targetID = getCamerasTargetID(camera);
-                System.out.println("[Vision] FrontRight Camera returned target ID: " + targetID);
-                if (isValidTargetForScoring(targetID)) {
-                    System.out.println("[Vision] Valid reef target found: " + targetID);
-                    return targetID;
-                } else {
-                    System.out.println("[Vision] Target ID " + targetID + " is not valid for scoring.");
-                }
+            if (!camera.camera.isConnected()) {
+                System.out.printf("[Vision] No frames from %s; camera not connected.%n", camera);
+                continue;
             }
+
+            System.out.printf("[Vision] Checking %s Camera for target.%n", camera);
+            int targetID = getCamerasTargetID(camera);
+            System.out.printf("[Vision] %s Camera returned target ID: %d%n", camera, targetID);
+
+            if (isValidTargetForScoring(targetID)) {
+                System.out.printf("[Vision] Valid reef target found in %s: %d%n", camera, targetID);
+                return targetID;
+            } else if (targetID == 0) {
+                System.out.println("[Vision] No valid reef target found.");
+                return 0;
+            }
+
         }
-        System.out.println("[Vision] No valid reef target found.");
         return 0;
     }
 
@@ -347,16 +354,15 @@ public class Vision {
      */
     enum Cameras {
 
-        /**
-         * Front Left Camera // ORANGE PI CAMERA
-         * 
-         * // FrontLeft("OV9281",
-         * // new Rotation3d(0, 0, 0), // correct yaw offset
-         * // new Translation3d(-0.1,
-         * // -1.2,
-         * // 0.381),
-         * // VecBuilder.fill(4, 4, 8), VecBuilder.fill(0.5, 0.5, 1)),
-         */
+        // Front Left Camera // ORANGE PI CAMERA
+
+        FrontLeft("Arducam_OV9782_USB_Camera",
+                new Rotation3d(0, 0, 0), // correct yaw offset
+                new Translation3d(-0.1,
+                        -1.2,
+                        0.381),
+                VecBuilder.fill(4, 4, 8), VecBuilder.fill(0.5, 0.5, 1)),
+
         /*
          * Front Right Camera*
          */
