@@ -398,7 +398,7 @@ public class Vision {
 
         FrontLeft(
                 // 1) The name of the PhotonCamera as configured in PhotonVision’s UI
-                "Arducam_OV9782_USB_Camera",
+                "OV9281",
 
                 // 2) Camera‐to‐robot rotation:
                 // Rotation3d(roll, pitch, yaw) in radians.
