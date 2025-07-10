@@ -5,9 +5,9 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Meter;
-import static edu.wpi.first.units.Units.Rotation;
+//import static edu.wpi.first.units.Units.Rotation;
 
-import edu.wpi.first.math.estimator.PoseEstimator;
+//import edu.wpi.first.math.estimator.PoseEstimator;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -25,7 +25,7 @@ import com.studica.frc.AHRS.NavXComType;
 import java.io.File;
 import java.util.function.Supplier;
 
-import com.ctre.phoenix6.swerve.SwerveModule;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.commands.PathfindingCommand;
@@ -33,7 +33,7 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathPlannerPath;
-import com.studica.frc.AHRS.NavXComType;
+
 
 import swervelib.SwerveDrive;
 import swervelib.parser.SwerveParser;

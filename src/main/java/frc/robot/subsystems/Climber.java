@@ -14,13 +14,13 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
+
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Configs;
 import frc.robot.Constants.ClimbConstants;
 import frc.robot.Constants.ClimbSetPoints;
-import frc.robot.Constants.IntakeSetpoints;
+
 
 public class Climber extends SubsystemBase {
 

@@ -10,7 +10,7 @@ import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -51,7 +51,7 @@ public class CoralSubsystem extends SubsystemBase {
     // arm setup
     private SparkFlex r_armMotor = new SparkFlex(ArmConstants.ArmRightCanID, MotorType.kBrushless);
     private SparkFlex l_armMotor = new SparkFlex(ArmConstants.ArmLeftCanID, MotorType.kBrushless);
-    private SparkClosedLoopController r_armController = r_armMotor.getClosedLoopController();
+    //private SparkClosedLoopController r_armController = r_armMotor.getClosedLoopController();
     private SparkClosedLoopController l_armController = l_armMotor.getClosedLoopController();
     
     private RelativeEncoder armEncoder = l_armMotor.getEncoder();
@@ -62,14 +62,14 @@ public class CoralSubsystem extends SubsystemBase {
     private SparkFlex l_elevatorMotor = new SparkFlex(ElevatorConstants.LeftElevatorCanID, MotorType.kBrushless);
     private SparkFlex r_elevatorMotor = new SparkFlex(ElevatorConstants.RightElevatorCanID, MotorType.kBrushless);
     private SparkClosedLoopController l_elevatorController = l_elevatorMotor.getClosedLoopController();
-    private SparkClosedLoopController r_elevatorController = r_elevatorMotor.getClosedLoopController();
+    //private SparkClosedLoopController r_elevatorController = r_elevatorMotor.getClosedLoopController();
     private RelativeEncoder elevatorEncoder = r_elevatorMotor.getEncoder();
 
     // wrist setup
     private SparkFlex wristMotor = new SparkFlex(ArmConstants.WristCanID, MotorType.kBrushless);
     private SparkClosedLoopController wristController = wristMotor.getClosedLoopController();
    // private RelativeEncoder wristEncoder = wristMotor.getEncoder();
-    private AbsoluteEncoder wristAbsoluteEncoder = wristMotor.getAbsoluteEncoder();
+    private AbsoluteEncoder wristEncoder = wristMotor.getAbsoluteEncoder();
 
     // intake setup
     private SparkFlex intakeMotor = new SparkFlex(ArmConstants.IntakeCanID, MotorType.kBrushless);
@@ -316,7 +316,7 @@ public class CoralSubsystem extends SubsystemBase {
         
         //SmartDashboard.putNumber("Coral/Arm/Target Position", armEncoder.getPosition());
         
-       // System.out.println("Wrist Encoder Position: " + wristAbsoluteEncoder.getPosition());
+       System.out.println("Wrist Encoder Position: " + wristEncoder.getPosition());
         //System.out.println("LaserCan value: " + measurement.status);
         //System.out.println("Normal Arm Position: " + armEncoder.getPosition()+ " Absolute Arm Position: ");
         // SmartDashboard.putNumber("Coral/Intake/Applied Output",
