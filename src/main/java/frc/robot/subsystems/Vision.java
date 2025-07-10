@@ -28,6 +28,7 @@ import frc.robot.Constants;
 import frc.robot.Robot;
 import java.awt.Desktop;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -156,7 +157,7 @@ public class Vision {
     public int getCamerasTargetID(Cameras camera) {
         System.out.println("[Vision] Getting camera target ID for " + camera.name());
         // Force a cache update.
-        camera.updateUnreadResults();
+        // camera.updateUnreadResults();
 
         // Try to use the cached result.
         Optional<PhotonPipelineResult> cachedResult = camera.getLatestResult();
@@ -231,6 +232,16 @@ public class Vision {
         // visionSim.update(swerveDrive.getSimulationDriveTrainPose().get());
         // }
         for (Cameras camera : Cameras.values()) {
+            Optional<PhotonPipelineResult> opt = camera.getLatestResult();
+            if (opt.isPresent()) {
+                PhotonPipelineResult res = opt.get(); // ← now a real result
+                if (res.hasTargets()) {
+                    Transform3d camToTag = res.getBestTarget()
+                            .getBestCameraToTarget();
+                    System.out.printf("cam→tag  X=%.3f  Y=%.3f  Z=%.3f%n",
+                            camToTag.getX(), camToTag.getY(), camToTag.getZ());
+                }
+            }
             Optional<EstimatedRobotPose> poseEst = getEstimatedGlobalPose(camera);
             if (poseEst.isPresent()) {
                 var pose = poseEst.get();
@@ -362,30 +373,88 @@ public class Vision {
         // Front Left Camera // ORANGE PI CAMERA
 
         FrontLeft(
-                "Arducam_OV9782_USB_Camera", // name
-                new Rotation3d(0, 0, 0), // camera-to-robot rotation
-                new Translation3d(-0.10, -1.20, 0.381), // camera-to-robot translation
-                // --- 4th arg: SINGLE-TAG covariance (tight) ---
+                // 1) The name of the PhotonCamera as configured in PhotonVision’s UI
+                "Arducam_OV9782_USB_Camera",
+
+                // 2) Camera‐to‐robot rotation:
+                // Rotation3d(roll, pitch, yaw) in radians.
+                // Here it’s (0,0,0) because this camera is mounted “flat” with no tilt or yaw
+                // offset.
+                new Rotation3d(0, 0, 0),
+
+                // 3) Camera‐to‐robot translation:
+                // Translation3d(x, y, z) in meters, from the robot’s center
+                // - x = forward/backward (+forward)
+                // - y = left/right (+left)
+                // - z = up/down (+up)
+                // Here it’s 25 cm forward, 0.25 m left, 0.381 m up.
+                new Translation3d(0.30, 0.30, 0.381),
+
+                // 4) Single‐tag covariance (tight):
+                // This VecBuilder.fill(...) gives your assumed measurement noise σ in [X, Y,
+                // θ].
+                // Use these when only one AprilTag is visible – you expect more uncertainty.
+                // • σ-X = 0.05 m
+                // • σ-Y = 0.05 m
+                // • σ-θ = 3° (converted to radians)
                 VecBuilder.fill(
-                        0.05, // σ-X (m)
-                        0.05, // σ-Y (m)
-                        Units.degreesToRadians(3) // σ-θ (rad ≈ 3°)
-                ),
-                // --- 5th arg: MULTI-TAG covariance (often even tighter) ---
+                        0.05,
+                        0.05,
+                        Units.degreesToRadians(3)),
+
+                // 5) Multi‐tag covariance (often tighter):
+                // When two or more tags are simultaneously visible, you can trust your
+                // pose solution more, so you give smaller σ:
+                // • σ-X = 0.03 m
+                // • σ-Y = 0.03 m
+                // • σ-θ = 2°
                 VecBuilder.fill(
-                        0.03, // σ-X
-                        0.03, // σ-Y
-                        Units.degreesToRadians(2) // σ-θ
-                )),
+                        0.03,
+                        0.03,
+                        Units.degreesToRadians(2))),
         /*
          * Front Right Camera*
          */
-        FrontRight("Limelight",
-                new Rotation3d(0, Math.toRadians(12.5), Math.toRadians(0)), // correct yaw offset
-                new Translation3d(0.25, // 10.944
-                        -0.25, // -11.2244
-                        0.381),
-                VecBuilder.fill(4, 4, 8), VecBuilder.fill(0.5, 0.5, 1));
+        FrontRight(
+                // 1) The name of the Limelight camera as configured in limelight UI
+                "Limelight",
+
+                // 2) Camera‐to‐robot rotation:
+                // Rotation3d(roll, pitch, yaw) in radians.
+                // Here it’s (0,0,0) because this camera is mounted “flat” with no tilt or yaw
+                // offset.
+                new Rotation3d(0, 12.5, 0),
+
+                // 3) Camera‐to‐robot translation:
+                // Translation3d(x, y, z) in meters, from the robot’s center
+                // - x = forward/backward (+forward)
+                // - y = left/right (+left)
+                // - z = up/down (+up)
+                // Here it’s 25 cm forward, 25 cm right, 0.381 m up.
+                new Translation3d(0.25, -0.25, 0.381),
+
+                // 4) Single‐tag covariance (tight):
+                // This VecBuilder.fill(...) gives your assumed measurement noise σ in [X, Y,
+                // θ].
+                // Use these when only one AprilTag is visible – you expect more uncertainty.
+                // • σ-X = 0.05 m
+                // • σ-Y = 0.05 m
+                // • σ-θ = 3° (converted to radians)
+                VecBuilder.fill(
+                        0.05,
+                        0.05,
+                        Units.degreesToRadians(3)),
+
+                // 5) Multi‐tag covariance (often tighter):
+                // When two or more tags are simultaneously visible, you can trust your
+                // pose solution more, so you give smaller σ:
+                // • σ-X = 0.03 m
+                // • σ-Y = 0.03 m
+                // • σ-θ = 2°
+                VecBuilder.fill(
+                        0.03,
+                        0.03,
+                        Units.degreesToRadians(2)));
 
         /**
          * Latency alert to use when high latency is detected.
@@ -525,16 +594,6 @@ public class Vision {
         }
 
         /**
-         * Get the latest result from the current cache.
-         *
-         * @return Empty optional if nothing is found. Latest result if something is
-         *         there.
-         */
-        public Optional<PhotonPipelineResult> getLatestResult() {
-            return resultsList.isEmpty() ? Optional.empty() : Optional.of(resultsList.get(0));
-        }
-
-        /**
          * Get the estimated robot pose. Updates the current robot pose estimation,
          * standard deviations, and flushes the
          * cache of results.
@@ -546,28 +605,40 @@ public class Vision {
             return estimatedRobotPose;
         }
 
+        /** Return the newest frame, automatically refreshing the cache first. */
+        public Optional<PhotonPipelineResult> getLatestResult() {
+            updateUnreadResults(); // ← always pull new frames
+            return resultsList.isEmpty()
+                    ? Optional.empty()
+                    : Optional.of(resultsList.get(0)); // 0 == newest after we sort
+        }
+
         /**
          * Update the latest results, cached with a maximum refresh rate of 1req/15ms.
          * Sorts the list by timestamp.
          */
         private void updateUnreadResults() {
-            double mostRecentTimestamp = resultsList.isEmpty() ? 0.0 : resultsList.get(0).getTimestampSeconds();
-            double currentTimestamp = Microseconds.of(NetworkTablesJNI.now()).in(Seconds);
-            double debounceTime = Milliseconds.of(15).in(Seconds);
-            for (PhotonPipelineResult result : resultsList) {
-                mostRecentTimestamp = Math.max(mostRecentTimestamp, result.getTimestampSeconds());
-            }
-            if ((resultsList.isEmpty() || (currentTimestamp - mostRecentTimestamp >= debounceTime)) &&
-                    (currentTimestamp - lastReadTimestamp) >= debounceTime) {
-                resultsList = camera.getAllUnreadResults();
-                lastReadTimestamp = currentTimestamp;
-                resultsList.sort((PhotonPipelineResult a, PhotonPipelineResult b) -> {
-                    return a.getTimestampSeconds() >= b.getTimestampSeconds() ? 1 : -1;
-                });
-                if (!resultsList.isEmpty()) {
-                    updateEstimatedGlobalPose();
-                }
-            }
+            double now = Microseconds.of(NetworkTablesJNI.now()).in(Seconds);
+            if (now - lastReadTimestamp < Milliseconds.of(15).in(Seconds))
+                return; // debounce
+
+            // 1. Pull ALL unread frames from PhotonVision
+            List<PhotonPipelineResult> unread = camera.getAllUnreadResults();
+
+            if (unread.isEmpty())
+                return; // nothing new
+
+            // 2. Sort newest → oldest (descending timestamp)
+            unread.sort(Comparator.comparingDouble(PhotonPipelineResult::getTimestampSeconds)
+                    .reversed());
+
+            // 3. Replace old cache
+            resultsList.clear();
+            resultsList.addAll(unread);
+            lastReadTimestamp = now;
+
+            // 4. Re-compute the pose once, with the newest frame
+            updateEstimatedGlobalPose(); // uses resultsList.get(0)
         }
 
         /**

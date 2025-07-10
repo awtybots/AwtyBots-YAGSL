@@ -343,16 +343,23 @@ public class SwerveSubsystem extends SubsystemBase {
     poseEstimator.update(
         Rotation2d.fromDegrees(getGyroYaw()),
         swerveDrive.getModulePositions());
-    Pose2d estimatedPose = poseEstimator.getEstimatedPosition();
 
+    // --- Vision Integration in periodic() ---
+    vision.updatePoseEstimation(swerveDrive);
+    // swerveDrive.updateOdometry();
+    Pose2d fusedPose = swerveDrive.getPose();
+
+    int currAprilTagTarget = vision.getBestReefTarget();
     if (loopCounter % 10 == 0) {
 
       SmartDashboard.putNumber("Gyro Yaw", getGyroYaw());
       SmartDashboard.putNumber("Gyro Angle", getGyroAngle());
-      SmartDashboard.putNumber("Odometry X", estimatedPose.getX());
-      SmartDashboard.putNumber("Odometry Y", estimatedPose.getY());
-      SmartDashboard.putNumber("Odometry Heading", estimatedPose.getRotation().getDegrees());
-      SmartDashboard.putString("Odometry Pose: ", estimatedPose.toString());
+      if (!fusedPose.equals(lastLoggedPose)) {
+        System.out.printf("[SwerveSubsystem] Odometry Pose: %s%n", fusedPose);
+        SmartDashboard.putString("Odometry Pose: ", fusedPose.toString());
+        lastLoggedPose = fusedPose;
+      }
+
       SmartDashboard.putString("PathPlanner Pose ", getPose().toString());
     }
     loopCounter++;
@@ -360,19 +367,9 @@ public class SwerveSubsystem extends SubsystemBase {
     for (int i = 0; i < 4; i++) {
       SmartDashboard.putNumber("module " + i, positions[i].angle.getDegrees());
     }
-
-    // --- Vision Integration in periodic() ---
-    vision.updatePoseEstimation(swerveDrive);
-    // swerveDrive.updateOdometry();
-    Pose2d fused = swerveDrive.getPose();
-
-    int currAprilTagTarget = vision.getBestReefTarget();
     SmartDashboard.putNumber("Vision/AprilTag", currAprilTagTarget);
     SmartDashboard.putData("Field", swerveDrive.field);
-    if (!fused.equals(lastLoggedPose)) {
-      System.out.printf("[SwerveSubsystem] Odometry Pose: %s%n", fused);
-      lastLoggedPose = fused;
-    }
+
   }
 
   @Override
@@ -381,16 +378,23 @@ public class SwerveSubsystem extends SubsystemBase {
     poseEstimator.update(
         Rotation2d.fromDegrees(getGyroYaw()),
         swerveDrive.getModulePositions());
-    Pose2d estimatedPose = poseEstimator.getEstimatedPosition();
 
+    // --- Vision Integration in periodic() ---
+    vision.updatePoseEstimation(swerveDrive);
+    // swerveDrive.updateOdometry();
+    Pose2d fusedPose = swerveDrive.getPose();
+
+    int currAprilTagTarget = vision.getBestReefTarget();
     if (loopCounter % 10 == 0) {
 
       SmartDashboard.putNumber("Gyro Yaw", getGyroYaw());
       SmartDashboard.putNumber("Gyro Angle", getGyroAngle());
-      SmartDashboard.putNumber("Odometry X", estimatedPose.getX());
-      SmartDashboard.putNumber("Odometry Y", estimatedPose.getY());
-      SmartDashboard.putNumber("Odometry Heading", estimatedPose.getRotation().getDegrees());
-      SmartDashboard.putString("Odometry Pose: ", estimatedPose.toString());
+      if (!fusedPose.equals(lastLoggedPose)) {
+        System.out.printf("[SwerveSubsystem] Odometry Pose: %s%n", fusedPose);
+        SmartDashboard.putString("Odometry Pose: ", fusedPose.toString());
+        lastLoggedPose = fusedPose;
+      }
+
       SmartDashboard.putString("PathPlanner Pose ", getPose().toString());
     }
     loopCounter++;
@@ -398,19 +402,9 @@ public class SwerveSubsystem extends SubsystemBase {
     for (int i = 0; i < 4; i++) {
       SmartDashboard.putNumber("module " + i, positions[i].angle.getDegrees());
     }
-
-    // --- Vision Integration in periodic() ---
-    vision.updatePoseEstimation(swerveDrive);
-    // swerveDrive.updateOdometry();
-    Pose2d fused = swerveDrive.getPose();
-
-    int currAprilTagTarget = vision.getBestReefTarget();
     SmartDashboard.putNumber("Vision/AprilTag", currAprilTagTarget);
     SmartDashboard.putData("Field", swerveDrive.field);
-    if (!fused.equals(lastLoggedPose)) {
-      System.out.printf("[SwerveSubsystem] Odometry Pose: %s%n", fused);
-      lastLoggedPose = fused;
-    }
+
   }
 
   // --- Vision Setup and Commands ---

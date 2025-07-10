@@ -15,6 +15,7 @@ import frc.robot.subsystems.SwerveSubsystem;
 import swervelib.SwerveInputStream;
 
 import java.io.File;
+import java.util.Set;
 import java.util.function.IntSupplier;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -28,6 +29,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -106,12 +108,29 @@ public class RobotContainer {
                 NamedCommands.registerCommand("Blue Align 8 Left", drivebase.alignToReefScore(22, TargetSide.LEFT));
                 NamedCommands.registerCommand("Blue Align 10 Right", drivebase.alignToReefScore(17, TargetSide.RIGHT));
                 NamedCommands.registerCommand("Blue Align 10 Left", drivebase.alignToReefScore(17, TargetSide.LEFT));
-                NamedCommands.registerCommand("align Left", Commands.run(() -> {
-                        drivebase.alignToReefScore(() -> drivebase.getReefTargetTagID(), TargetSide.LEFT).schedule();
-                }));
-                NamedCommands.registerCommand("align Right", Commands.run(() -> {
-                        drivebase.alignToReefScore(() -> drivebase.getReefTargetTagID(), TargetSide.RIGHT).schedule();
-                }));
+                // NamedCommands.registerCommand("align Left", Commands.run(() -> {
+                // drivebase.alignToReefScore(() -> drivebase.getReefTargetTagID(),
+                // TargetSide.LEFT).schedule();
+                // }));
+                NamedCommands.registerCommand(
+                                "align Left",
+                                new DeferredCommand(
+                                                // supplier: build the real command when it’s time to run
+                                                () -> drivebase.alignToReefScore(
+                                                                () -> drivebase.getReefTargetTagID(),
+                                                                TargetSide.LEFT),
+                                                // requirements: make sure to include your drivebase here
+                                                Set.of(drivebase)));
+                NamedCommands.registerCommand(
+                                "align Right",
+                                new DeferredCommand(
+                                                // supplier: build the real command when it’s time to run
+                                                () -> drivebase.alignToReefScore(
+                                                                () -> drivebase.getReefTargetTagID(),
+                                                                TargetSide.RIGHT),
+                                                // Giving the align Right command ownership of drivebase while the
+                                                // alignment runs
+                                                Set.of(drivebase)));
                 NamedCommands.registerCommand("Gyroreset1",
                                 new InstantCommand(() -> drivebase.setInitialHeading(0), drivebase));
                 autoChooser = AutoBuilder.buildAutoChooser();
@@ -197,14 +216,19 @@ public class RobotContainer {
 
                 // vision buttons
                 // align left levels 1-3
-                m_driverController.leftBumper().onTrue(Commands.runOnce(() -> {
-                        drivebase.alignToReefScore((IntSupplier) () -> drivebase.getReefTargetTagID(), TargetSide.LEFT)
-                                        .schedule();
-                }));
-                m_driverController.rightBumper().onTrue(Commands.runOnce(() -> {
-                        drivebase.alignToReefScore((IntSupplier) () -> drivebase.getReefTargetTagID(), TargetSide.RIGHT)
-                                        .schedule();
-                }));
+                m_driverController.leftBumper()
+                                .onTrue(
+                                                // when the left bumper goes true, schedule a fresh alignToReefScore
+                                                // command:
+                                                drivebase.alignToReefScore(
+                                                                drivebase::getReefTargetTagID,
+                                                                TargetSide.LEFT));
+
+                m_driverController.rightBumper()
+                                .onTrue(
+                                                drivebase.alignToReefScore(
+                                                                drivebase::getReefTargetTagID,
+                                                                TargetSide.RIGHT));
 
                 //////////////////////////////////////////////
                 /// operator controller bindings ////////////
