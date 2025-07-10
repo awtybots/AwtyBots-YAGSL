@@ -155,7 +155,10 @@ public class Vision {
     // find the latest targets april tag id from the camera
     // if no target return 0
     public int getCamerasTargetID(Cameras camera) {
-        System.out.println("[Vision] Getting camera target ID for " + camera.name());
+        if (Constants.DebugMode) {
+            System.out.println("[Vision] Getting camera target ID for " + camera.name());
+        }
+
         // Force a cache update.
         // camera.updateUnreadResults();
 
@@ -163,21 +166,28 @@ public class Vision {
         Optional<PhotonPipelineResult> cachedResult = camera.getLatestResult();
         if (cachedResult.isPresent() && cachedResult.get().hasTargets()) {
             PhotonTrackedTarget target = cachedResult.get().getBestTarget();
-            System.out.println(
-                    "[Vision] Camera " + camera.name() + " found best target with ID: " + target.getFiducialId());
+            if (Constants.DebugMode) {
+                System.out.println(
+                        "[Vision] Camera " + camera.name() + " found best target with ID: " + target.getFiducialId());
+            }
             return target.getFiducialId();
         }
 
         // Fallback to the raw result.
         var rawResult = camera.camera.getLatestResult();
-        System.out.println("[Vision DEBUG] Raw PhotonVision result: hasTargets = " + rawResult.hasTargets());
+        if (Constants.DebugMode) {
+            System.out.println("[Vision DEBUG] Raw PhotonVision result: hasTargets = " + rawResult.hasTargets());
+        }
         if (rawResult.hasTargets()) {
             PhotonTrackedTarget target = rawResult.getBestTarget();
-            System.out.println("[Vision DEBUG] Best target ID (raw): " + target.getFiducialId());
+            if (Constants.DebugMode) {
+                System.out.println("[Vision DEBUG] Best target ID (raw): " + target.getFiducialId());
+            }
             return target.getFiducialId();
         }
-
-        System.out.println("[Vision] Camera " + camera.name() + " did not find any targets.");
+        if (Constants.DebugMode) {
+            System.out.println("[Vision] Camera " + camera.name() + " did not find any targets.");
+        }
         return 0;
     }
 
@@ -186,22 +196,31 @@ public class Vision {
      * only return a target if it is on the same reef as our alliance
      */
     public int getBestReefTarget() {
-        System.out.println("[Vision] Searching for reef target...");
+        if (Constants.DebugMode) {
+            System.out.println("[Vision] Searching for reef target...");
+        }
         for (Cameras camera : Cameras.values()) {
             if (!camera.camera.isConnected()) {
                 System.out.printf("[Vision] No frames from %s; camera not connected.%n", camera);
                 continue;
             }
-
-            System.out.printf("[Vision] Checking %s Camera for target.%n", camera);
+            if (Constants.DebugMode) {
+                System.out.printf("[Vision] Checking %s Camera for target.%n", camera);
+            }
             int targetID = getCamerasTargetID(camera);
-            System.out.printf("[Vision] %s Camera returned target ID: %d%n", camera, targetID);
+            if (Constants.DebugMode) {
+                System.out.printf("[Vision] %s Camera returned target ID: %d%n", camera, targetID);
+            }
 
             if (isValidTargetForScoring(targetID)) {
-                System.out.printf("[Vision] Valid reef target found in %s: %d%n", camera, targetID);
+                if (Constants.DebugMode) {
+                    System.out.printf("[Vision] Valid reef target found in %s: %d%n", camera, targetID);
+                }
                 return targetID;
             } else if (targetID == 0) {
-                System.out.println("[Vision] No valid reef target found.");
+                if (Constants.DebugMode) {
+                    System.out.println("[Vision] No valid reef target found.");
+                }
                 return 0;
             }
 
@@ -238,26 +257,31 @@ public class Vision {
                 if (res.hasTargets()) {
                     Transform3d camToTag = res.getBestTarget()
                             .getBestCameraToTarget();
-                    System.out.printf("cam→tag  X=%.3f  Y=%.3f  Z=%.3f%n",
-                            camToTag.getX(), camToTag.getY(), camToTag.getZ());
+                    if (Constants.DebugMode) {
+                        System.out.printf("cam→tag  X=%.3f  Y=%.3f  Z=%.3f%n",
+                                camToTag.getX(), camToTag.getY(), camToTag.getZ());
+                    }
                 }
             }
             Optional<EstimatedRobotPose> poseEst = getEstimatedGlobalPose(camera);
             if (poseEst.isPresent()) {
                 var pose = poseEst.get();
                 Pose2d pose2d = pose.estimatedPose.toPose2d();
-                System.out.printf(
-                        "[Vision] Camera: %s | Estimated Pose: (X: %.2f, Y: %.2f, Rot: %.2f°) | Timestamp: %.2f\n",
-                        camera.name(), pose2d.getX(), pose2d.getY(), pose2d.getRotation().getDegrees(),
-                        Timer.getFPGATimestamp());
-
+                if (Constants.DebugMode) {
+                    System.out.printf(
+                            "[Vision] Camera: %s | Estimated Pose: (X: %.2f, Y: %.2f, Rot: %.2f°) | Timestamp: %.2f\n",
+                            camera.name(), pose2d.getX(), pose2d.getY(), pose2d.getRotation().getDegrees(),
+                            Timer.getFPGATimestamp());
+                }
                 swerveDrive.addVisionMeasurement(pose.estimatedPose.toPose2d(),
                         Timer.getFPGATimestamp(),
                         camera.curStdDevs);
             } else {
-                System.out.printf(
-                        "[Vision] Camera %s: no global pose available\n",
-                        camera.name());
+                if (Constants.DebugMode) {
+                    System.out.printf(
+                            "[Vision] Camera %s: no global pose available\n",
+                            camera.name());
+                }
             }
         }
 
@@ -380,15 +404,16 @@ public class Vision {
                 // Rotation3d(roll, pitch, yaw) in radians.
                 // Here it’s (0,0,0) because this camera is mounted “flat” with no tilt or yaw
                 // offset.
-                new Rotation3d(0, 0, 0),
+                new Rotation3d(0, 0, 0), // Change the yaw if the rotation degrees is off. Example new Rotation3d(0, 0,
+                                         // Units.degreesToRadians(10))
 
                 // 3) Camera‐to‐robot translation:
                 // Translation3d(x, y, z) in meters, from the robot’s center
                 // - x = forward/backward (+forward)
                 // - y = left/right (+left)
                 // - z = up/down (+up)
-                // Here it’s 25 cm forward, 0.25 m left, 0.381 m up.
-                new Translation3d(0.30, 0.30, 0.381),
+                // Here it’s 0.70 m forward, 0.50 m left, 0.381 m up.
+                new Translation3d(0.70, 0.50, 0.381),
 
                 // 4) Single‐tag covariance (tight):
                 // This VecBuilder.fill(...) gives your assumed measurement noise σ in [X, Y,
