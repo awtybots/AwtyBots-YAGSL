@@ -216,19 +216,23 @@ public class RobotContainer {
 
                 // vision buttons
                 // align left levels 1-3
-                m_driverController.leftBumper()
-                                .onTrue(
-                                                // when the left bumper goes true, schedule a fresh alignToReefScore
-                                                // command:
-                                                drivebase.alignToReefScore(
-                                                                drivebase::getReefTargetTagID,
-                                                                TargetSide.LEFT));
+                m_driverController.leftBumper().onTrue(
+                                new DeferredCommand(
+                                                // 1) supplier that builds a fresh align command
+                                                () -> drivebase.alignToReefScore(
+                                                                () -> drivebase.getReefTargetTagID(),
+                                                                TargetSide.LEFT),
+                                                // 2) wrap your single subsystem in a Set
+                                                Set.of(drivebase)));
 
-                m_driverController.rightBumper()
-                                .onTrue(
-                                                drivebase.alignToReefScore(
-                                                                drivebase::getReefTargetTagID,
-                                                                TargetSide.RIGHT));
+                m_driverController.rightBumper().onTrue(
+                                new DeferredCommand(
+                                                // 1) supplier that builds a fresh align command
+                                                () -> drivebase.alignToReefScore(
+                                                                () -> drivebase.getReefTargetTagID(),
+                                                                TargetSide.RIGHT),
+                                                // 2) wrap your single subsystem in a Set
+                                                Set.of(drivebase)));
 
                 //////////////////////////////////////////////
                 /// operator controller bindings ////////////

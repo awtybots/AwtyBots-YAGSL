@@ -6,7 +6,7 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.Rotation;
-
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -33,6 +33,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
@@ -45,8 +46,13 @@ import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.path.PathPoint;
+import com.pathplanner.lib.path.Waypoint;
+import com.pathplanner.lib.trajectory.PathPlannerTrajectory;
+
 import swervelib.SwerveDrive;
 import swervelib.parser.SwerveParser;
 // Import the working team's Vision class:
@@ -355,7 +361,9 @@ public class SwerveSubsystem extends SubsystemBase {
       SmartDashboard.putNumber("Gyro Yaw", getGyroYaw());
       SmartDashboard.putNumber("Gyro Angle", getGyroAngle());
       if (!fusedPose.equals(lastLoggedPose)) {
-        System.out.printf("[SwerveSubsystem] Odometry Pose: %s%n", fusedPose);
+        if (Constants.DebugMode) {
+          System.out.printf("[SwerveSubsystem] Odometry Pose: %s%n", fusedPose);
+        }
         SmartDashboard.putString("Odometry Pose: ", fusedPose.toString());
         lastLoggedPose = fusedPose;
       }
@@ -390,7 +398,9 @@ public class SwerveSubsystem extends SubsystemBase {
       SmartDashboard.putNumber("Gyro Yaw", getGyroYaw());
       SmartDashboard.putNumber("Gyro Angle", getGyroAngle());
       if (!fusedPose.equals(lastLoggedPose)) {
-        System.out.printf("[SwerveSubsystem] Odometry Pose: %s%n", fusedPose);
+        if (Constants.DebugMode) {
+          System.out.printf("[SwerveSubsystem] Odometry Pose: %s%n", fusedPose);
+        }
         SmartDashboard.putString("Odometry Pose: ", fusedPose.toString());
         lastLoggedPose = fusedPose;
       }
@@ -419,12 +429,46 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   // Command that uses AutoBuilder's pathfinding to drive to a specified pose.
-  public Command driveToPose(Pose2d pose) {
-    System.out.println("[SwerveSubsystem] driveToPose called with pose: " + pose);
+  public Command driveToPose(Pose2d targetPose) {
+
+    System.out.println("[SwerveSubsystem] driveToPose called with pose: " + targetPose);
+
+    // ── 1) Build two “direction-of-travel” poses ─────────────────────────────
+    Pose2d current = getPose();
+
+    // Heading of the straight-line segment
+    Rotation2d segmentHeading = new Rotation2d(
+        targetPose.getX() - current.getX(),
+        targetPose.getY() - current.getY());
+
+    // Two poses whose *rot* is the direction of travel
+    Pose2d startPose = new Pose2d(current.getTranslation(), segmentHeading);
+    Pose2d endPose = new Pose2d(targetPose.getTranslation(), segmentHeading);
+
+    // ── 2) Convert to waypoints and build the path ───────────────────────────
+    List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(startPose, endPose);
+
     PathConstraints constraints = new PathConstraints(
         swerveDrive.getMaximumChassisVelocity(), 2.5,
         swerveDrive.getMaximumChassisAngularVelocity(), Math.toRadians(720));
-    return AutoBuilder.pathfindToPose(pose, constraints, edu.wpi.first.units.Units.MetersPerSecond.of(0));
+
+    PathPlannerPath path = new PathPlannerPath(
+        waypoints,
+        constraints,
+        null, // no ideal start state needed for on-the-fly paths
+        new GoalEndState(0.0, targetPose.getRotation()) // keep holonomic facing
+    );
+    path.preventFlipping = true; // coords already field-correct
+
+    // ── 3) Follow it with AutoBuilder and keep debug prints ─────────────────
+    Command navCmd = AutoBuilder.followPath(path);
+
+    return Commands.sequence(
+        Commands.runOnce(
+            () -> System.out.println("[SwerveSubsystem] PathPlanner initialize"), this),
+        navCmd,
+        Commands.runOnce(
+            () -> System.out.println("[SwerveSubsystem] PathPlanner ended"), this));
   }
 
   // Command to align the robot for reef scoring using a detected AprilTag ID and

@@ -63,7 +63,7 @@ public final class Constants {
     // align to reef works correctly, the reef poles are 6.5 inches from the
     // center of the april tag
     public static double ReefLeftYOffset = Units.inchesToMeters(-9.5);
-    public static double ReefRightYOffset = Units.inchesToMeters(4);
+    public static double ReefRightYOffset = Units.inchesToMeters(9.5);
     public static double ReefXDistance = Units.inchesToMeters(25);
   }
 
@@ -318,21 +318,19 @@ public final class Constants {
 
     }
 
-    
-public static final class DrivebaseConstants {
-  // Distance to stay away from reef (in meters)
-  public static final double ReefXDistance = 1.0; // Adjust based on your robot size
-  
-  // Y-axis offsets for left and right scoring positions (in meters)
-  public static final double ReefLeftYOffset = 0.5;   // Adjust based on reef layout
-  public static final double ReefRightYOffset = -0.5; // Adjust based on reef layout
-  
-  public enum TargetSide {
-      LEFT,
-      RIGHT
-  }
-}
-  }
+    public static final class DrivebaseConstants {
+      // Distance to stay away from reef (in meters)
+      public static final double ReefXDistance = 1.0; // Adjust based on your robot size
 
+      // Y-axis offsets for left and right scoring positions (in meters)
+      public static final double ReefLeftYOffset = 0.5; // Adjust based on reef layout
+      public static final double ReefRightYOffset = -0.5; // Adjust based on reef layout
+
+      public enum TargetSide {
+        LEFT,
+        RIGHT
+      }
+    }
+  }
 
 }
