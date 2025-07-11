@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import frc.robot.commands.AlignToReefTagRelative;
 import frc.robot.Constants.OIConstants;
 //import frc.robot.commands.Autos;
 import frc.robot.subsystems.CoralSubsystem;
@@ -196,6 +197,10 @@ public class RobotContainer {
             ),
             m_coralSubsystem.runIntakeCommand(), // Do nothing
             () -> CoralSubsystem.runFunnelIntake || CoralSubsystem.ElevatorAtL4));
+
+    // Reef alignment
+		m_driverController.povRight().onTrue(new AlignToReefTagRelative(true, drivebase).withTimeout(3));
+		m_driverController.povLeft().onTrue(new AlignToReefTagRelative(false, drivebase).withTimeout(3));
 
     m_operatorController.rightStick().onTrue(m_coralSubsystem.resetElevatorEncoder());
 

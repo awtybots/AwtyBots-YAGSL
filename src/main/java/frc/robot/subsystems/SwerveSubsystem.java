@@ -246,7 +246,12 @@ public class SwerveSubsystem extends SubsystemBase {
     gyro.reset();
     gyro.zeroYaw();
   }
-
+  public void drive(Translation2d translation, double rotation, boolean fieldRelative) {
+		swerveDrive.drive(translation,
+				rotation,
+				fieldRelative,
+				false); // Open loop is disabled since it shouldn't be used most of the time.
+	}
   public void zeroGyro() {
     swerveDrive.zeroGyro();
   }
