@@ -75,12 +75,31 @@ public class SwerveSubsystem extends SubsystemBase {
   public SwerveDrive getSwerveDrive() {
     return swerveDrive;
   }
-
+  
   public void updateOdometry() {
+
     poseEstimator.update(
         gyro.getRotation2d(),
         swerveDrive.getModulePositions());
-
+     simulationPeriodic();
+    {
+      // if we are in simulation, we need to update the pose estimator with the
+      // simulated gyro angle
+      poseEstimator.update(
+          Rotation2d.fromDegrees(getGyroYaw()),
+          swerveDrive.getModulePositions());
+          double robotYaw = gyro.getYaw();  
+          LimelightHelpers.SetRobotOrientation("", robotYaw, 0.0, 0.0, 0.0, 0.0, 0.0);
+          //LimelightHelpers.SetRobotOrientation("", poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0,0, 0);
+          LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("");
+    
+            poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
+            poseEstimator.addVisionMeasurement(
+                mt2.pose,
+                mt2.timestampSeconds);
+          
+      
+    }
     boolean doRejectUpdate = false;
     boolean useMegaTag2 = true; // set to false to use MegaTag1
     // LimelightHelpers.SetRobotOrientation("",
@@ -125,8 +144,9 @@ public class SwerveSubsystem extends SubsystemBase {
             mt1.timestampSeconds);
       }
     } else if (useMegaTag2 == true) {
-      LimelightHelpers.SetRobotOrientation("", poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0,
-          0, 0);
+      double robotYaw = gyro.getYaw();  
+      LimelightHelpers.SetRobotOrientation("", robotYaw, 0.0, 0.0, 0.0, 0.0, 0.0);
+      //LimelightHelpers.SetRobotOrientation("", poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0,0, 0);
       LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("");
       if (Math.abs(gyro.getRate()) > 720) // if our angular velocity is greater than 720 degrees per second, ignore
                                           // vision updates
@@ -349,12 +369,8 @@ public class SwerveSubsystem extends SubsystemBase {
         Rotation2d.fromDegrees(getGyroYaw()),
         swerveDrive.getModulePositions());
 
-    LimelightHelpers.PoseEstimate limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
-    if (limelightMeasurement.tagCount >= 2) { // Only trust measurement if we see multiple tags
-      poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(0.7, 0.7, 9999999));
-      poseEstimator.addVisionMeasurement(
-          limelightMeasurement.pose,
-          limelightMeasurement.timestampSeconds);
+    //updateOdometry();
+   
       SmartDashboard.putNumber("Gyro Yaw", getGyroYaw());
       SmartDashboard.putNumber("Gyro Angle", getGyroAngle());
 
@@ -373,4 +389,4 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
   }
-}
+

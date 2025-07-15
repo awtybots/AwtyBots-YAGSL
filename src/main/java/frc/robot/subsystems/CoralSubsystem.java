@@ -316,7 +316,7 @@ public class CoralSubsystem extends SubsystemBase {
         
         //SmartDashboard.putNumber("Coral/Arm/Target Position", armEncoder.getPosition());
         
-       System.out.println("Wrist Encoder Position: " + wristEncoder.getPosition());
+       //System.out.println("Wrist Encoder Position: " + wristEncoder.getPosition());
         //System.out.println("LaserCan value: " + measurement.status);
         //System.out.println("Normal Arm Position: " + armEncoder.getPosition()+ " Absolute Arm Position: ");
         // SmartDashboard.putNumber("Coral/Intake/Applied Output",
