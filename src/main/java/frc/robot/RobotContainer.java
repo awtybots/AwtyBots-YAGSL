@@ -16,6 +16,7 @@ import swervelib.SwerveInputStream;
 
 import java.io.File;
 
+import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveRequest.RobotCentric;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
@@ -89,8 +90,13 @@ public class RobotContainer {
     NamedCommands.registerCommand("AlgaeHigh", m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeHigh));
     NamedCommands.registerCommand("Gyroreset", new InstantCommand(() -> drivebase.setInitialHeading(180), drivebase));
     NamedCommands.registerCommand("Gyroreset1", new InstantCommand(() -> drivebase.setInitialHeading(0), drivebase));
-    autoChooser = AutoBuilder.buildAutoChooser();
+    NamedCommands.registerCommand("AlignRight",
+        new AlignToReefTagRelative(true, drivebase).withTimeout(4));
+    NamedCommands.registerCommand("AlignLeft", 
+        new AlignToReefTagRelative(false, drivebase).withTimeout(4));
 
+    autoChooser = AutoBuilder.buildAutoChooser();
+    
     SmartDashboard.putData("Auto Chooser", autoChooser);
 
     DriverStation.silenceJoystickConnectionWarning(true);

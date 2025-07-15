@@ -4,8 +4,11 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -15,15 +18,31 @@ import frc.robot.subsystems.SwerveSubsystem;
 
 public class AlignToReefTagRelative extends Command {
   private PIDController xController, yController, rotController;
+  private ProfiledPIDController rotControllerProfiled;
   private boolean isRightScore;
   private Timer dontSeeTagTimer, stopTimer;
   private SwerveSubsystem drivebase;
   private double tagID = -1;
-    
+
   public AlignToReefTagRelative(boolean isRightScore, SwerveSubsystem drivebase) {
-    xController = new PIDController(Constants.X_REEF_ALIGNMENT_P, 0.0, 0);  // Vertical movement
-    yController = new PIDController(Constants.Y_REEF_ALIGNMENT_P, 0.0, 0);  // Horitontal movement
-    rotController = new PIDController(Constants.ROT_REEF_ALIGNMENT_P, 0, 0);  // Rotation
+    xController = new PIDController(Constants.X_REEF_ALIGNMENT_P, 0.0, 0);
+    // Vertical movement
+    yController = new PIDController(Constants.Y_REEF_ALIGNMENT_P, 0.0, 0);
+    // Horitontal movement
+    rotController = new PIDController(Constants.ROT_REEF_ALIGNMENT_P, 0, 0);
+    // Rotation
+    // rotControllerProfiled = new ProfiledPIDController(Constants.ROT_REEF_ALIGNMENT_P, 0, 0,
+    //     new TrapezoidProfile.Constraints(6.28, 3.14));
+    // Rotation using holonic drive controller
+
+    // var controller = new HolonomicDriveController(
+    // new PIDController(Constants.X_REEF_ALIGNMENT_P, 0, 0), new
+    // PIDController(Constants.Y_REEF_ALIGNMENT_P, 0, 0),
+    // new ProfiledPIDController(Constants.ROT_REEF_ALIGNMENT_P, 0, 0,
+    // new TrapezoidProfile.Constraints(6.28, 3.14)));
+    // // Here, our rotation profile constraints were a max velocity
+    // // of 1 rotation per second and a max acceleration of 180 degrees
+    // // per second squared.
     this.isRightScore = isRightScore;
     this.drivebase = drivebase;
     addRequirements(drivebase);
@@ -82,7 +101,8 @@ public class AlignToReefTagRelative extends Command {
 
   @Override
   public boolean isFinished() {
-    // Requires the robot to stay in the correct position for 0.3 seconds, as long as it gets a tag in the camera
+    // Requires the robot to stay in the correct position for 0.3 seconds, as long
+    // as it gets a tag in the camera
     return this.dontSeeTagTimer.hasElapsed(Constants.DONT_SEE_TAG_WAIT_TIME) ||
         stopTimer.hasElapsed(Constants.POSE_VALIDATION_TIME);
   }
