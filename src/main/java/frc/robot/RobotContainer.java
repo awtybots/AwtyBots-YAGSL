@@ -80,6 +80,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("Stop", Commands.runOnce(() -> drivebase.stop()));
     NamedCommands.registerCommand("test", Commands.print("Hello World"));
     NamedCommands.registerCommand("outtake", m_coralSubsystem.reverseIntakeCommand().withTimeout(1));
+    NamedCommands.registerCommand("outtake0.5", m_coralSubsystem.reverseIntakeCommand().withTimeout(0.5));
     NamedCommands.registerCommand("fintake", m_funnelIntakeSubsystem.runIntakeCommand().withTimeout(1));
     NamedCommands.registerCommand("FeederStation", m_coralSubsystem.setSetpointCommand(Setpoint.FeederStation));
     NamedCommands.registerCommand("ElevatorLiftL1", m_coralSubsystem.setSetpointCommand(Setpoint.L1));
@@ -187,7 +188,7 @@ public class RobotContainer {
             ),
             m_coralSubsystem.runIntakeCommand(), // Do nothing
             () -> CoralSubsystem.runFunnelIntake || CoralSubsystem.ElevatorAtL4));
-    m_driverController.leftBumper().whileTrue(
+    m_driverController.rightTrigger().whileTrue(
         Commands.either(
             Commands.either(
                 Commands.parallel(
@@ -205,8 +206,8 @@ public class RobotContainer {
             () -> CoralSubsystem.runFunnelIntake || CoralSubsystem.ElevatorAtL4));
 
     // Reef alignment
-		m_driverController.povRight().onTrue(new AlignToReefTagRelative(true, drivebase).withTimeout(3));
-		m_driverController.povLeft().onTrue(new AlignToReefTagRelative(false, drivebase).withTimeout(3));
+		m_driverController.rightBumper().onTrue(new AlignToReefTagRelative(true, drivebase).withTimeout(3));
+		m_driverController.leftBumper().onTrue(new AlignToReefTagRelative(false, drivebase).withTimeout(3));
 
     m_operatorController.rightStick().onTrue(m_coralSubsystem.resetElevatorEncoder());
 

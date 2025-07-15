@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.226639344262295,
-        "y": 2.508555327868852
+        "x": 3.729374999999999,
+        "y": 2.6239914772727264
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.403750353208787,
-        "y": 2.079796364376786
+        "x": 2.9064860089464917,
+        "y": 2.1952325137806605
       },
       "isLocked": false,
       "linkedName": "t3"
     },
     {
       "anchor": {
-        "x": 1.282684426229508,
-        "y": 1.0340676229508199
+        "x": 1.286335227272727,
+        "y": 0.948764204545455
       },
       "prevControl": {
-        "x": 2.070040769344728,
-        "y": 1.319655648339045
+        "x": 2.073691570387947,
+        "y": 1.23435222993368
       },
       "nextControl": null,
       "isLocked": false,
@@ -31,7 +31,19 @@
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "ToFeeder",
+      "waypointRelativePos": 0.43194600674915656,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "FeederStation"
+        }
+      }
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 2.0,
     "maxAcceleration": 3.0,
@@ -41,14 +53,14 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 2.0,
-    "rotation": -122.8285417914125
+    "velocity": 0.0,
+    "rotation": -127.04880966701955
   },
   "reversed": false,
-  "folder": "Leftauto",
+  "folder": "VisionPath",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -58.73626830562264
+    "rotation": -119.31000707091604
   },
   "useDefaultConstraints": true
 }

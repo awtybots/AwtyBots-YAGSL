@@ -3,11 +3,12 @@
   "robotLength": 0.889,
   "holonomicMode": true,
   "pathFolders": [
-    "BackReef",
-    "Leftauto",
+    "VisionPath",
+    "CompPath",
     "test"
   ],
   "autoFolders": [
+    "VisionAuto",
     "Red and Blue Comp"
   ],
   "defaultMaxVel": 2.0,
