@@ -21,7 +21,7 @@
       },
       "prevControl": {
         "x": 2.170625086952243,
-        "y": 1.63093365894532
+        "y": 1.6309336589453203
       },
       "nextControl": null,
       "isLocked": false,
@@ -31,19 +31,7 @@
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "ToFeeder",
-      "waypointRelativePos": 0.4319460067491569,
-      "endWaypointRelativePos": null,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "FeederStation"
-        }
-      }
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 2.0,
     "maxAcceleration": 3.0,

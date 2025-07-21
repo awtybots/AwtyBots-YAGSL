@@ -61,7 +61,7 @@ public class AlignToReefTagRelative extends Command {
     xController.setSetpoint(Constants.X_SETPOINT_REEF_ALIGNMENT);
     xController.setTolerance(Constants.X_TOLERANCE_REEF_ALIGNMENT);
 
-    yController.setSetpoint(isRightScore ? Constants.Y_SETPOINT_REEF_ALIGNMENT : -Constants.Y_SETPOINT_REEF_ALIGNMENT);
+    yController.setSetpoint(isRightScore ? Constants.Y_R_SETPOINT_REEF_ALIGNMENT : Constants.Y_L_SETPOINT_REEF_ALIGNMENT);
     yController.setTolerance(Constants.Y_TOLERANCE_REEF_ALIGNMENT);
 
     tagID = LimelightHelpers.getFiducialID("");
@@ -75,10 +75,10 @@ public class AlignToReefTagRelative extends Command {
       double[] postions = LimelightHelpers.getBotPose_TargetSpace("");
       SmartDashboard.putNumber("x", postions[2]);
 
-      double xSpeed = xController.calculate(postions[2]);
+      double xSpeed = -xController.calculate(postions[2]);
       SmartDashboard.putNumber("xspeed", xSpeed);
-      double ySpeed = -yController.calculate(postions[0]);
-      double rotValue = -rotController.calculate(postions[4]);
+      double ySpeed = yController.calculate(postions[0]);
+      double rotValue = rotController.calculate(postions[4]);
 
       drivebase.drive(new Translation2d(xSpeed, ySpeed), rotValue, false);
 
