@@ -207,7 +207,7 @@ public class RobotContainer {
 
     // Reef alignment
 		m_driverController.rightBumper().onTrue(new AlignToReefTagRelative(true, drivebase).withTimeout(3));
-		m_driverController.leftBumper().onTrue(new AlignToReefTagRelative(false, drivebase).withTimeout(3));
+		m_driverController.leftBumper().whileTrue(new AlignToReefTagRelative(false, drivebase).withTimeout(3));
 
     m_operatorController.rightStick().onTrue(m_coralSubsystem.resetElevatorEncoder());
 
