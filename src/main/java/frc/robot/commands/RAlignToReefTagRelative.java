@@ -16,15 +16,15 @@ import frc.robot.Constants;
 import frc.robot.LimelightHelpers;
 import frc.robot.subsystems.SwerveSubsystem;
 
-public class AlignToReefTagRelative extends Command {
+public class RAlignToReefTagRelative extends Command {
   private PIDController xController, yController, rotController;
   private ProfiledPIDController rotControllerProfiled;
-  private boolean isRightScore;
+  //private boolean isRightScore;
   private Timer dontSeeTagTimer, stopTimer;
   private SwerveSubsystem drivebase;
   private double tagID = -1;
 
-  public AlignToReefTagRelative(boolean isRightScore, SwerveSubsystem drivebase) {
+  public RAlignToReefTagRelative(SwerveSubsystem drivebase) {
     xController = new PIDController(Constants.X_REEF_ALIGNMENT_P, 0.0, 0);
     // Vertical movement
     yController = new PIDController(Constants.Y_REEF_ALIGNMENT_P, 0.0, 0);
@@ -43,7 +43,7 @@ public class AlignToReefTagRelative extends Command {
     // // Here, our rotation profile constraints were a max velocity
     // // of 1 rotation per second and a max acceleration of 180 degrees
     // // per second squared.
-    this.isRightScore = isRightScore;
+    //this.isRightScore = isRightScore;
     this.drivebase = drivebase;
     addRequirements(drivebase);
   }
@@ -61,18 +61,18 @@ public class AlignToReefTagRelative extends Command {
     xController.setSetpoint(Constants.X_SETPOINT_REEF_ALIGNMENT);
     xController.setTolerance(Constants.X_TOLERANCE_REEF_ALIGNMENT);
 
-    yController.setSetpoint(isRightScore ? Constants.Y_R_SETPOINT_REEF_ALIGNMENT : Constants.Y_L_SETPOINT_REEF_ALIGNMENT);
+    yController.setSetpoint(Constants.Y_R_SETPOINT_REEF_ALIGNMENT);
     yController.setTolerance(Constants.Y_TOLERANCE_REEF_ALIGNMENT);
 
-    tagID = LimelightHelpers.getFiducialID("");
+    tagID = LimelightHelpers.getFiducialID("limelight-left");
   }
 
   @Override
   public void execute() {
-    if (LimelightHelpers.getTV("") && LimelightHelpers.getFiducialID("") == tagID) {
+    if (LimelightHelpers.getTV("limelight-left") && LimelightHelpers.getFiducialID("limelight-left") == tagID) {
       this.dontSeeTagTimer.reset();
 
-      double[] postions = LimelightHelpers.getBotPose_TargetSpace("");
+      double[] postions = LimelightHelpers.getBotPose_TargetSpace("limelight-left");
       SmartDashboard.putNumber("x", postions[2]);
 
       double xSpeed = -xController.calculate(postions[2]);

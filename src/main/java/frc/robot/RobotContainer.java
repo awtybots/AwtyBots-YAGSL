@@ -4,7 +4,8 @@
 
 package frc.robot;
 
-import frc.robot.commands.AlignToReefTagRelative;
+import frc.robot.commands.LAlignToReefTagRelative;
+import frc.robot.commands.RAlignToReefTagRelative;
 import frc.robot.Constants.OIConstants;
 //import frc.robot.commands.Autos;
 import frc.robot.subsystems.CoralSubsystem;
@@ -91,10 +92,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("AlgaeHigh", m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeHigh));
     NamedCommands.registerCommand("Gyroreset", new InstantCommand(() -> drivebase.setInitialHeading(180), drivebase));
     NamedCommands.registerCommand("Gyroreset1", new InstantCommand(() -> drivebase.setInitialHeading(0), drivebase));
-    NamedCommands.registerCommand("AlignRight",
-        new AlignToReefTagRelative(true, drivebase).withTimeout(4));
-    NamedCommands.registerCommand("AlignLeft", 
-        new AlignToReefTagRelative(false, drivebase).withTimeout(4));
+
 
     autoChooser = AutoBuilder.buildAutoChooser();
     
@@ -206,8 +204,8 @@ public class RobotContainer {
             () -> CoralSubsystem.runFunnelIntake || CoralSubsystem.ElevatorAtL4));
 
     // Reef alignment
-		m_driverController.rightBumper().onTrue(new AlignToReefTagRelative(true, drivebase).withTimeout(3));
-		m_driverController.leftBumper().whileTrue(new AlignToReefTagRelative(false, drivebase).withTimeout(3));
+		m_driverController.rightBumper().whileTrue(new RAlignToReefTagRelative(drivebase));
+		m_driverController.leftBumper().whileTrue(new LAlignToReefTagRelative(drivebase));
 
     m_operatorController.rightStick().onTrue(m_coralSubsystem.resetElevatorEncoder());
 
