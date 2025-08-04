@@ -36,9 +36,7 @@ public class CoralSubsystem extends SubsystemBase {
         Barge;
     }
 
-    //LaserCan setup
-    private LaserCan lc = new LaserCan(29);
-    LaserCan.Measurement measurement = lc.getMeasurement();
+
 
     // Variable use for tracking if the elevator was raised to L4
     public static boolean ElevatorAtL4;
@@ -71,8 +69,7 @@ public class CoralSubsystem extends SubsystemBase {
    // private RelativeEncoder wristEncoder = wristMotor.getEncoder();
     private AbsoluteEncoder wristEncoder = wristMotor.getAbsoluteEncoder();
 
-    // intake setup
-    private SparkFlex intakeMotor = new SparkFlex(ArmConstants.IntakeCanID, MotorType.kBrushless);
+ 
 
     private boolean wasReset = false;
     //private double armCurrentTarget = ArmSetpoints.FeederStation;
@@ -108,10 +105,7 @@ public class CoralSubsystem extends SubsystemBase {
                 ResetMode.kResetSafeParameters,
                 PersistMode.kPersistParameters);
 
-        intakeMotor.configure(
-                Configs.CoralSubsystem.intakeMotorConfig,
-                ResetMode.kResetSafeParameters,
-                PersistMode.kPersistParameters);
+
 
         
         elevatorEncoder.setPosition(0);
@@ -175,9 +169,7 @@ public class CoralSubsystem extends SubsystemBase {
         });
     }
 
-    private void setIntakePower(double power) {
-        intakeMotor.set(power);
-    }
+
 
     public Command setSetpointCommand(Setpoint setpoint) {
         return this.runOnce(
@@ -283,24 +275,7 @@ public class CoralSubsystem extends SubsystemBase {
                 });
     }
 
-    public Command runIntakeCommand() {
-
-        /*if(measurement.status > 10){
-            return Commands.startEnd(
-                () -> setIntakePower(IntakeSetpoints.kForward), () -> setIntakePower(0.0));
-        }else{
-            return Commands.startEnd(
-                () -> setIntakePower(0.0), () -> setIntakePower(0.0));
-        }*/
-        return Commands.startEnd(
-                () -> setIntakePower(IntakeSetpoints.kForward), () -> setIntakePower(0.0));
-    }
-
-    public Command reverseIntakeCommand() {
-        return this.startEnd(
-                () -> this.setIntakePower(IntakeSetpoints.kReverse), () -> this.setIntakePower(0.0));
-    }
-
+  
     public void periodic() {
         moveToSetpoint();
         zeroOnUserButton();
@@ -320,6 +295,6 @@ public class CoralSubsystem extends SubsystemBase {
         //System.out.println("LaserCan value: " + measurement.status);
         //System.out.println("Normal Arm Position: " + armEncoder.getPosition()+ " Absolute Arm Position: ");
         // SmartDashboard.putNumber("Coral/Intake/Applied Output",
-        // intakeMotor.getAppliedOutput());
+        //intakeMotor.getAppliedOutput();
     }
 }

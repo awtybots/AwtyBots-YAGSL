@@ -9,6 +9,7 @@ import frc.robot.commands.RAlignToReefTagRelative;
 import frc.robot.Constants.OIConstants;
 //import frc.robot.commands.Autos;
 import frc.robot.subsystems.CoralSubsystem;
+import frc.robot.subsystems.EndE;
 import frc.robot.subsystems.CoralSubsystem.Setpoint;
 import frc.robot.subsystems.FunnelIntake;
 import frc.robot.subsystems.Climber;
@@ -44,6 +45,7 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   public final SwerveSubsystem drivebase = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(), "swerve"));
   private final CoralSubsystem m_coralSubsystem = new CoralSubsystem();
+  private final EndE m_EndE = new EndE();
   private final FunnelIntake m_funnelIntakeSubsystem = new FunnelIntake();
   private final Climber m_climber = new Climber();
   private final SendableChooser<Command> autoChooser;
@@ -80,8 +82,8 @@ public class RobotContainer {
     drivebase.setDefaultCommand(driveFieldOrientedAngluarVelocity);
     NamedCommands.registerCommand("Stop", Commands.runOnce(() -> drivebase.stop()));
     NamedCommands.registerCommand("test", Commands.print("Hello World"));
-    NamedCommands.registerCommand("outtake", m_coralSubsystem.reverseIntakeCommand().withTimeout(1));
-    NamedCommands.registerCommand("outtake0.5", m_coralSubsystem.reverseIntakeCommand().withTimeout(0.5));
+    NamedCommands.registerCommand("outtake", m_EndE.reverseIntakeCommand().withTimeout(1));
+    NamedCommands.registerCommand("outtake0.5", m_EndE.reverseIntakeCommand().withTimeout(0.5));
     NamedCommands.registerCommand("fintake", m_funnelIntakeSubsystem.runIntakeCommand().withTimeout(1));
     NamedCommands.registerCommand("FeederStation", m_coralSubsystem.setSetpointCommand(Setpoint.FeederStation));
     NamedCommands.registerCommand("ElevatorLiftL1", m_coralSubsystem.setSetpointCommand(Setpoint.L1));
@@ -162,8 +164,8 @@ public class RobotContainer {
 
     // Left Bumper -> Run tube intake
     m_operatorController.leftBumper().whileTrue(Commands.either(
-        m_coralSubsystem.runIntakeCommand(), // If ElevatorAtL4 is true, run Reverse Intake
-        m_coralSubsystem.reverseIntakeCommand(), // Otherwise, run normal intake
+        m_EndE.runIntakeCommand(), // If ElevatorAtL4 is true, run Reverse Intake
+        m_EndE.reverseIntakeCommand(), // Otherwise, run normal intake
         () -> CoralSubsystem.ElevatorAtL4 // Condition for reverse intake
     ));
 
@@ -175,32 +177,32 @@ public class RobotContainer {
             Commands.either(
                 Commands.parallel(
                     m_funnelIntakeSubsystem.runIntakeCommand(), // Run Funnel Intake
-                    m_coralSubsystem.runIntakeCommand() // Run Coral Intake at the same time
+                    m_EndE.runIntakeCommand() // Run Coral Intake at the same time
                 ),
                 Commands.either(
-                    m_coralSubsystem.reverseIntakeCommand(), // If ElevatorAtL4 is true, run Reverse Intake
-                    m_coralSubsystem.runIntakeCommand(), // Otherwise, run normal intake
+                    m_EndE.reverseIntakeCommand(), // If ElevatorAtL4 is true, run Reverse Intake
+                    m_EndE.runIntakeCommand(), // Otherwise, run normal intake
                     () -> CoralSubsystem.ElevatorAtL4 // Condition for reverse intake
                 ),
                 () -> CoralSubsystem.runFunnelIntake // Condition for Funnel Intake
             ),
-            m_coralSubsystem.runIntakeCommand(), // Do nothing
+            m_EndE.runIntakeCommand(), // Do nothing
             () -> CoralSubsystem.runFunnelIntake || CoralSubsystem.ElevatorAtL4));
     m_driverController.rightTrigger().whileTrue(
         Commands.either(
             Commands.either(
                 Commands.parallel(
                     m_funnelIntakeSubsystem.runIntakeCommand(), // Run Funnel Intake
-                    m_coralSubsystem.runIntakeCommand() // Run Coral Intake at the same time
+                    m_EndE.runIntakeCommand() // Run Coral Intake at the same time
                 ),
                 Commands.either(
-                    m_coralSubsystem.reverseIntakeCommand(), // If ElevatorAtL4 is true, run Reverse Intake
-                    m_coralSubsystem.runIntakeCommand(), // Otherwise, run normal intake
+                    m_EndE.reverseIntakeCommand(), // If ElevatorAtL4 is true, run Reverse Intake
+                    m_EndE.runIntakeCommand(), // Otherwise, run normal intake
                     () -> CoralSubsystem.ElevatorAtL4 // Condition for reverse intake
                 ),
                 () -> CoralSubsystem.runFunnelIntake // Condition for Funnel Intake
             ),
-            m_coralSubsystem.runIntakeCommand(), // Do nothing
+            m_EndE.runIntakeCommand(), // Do nothing
             () -> CoralSubsystem.runFunnelIntake || CoralSubsystem.ElevatorAtL4));
 
     // Reef alignment
