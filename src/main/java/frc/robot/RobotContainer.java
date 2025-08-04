@@ -211,7 +211,8 @@ public class RobotContainer {
     // Reef alignment
 		// m_driverController.rightBumper().whileTrue(new RAlignToReefTagRelative(drivebase));
 		// m_driverController.leftBumper().whileTrue(new LAlignToReefTagRelative(drivebase));
-    m_driverController.rightBumper().whileTrue(new SequentialCommandGroup(m_coralSubsystem.setSetpointCommand(Setpoint.L4).onlyWhile(() -> EndE.CoralEngaged), new RAlignToReefTagRelative(drivebase)));
+    m_driverController.rightBumper().whileTrue(new SequentialCommandGroup(m_coralSubsystem.setSetpointCommand(Setpoint.L4).onlyWhile(() -> EndE.CoralEngaged = true), 
+    new RAlignToReefTagRelative(drivebase)));
 		m_driverController.leftBumper().whileTrue(new LAlignToReefTagRelative(drivebase));
     m_operatorController.rightStick().onTrue(m_coralSubsystem.resetElevatorEncoder());
 
