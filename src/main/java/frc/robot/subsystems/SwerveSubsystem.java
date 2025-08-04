@@ -369,7 +369,7 @@ public class SwerveSubsystem extends SubsystemBase {
         Rotation2d.fromDegrees(getGyroYaw()),
         swerveDrive.getModulePositions());
 
-    //updateOdometry();
+    updateOdometry();
    
       SmartDashboard.putNumber("Gyro Yaw", getGyroYaw());
       SmartDashboard.putNumber("Gyro Angle", getGyroAngle());

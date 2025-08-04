@@ -23,7 +23,7 @@ public class EndE {
     private LaserCan lc = new LaserCan(29);
     // intake setup
     private SparkFlex intakeMotor = new SparkFlex(ArmConstants.IntakeCanID, MotorType.kBrushless);
-
+    public static Boolean CoralEngaged = false;
     public EndE() {
         intakeMotor.configure(
                 Configs.CoralSubsystem.intakeMotorConfig,
@@ -49,11 +49,14 @@ public class EndE {
     public Command runIntakeCommand() {
         LaserCan.Measurement measurement = lc.getMeasurement();
         if (measurement.distance_mm > 10) {
+            CoralEngaged = false;
             return Commands.startEnd(
                     () -> setIntakePower(IntakeSetpoints.kForward), () -> setIntakePower(0.0));
         } else {
+            CoralEngaged = true;
             return Commands.startEnd(
-                    () -> setIntakePower(0.0), () -> setIntakePower(0.0));
+                    () -> setIntakePower(0.0), () -> setIntakePower(0.0)
+                    );
         }
         // return Commands.startEnd(
         //         () -> setIntakePower(IntakeSetpoints.kForward), () -> setIntakePower(0.0));

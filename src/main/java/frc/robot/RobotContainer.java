@@ -18,6 +18,7 @@ import swervelib.SwerveInputStream;
 
 import java.io.File;
 
+import com.ctre.phoenix6.hardware.core.CoreCANcoder;
 import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveRequest.RobotCentric;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -31,6 +32,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -83,6 +85,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("Stop", Commands.runOnce(() -> drivebase.stop()));
     NamedCommands.registerCommand("test", Commands.print("Hello World"));
     NamedCommands.registerCommand("outtake", m_EndE.reverseIntakeCommand().withTimeout(1));
+    //NamedCommands.registerCommand("outtake", m_EndE.reverseIntakeCommand().until(() -> EndE.CoralEngaged = true));
     NamedCommands.registerCommand("outtake0.5", m_EndE.reverseIntakeCommand().withTimeout(0.5));
     NamedCommands.registerCommand("fintake", m_funnelIntakeSubsystem.runIntakeCommand().withTimeout(1));
     NamedCommands.registerCommand("FeederStation", m_coralSubsystem.setSetpointCommand(Setpoint.FeederStation));
@@ -206,9 +209,10 @@ public class RobotContainer {
             () -> CoralSubsystem.runFunnelIntake || CoralSubsystem.ElevatorAtL4));
 
     // Reef alignment
-		m_driverController.rightBumper().whileTrue(new RAlignToReefTagRelative(drivebase));
+		// m_driverController.rightBumper().whileTrue(new RAlignToReefTagRelative(drivebase));
+		// m_driverController.leftBumper().whileTrue(new LAlignToReefTagRelative(drivebase));
+    m_driverController.rightBumper().whileTrue(new SequentialCommandGroup(m_coralSubsystem.setSetpointCommand(Setpoint.L4).onlyWhile(() -> EndE.CoralEngaged), new RAlignToReefTagRelative(drivebase)));
 		m_driverController.leftBumper().whileTrue(new LAlignToReefTagRelative(drivebase));
-
     m_operatorController.rightStick().onTrue(m_coralSubsystem.resetElevatorEncoder());
 
     // B Button -> Elevator/Arm to human player position, set ball intake to stow
