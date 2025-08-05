@@ -68,6 +68,7 @@ public class EndE {
         return Commands.startEnd(
                 () -> this.setIntakePower(IntakeSetpoints.kReverse), () -> this.setIntakePower(0.0));
     }
+    
     public boolean isCoralEngaged() {
         return CoralEngaged;
     }

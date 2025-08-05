@@ -85,7 +85,8 @@ public class RobotContainer {
     NamedCommands.registerCommand("Stop", Commands.runOnce(() -> drivebase.stop()));
     NamedCommands.registerCommand("test", Commands.print("Hello World"));
     NamedCommands.registerCommand("outtake", m_EndE.reverseIntakeCommand().withTimeout(1));
-    //NamedCommands.registerCommand("outtake", m_EndE.reverseIntakeCommand().until(() -> EndE.CoralEngaged = true));
+    // NamedCommands.registerCommand("outtake",
+    // m_EndE.reverseIntakeCommand().until(() -> EndE.CoralEngaged = true));
     NamedCommands.registerCommand("outtake0.5", m_EndE.reverseIntakeCommand().withTimeout(0.5));
     NamedCommands.registerCommand("fintake", m_funnelIntakeSubsystem.runIntakeCommand().withTimeout(1));
     NamedCommands.registerCommand("FeederStation", m_coralSubsystem.setSetpointCommand(Setpoint.FeederStation));
@@ -98,9 +99,8 @@ public class RobotContainer {
     NamedCommands.registerCommand("Gyroreset", new InstantCommand(() -> drivebase.setInitialHeading(180), drivebase));
     NamedCommands.registerCommand("Gyroreset1", new InstantCommand(() -> drivebase.setInitialHeading(0), drivebase));
 
-
     autoChooser = AutoBuilder.buildAutoChooser();
-    
+
     SmartDashboard.putData("Auto Chooser", autoChooser);
 
     DriverStation.silenceJoystickConnectionWarning(true);
@@ -126,6 +126,23 @@ public class RobotContainer {
 
   Command driveFieldOrientedAngluarVelocity = drivebase.driveFieldOriented(driveAngulareVelocity);
 
+  Command ScoreUniversal () {
+    return  Commands.either(
+        Commands.either(
+            Commands.parallel(
+                m_funnelIntakeSubsystem.runIntakeCommand(), // Run Funnel Intake
+                m_EndE.runIntakeCommand() // Run Coral Intake at the same time
+            ),
+            Commands.either(
+                m_EndE.reverseIntakeCommand(), // If ElevatorAtL4 is true, run Reverse Intake
+                m_EndE.runIntakeCommand(), // Otherwise, run normal intake
+                () -> CoralSubsystem.ElevatorAtL4 // Condition for reverse intake
+            ),
+            () -> CoralSubsystem.runFunnelIntake // Condition for Funnel Intake
+        ),
+        m_EndE.runIntakeCommand(), // Do nothing
+        () -> CoralSubsystem.runFunnelIntake || CoralSubsystem.ElevatorAtL4);
+}
   /**
    * Use this method to define your trigger->command mappings. Triggers can be
    * created via the
@@ -175,46 +192,20 @@ public class RobotContainer {
     // m_operatorController.start().whileTrue(m_coralSubsystem.manualElevatorDown());
     // Right Bumper -> Run tube intake in reverse
 
-    m_operatorController.rightBumper().whileTrue(
-        Commands.either(
-            Commands.either(
-                Commands.parallel(
-                    m_funnelIntakeSubsystem.runIntakeCommand(), // Run Funnel Intake
-                    m_EndE.runIntakeCommand() // Run Coral Intake at the same time
-                ),
-                Commands.either(
-                    m_EndE.reverseIntakeCommand(), // If ElevatorAtL4 is true, run Reverse Intake
-                    m_EndE.runIntakeCommand(), // Otherwise, run normal intake
-                    () -> CoralSubsystem.ElevatorAtL4 // Condition for reverse intake
-                ),
-                () -> CoralSubsystem.runFunnelIntake // Condition for Funnel Intake
-            ),
-            m_EndE.runIntakeCommand(), // Do nothing
-            () -> CoralSubsystem.runFunnelIntake || CoralSubsystem.ElevatorAtL4));
-    m_driverController.rightTrigger().whileTrue(
-        Commands.either(
-            Commands.either(
-                Commands.parallel(
-                    m_funnelIntakeSubsystem.runIntakeCommand(), // Run Funnel Intake
-                    m_EndE.runIntakeCommand() // Run Coral Intake at the same time
-                ),
-                Commands.either(
-                    m_EndE.reverseIntakeCommand(), // If ElevatorAtL4 is true, run Reverse Intake
-                    m_EndE.runIntakeCommand(), // Otherwise, run normal intake
-                    () -> CoralSubsystem.ElevatorAtL4 // Condition for reverse intake
-                ),
-                () -> CoralSubsystem.runFunnelIntake // Condition for Funnel Intake
-            ),
-            m_EndE.runIntakeCommand(), // Do nothing
-            () -> CoralSubsystem.runFunnelIntake || CoralSubsystem.ElevatorAtL4));
+    m_operatorController.rightBumper().whileTrue(this.ScoreUniversal());
+    m_driverController.rightTrigger().whileTrue(this.ScoreUniversal());
 
     // Reef alignment
-		// m_driverController.rightBumper().whileTrue(new RAlignToReefTagRelative(drivebase));
-		// m_driverController.leftBumper().whileTrue(new LAlignToReefTagRelative(drivebase));
-    m_driverController.rightBumper().whileTrue(new SequentialCommandGroup(m_coralSubsystem.setSetpointCommand(Setpoint.L4).onlyWhile(() -> EndE.CoralEngaged = true), 
-    new RAlignToReefTagRelative(drivebase)));
-		m_driverController.leftBumper().whileTrue(new LAlignToReefTagRelative(drivebase));
-    m_operatorController.rightStick().onTrue(m_coralSubsystem.resetElevatorEncoder());
+    // m_driverController.rightBumper().whileTrue(new
+    // RAlignToReefTagRelative(drivebase));
+    // m_driverController.leftBumper().whileTrue(new
+    // LAlignToReefTagRelative(drivebase));
+    m_driverController.rightBumper().whileTrue(new SequentialCommandGroup(
+        Commands.waitUntil(() -> m_EndE.isCoralEngaged()),
+        m_coralSubsystem.setSetpointCommand(Setpoint.L4),
+        new RAlignToReefTagRelative(drivebase),  this.ScoreUniversal().withTimeout(1)));
+    m_driverController.leftBumper().whileTrue(new LAlignToReefTagRelative(drivebase));
+    //m_operatorController.rightStick().onTrue(m_coralSubsystem.resetElevatorEncoder());
 
     // B Button -> Elevator/Arm to human player position, set ball intake to stow
     // when idle
@@ -245,8 +236,8 @@ public class RobotContainer {
     m_driverController.b().whileTrue(m_climber.runClimberCommand());
     // B Button -> Climber Goes Out
     m_driverController.a().whileTrue(m_climber.runReverseClimberCommand());
-    //Resets all encoders
-   // m_operatorController.start().onTrue(m_coralSubsystem.resetAllEncoders());
+    // Resets all encoders
+    // m_operatorController.start().onTrue(m_coralSubsystem.resetAllEncoders());
 
   }
 
