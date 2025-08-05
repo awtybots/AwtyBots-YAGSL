@@ -202,34 +202,34 @@ public class RobotContainer {
     // LAlignToReefTagRelative(drivebase));
     m_driverController.rightBumper().whileTrue(new SequentialCommandGroup(
         Commands.waitUntil(() -> m_EndE.isCoralEngaged()),
-        m_coralSubsystem.setSetpointCommand(Setpoint.L4),
+        m_coralSubsystem.setSetpointCommand(m_coralSubsystem.lastSetpoint),
         new RAlignToReefTagRelative(drivebase),  this.ScoreUniversal().withTimeout(1)));
     m_driverController.leftBumper().whileTrue(new LAlignToReefTagRelative(drivebase));
     //m_operatorController.rightStick().onTrue(m_coralSubsystem.resetElevatorEncoder());
 
     // B Button -> Elevator/Arm to human player position, set ball intake to stow
     // when idle
-    m_operatorController.back().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.FeederStation));
+    m_operatorController.back().onTrue(m_coralSubsystem.setSetpointDelayed(Setpoint.FeederStation));
 
     // A Button -> Elevator/Arm to level 1 position
-    m_operatorController.a().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.L1));
+    m_operatorController.a().onTrue(m_coralSubsystem.setSetpointDelayed(Setpoint.L1));
 
     // B Button -> Elevator/Arm to level 2 position
-    m_operatorController.b().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.L2));
+    m_operatorController.b().onTrue(m_coralSubsystem.setSetpointDelayed(Setpoint.L2));
 
     // X Button -> Elevator/Arm to level 3 position
-    m_operatorController.x().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.L3));
+    m_operatorController.x().onTrue(m_coralSubsystem.setSetpointDelayed(Setpoint.L3));
 
     // Y Button -> Elevator/Arm to level 4 position
-    m_operatorController.y().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.L4));
+    m_operatorController.y().onTrue(m_coralSubsystem.setSetpointDelayed(Setpoint.L4));
 
     // D-Pad Up -> Elevator to 2st Algae pickup position
-    m_operatorController.povUp().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeHigh));
+    m_operatorController.povUp().onTrue(m_coralSubsystem.setSetpointDelayed(Setpoint.AlgaeHigh));
 
     // D-Pad Down -> Elevator to 1st Algae pickup position
-    m_operatorController.povDown().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeLow));
+    m_operatorController.povDown().onTrue(m_coralSubsystem.setSetpointDelayed(Setpoint.AlgaeLow));
     // D-Pad Left -> Elevator to Barge position
-    m_operatorController.povLeft().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.Barge));
+    m_operatorController.povLeft().onTrue(m_coralSubsystem.setSetpointDelayed(Setpoint.Barge));
 
     m_driverController.start().onTrue(new InstantCommand(() -> drivebase.setInitialHeading(180), drivebase));
     // A Button -> Climber Goes In
