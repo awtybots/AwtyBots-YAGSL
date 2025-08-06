@@ -98,6 +98,10 @@ public class RobotContainer {
     NamedCommands.registerCommand("AlgaeHigh", m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeHigh));
     NamedCommands.registerCommand("Gyroreset", new InstantCommand(() -> drivebase.setInitialHeading(180), drivebase));
     NamedCommands.registerCommand("Gyroreset1", new InstantCommand(() -> drivebase.setInitialHeading(0), drivebase));
+    NamedCommands.registerCommand("AlignR", new SequentialCommandGroup(
+      Commands.waitUntil(() -> m_EndE.isCoralEngaged()),
+      m_coralSubsystem.setSetpointCommand(Setpoint.L4),
+      new RAlignToReefTagRelative(drivebase),  this.ScoreUniversal().withTimeout(1)));
 
     autoChooser = AutoBuilder.buildAutoChooser();
 
