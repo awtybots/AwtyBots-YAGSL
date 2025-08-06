@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.729374999999999,
-        "y": 2.6239914772727264
+        "x": 3.958721590909091,
+        "y": 2.8134517045454537
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.9064860089464917,
-        "y": 2.1952325137806605
+        "x": 3.1358325998555836,
+        "y": 2.384692741053388
       },
       "isLocked": false,
-      "linkedName": "t3"
+      "linkedName": null
     },
     {
       "anchor": {
-        "x": 1.286335227272727,
-        "y": 0.948764204545455
+        "x": 1.6453125,
+        "y": 0.67953125
       },
       "prevControl": {
-        "x": 2.073691570387947,
-        "y": 1.23435222993368
+        "x": 2.43266884311522,
+        "y": 0.9651192753882251
       },
       "nextControl": null,
       "isLocked": false,
@@ -31,10 +31,22 @@
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "gofeeder",
+      "waypointRelativePos": 0.37120359955005694,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "FeederStation"
+        }
+      }
+    }
+  ],
   "globalConstraints": {
-    "maxVelocity": 2.0,
-    "maxAcceleration": 3.0,
+    "maxVelocity": 3.0,
+    "maxAcceleration": 4.0,
     "maxAngularVelocity": 180.0,
     "maxAngularAcceleration": 360.0,
     "nominalVoltage": 12.0,

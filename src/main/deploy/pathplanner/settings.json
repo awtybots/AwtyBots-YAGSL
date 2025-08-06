@@ -11,8 +11,8 @@
     "VisionAuto",
     "Red and Blue Comp"
   ],
-  "defaultMaxVel": 2.0,
-  "defaultMaxAccel": 3.0,
+  "defaultMaxVel": 3.0,
+  "defaultMaxAccel": 4.0,
   "defaultMaxAngVel": 180.0,
   "defaultMaxAngAccel": 360.0,
   "defaultNominalVoltage": 12.0,

@@ -33,7 +33,7 @@ public class EndE {
 
     public void periodic() {
         LaserCan.Measurement measurement = lc.getMeasurement();
-    if (measurement != null && measurement.status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT) {
+    if (measurement != null) {
         CoralEngaged = measurement.distance_mm <= 10;}
         // if (measurement != null && measurement.status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT) {
         //     System.out.println("The target is " + measurement.distance_mm + "mm away!");
@@ -49,17 +49,16 @@ public class EndE {
     }
 
     public Command runIntakeCommand() {
+        return Commands.startEnd(
+                () -> setIntakePower(IntakeSetpoints.kForward), 
+                () -> setIntakePower(0.0));
+    }
+    public Command runIntakeCommandFeeder() {
        
-        if (!CoralEngaged) {
-        
-            return Commands.startEnd(
-                    () -> setIntakePower(IntakeSetpoints.kForward), () -> setIntakePower(0.0));
-        } else {
-         
-            return Commands.startEnd(
-                    () -> setIntakePower(0.0), () -> setIntakePower(0.0)
-                    );
-        }
+        return Commands.startEnd(
+        () -> setIntakePower(IntakeSetpoints.kForward), 
+        () -> runIntakeCommand().withTimeout(0.2)
+    ).until(() -> isCoralEngaged()); // Continuously check while running
         // return Commands.startEnd(
         //         () -> setIntakePower(IntakeSetpoints.kForward), () -> setIntakePower(0.0));
     }

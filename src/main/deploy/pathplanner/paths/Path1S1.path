@@ -47,7 +47,7 @@
   "reversed": false,
   "folder": "VisionPath",
   "idealStartingState": {
-    "velocity": 1.0,
+    "velocity": 0.0,
     "rotation": -0.13814945445545998
   },
   "useDefaultConstraints": false
