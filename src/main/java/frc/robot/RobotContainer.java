@@ -101,6 +101,10 @@ public class RobotContainer {
       Commands.waitUntil(() -> m_EndE.isCoralEngaged()),
       m_coralSubsystem.setSetpointCommand(Setpoint.L4),
       new RAlignToReefTagRelative(drivebase),  this.ScoreUniversal().withTimeout(1)));
+    NamedCommands.registerCommand("AlignL", new SequentialCommandGroup(
+        Commands.waitUntil(() -> m_EndE.isCoralEngaged()),
+        m_coralSubsystem.setSetpointCommand(Setpoint.L4),
+        new LAlignToReefTagRelative(drivebase),  this.ScoreUniversal().withTimeout(1)));
 
     autoChooser = AutoBuilder.buildAutoChooser();
 
