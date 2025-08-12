@@ -56,7 +56,7 @@ public class RobotContainer {
   private final CommandXboxController m_driverController = new CommandXboxController(OIConstants.kDriverControllerPort);
   private final CommandXboxController m_operatorController = new CommandXboxController(
       OIConstants.kOperatorControllerPort);
-
+  Trigger CoralEngaged = new Trigger(m_EndE::isCoralEngaged);
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
@@ -85,7 +85,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("Stop", Commands.runOnce(() -> drivebase.stop()));
     NamedCommands.registerCommand("test", Commands.print("Hello World"));
     NamedCommands.registerCommand("outtake", m_EndE.reverseIntakeCommand().withTimeout(1));
-    NamedCommands.registerCommand("outtakeLD",m_EndE.runIntakeCommandFeeder());
+    NamedCommands.registerCommand("outtakeLD",m_EndE.ArunIntakeCommandFeeder());
     NamedCommands.registerCommand("outtake0.5", m_EndE.reverseIntakeCommand().withTimeout(0.5));
     NamedCommands.registerCommand("fintake", m_funnelIntakeSubsystem.runIntakeCommand().withTimeout(1));
     NamedCommands.registerCommand("FeederStation", m_coralSubsystem.setSetpointCommand(Setpoint.FeederStation));
@@ -190,11 +190,7 @@ public class RobotContainer {
             }));
 
     // Left Bumper -> Run tube intake
-    m_operatorController.leftBumper().whileTrue(Commands.either(
-        m_EndE.runIntakeCommand(), // If ElevatorAtL4 is true, run Reverse Intake
-        m_EndE.reverseIntakeCommand(), // Otherwise, run normal intake
-        () -> CoralSubsystem.ElevatorAtL4 // Condition for reverse intake
-    ));
+    m_operatorController.leftBumper().whileTrue(m_EndE.ArunIntakeCommandFeeder().finallyDo(() -> m_EndE.NorunIntakeCommand()));
 
     // m_operatorController.start().whileTrue(m_coralSubsystem.manualElevatorDown());
     // Right Bumper -> Run tube intake in reverse
