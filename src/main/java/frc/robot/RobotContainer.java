@@ -190,11 +190,7 @@ public class RobotContainer {
             }));
 
     // Left Bumper -> Run tube intake
-    m_operatorController.leftBumper().whileTrue(Commands.either(
-        m_EndE.runIntakeCommand(), // If ElevatorAtL4 is true, run Reverse Intake
-        m_EndE.reverseIntakeCommand(), // Otherwise, run normal intake
-        () -> CoralSubsystem.ElevatorAtL4 // Condition for reverse intake
-    ));
+    m_operatorController.leftBumper().onTrue(m_EndE.runIntakeCommandFeeder().until(() -> m_EndE.isCoralEngaged()));
 
     // m_operatorController.start().whileTrue(m_coralSubsystem.manualElevatorDown());
     // Right Bumper -> Run tube intake in reverse

@@ -8,6 +8,8 @@ import au.grapplerobotics.interfaces.LaserCanInterface.Measurement;
 import au.grapplerobotics.ConfigurationFailedException;
 import java.time.Period;
 
+import org.ejml.data.FScalar;
+
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import au.grapplerobotics.GrappleJNI;
@@ -20,7 +22,9 @@ import frc.robot.Constants.IntakeSetpoints;
 import frc.robot.Robot;
 
 public class EndE {
+    
     private LaserCan lc = new LaserCan(29);
+    LaserCan.Measurement measurement = lc.getMeasurement();
     // intake setup
     private SparkFlex intakeMotor = new SparkFlex(ArmConstants.IntakeCanID, MotorType.kBrushless);
     private static boolean CoralEngaged = false;
@@ -32,9 +36,12 @@ public class EndE {
     }
 
     public void periodic() {
-        LaserCan.Measurement measurement = lc.getMeasurement();
-    if (measurement != null) {
-        CoralEngaged = measurement.distance_mm <= 10;}
+        
+    if (measurement.distance_mm <= 0.085) {
+        CoralEngaged = true;
+    } else {
+        CoralEngaged = false;
+    }
         // if (measurement != null && measurement.status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT) {
         //     System.out.println("The target is " + measurement.distance_mm + "mm away!");
         // } else {
@@ -53,16 +60,14 @@ public class EndE {
                 () -> setIntakePower(IntakeSetpoints.kForward), 
                 () -> setIntakePower(0.0));
     }
-    public Command runIntakeCommandFeeder() {
-       
-        return Commands.startEnd(
+public Command runIntakeCommandFeeder() {
+    return Commands.startEnd(
         () -> setIntakePower(IntakeSetpoints.kForward), 
-        () -> runIntakeCommand().withTimeout(0.2)
+        () -> setIntakePower(0)
     ).until(() -> isCoralEngaged()); // Continuously check while running
         // return Commands.startEnd(
         //         () -> setIntakePower(IntakeSetpoints.kForward), () -> setIntakePower(0.0));
-    }
-
+}
     public Command reverseIntakeCommand() {
         return Commands.startEnd(
                 () -> this.setIntakePower(IntakeSetpoints.kReverse), () -> this.setIntakePower(0.0));
