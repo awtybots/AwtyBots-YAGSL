@@ -14,12 +14,13 @@ import au.grapplerobotics.GrappleJNI;
 //import au.grapplerobotics.LaserCan;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Configs;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.IntakeSetpoints;
 import frc.robot.Robot;
 
-public class EndE {
+public class EndE extends SubsystemBase {
     private LaserCan lc = new LaserCan(29);
     LaserCan.Measurement measurement = lc.getMeasurement();
     // intake setup
@@ -34,10 +35,7 @@ public class EndE {
     }
 
     public boolean isCoralEngaged() {
-
-  
-    return measurement.distance_mm <= 85;
-    }
+        return lc.getMeasurement().distance_mm <= 85;}
 
     public void periodic() {
         //lc.getMeasurement();
