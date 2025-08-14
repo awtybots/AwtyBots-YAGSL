@@ -21,8 +21,8 @@ import frc.robot.Constants.IntakeSetpoints;
 import frc.robot.Robot;
 
 public class EndE extends SubsystemBase {
-    private static LaserCan lc = new LaserCan(29);
-
+    private LaserCan lc = new LaserCan(29);
+    LaserCan.Measurement measurement = lc.getMeasurement();
     // intake setup
     private SparkFlex intakeMotor = new SparkFlex(ArmConstants.IntakeCanID, MotorType.kBrushless);
     private boolean CoralEngaged = false;
@@ -33,24 +33,18 @@ public class EndE extends SubsystemBase {
                 ResetMode.kResetSafeParameters,
                 PersistMode.kPersistParameters);
     }
-    public static double getMeasurementIntake() {
-        if (Robot.isSimulation())
-            return Double.NaN;
-        return lc.getMeasurement().distance_mm;
-    }
 
     public boolean isCoralEngaged() {
-        return getMeasurementIntake() <= 85;
-    }
-
+        return lc.getMeasurement().distance_mm <= 85;}
 
     public void periodic() {
         //lc.getMeasurement();
         // if (measurement.distance_mm <= 85) {
-        // CoralEngaged = true;
+        //     CoralEngaged = true;
         // } else {
-        // CoralEngaged = false;
+        //     CoralEngaged = false;
         // }
+
 
         // if (measurement != null && measurement.status ==
         // LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT) {
@@ -63,7 +57,7 @@ public class EndE extends SubsystemBase {
         // }
     }
 
-    private void setIntakePower(double power) {
+    public void setIntakePower(double power) {
         intakeMotor.set(power);
     }
 
@@ -80,20 +74,20 @@ public class EndE extends SubsystemBase {
     public Command ArunIntakeCommandFeeder() {
 
         return this.runIntakeCommand().until(this::isCoralEngaged)
-                .andThen(Commands.runOnce(() -> this.setIntakePower(0)));
-        // Continuously check while running
-        // return Commands.startEnd(
-        // () -> setIntakePower(IntakeSetpoints.kForward), () -> setIntakePower(0.0));
+        .andThen(Commands.runOnce(() -> this.setIntakePower(0)));
+                                        // Continuously check while running
+                                         // return Commands.startEnd(
+                                         // () -> setIntakePower(IntakeSetpoints.kForward), () -> setIntakePower(0.0));
     }
 
+    
     public Command BrunIntakeCommandFeeder() {
 
         return Commands.startEnd(
-                () -> this.setIntakePower(IntakeSetpoints.kForward), () -> this.setIntakePower(0.0))
-                .until(this::isCoralEngaged);
-        // Continuously check while running
-        // return Commands.startEnd(
-        // () -> setIntakePower(IntakeSetpoints.kForward), () -> setIntakePower(0.0));
+            () -> this.setIntakePower(IntakeSetpoints.kForward), () -> this.setIntakePower(0.0)).until(this::isCoralEngaged);
+                                        // Continuously check while running
+                                         // return Commands.startEnd(
+                                         // () -> setIntakePower(IntakeSetpoints.kForward), () -> setIntakePower(0.0));
     }
 
     public Command reverseIntakeCommand() {
@@ -102,6 +96,6 @@ public class EndE extends SubsystemBase {
     }
 
     // public boolean isCoralEngaged() {
-    // return CoralEngaged;
+    //     return CoralEngaged;
     // }
 }

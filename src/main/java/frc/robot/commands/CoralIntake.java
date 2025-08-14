@@ -28,6 +28,7 @@ public class CoralIntake extends Command {
     public void execute(){
         LaserCan.Measurement measurement = lc.getMeasurement();
         if(measurement != null && measurement.distance_mm <= 85) {
+            //withTimeout(0.2);
             intake.setIntakePower(0.0);
         } else {
             intake.setIntakePower(forward);
