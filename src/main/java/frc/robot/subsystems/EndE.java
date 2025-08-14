@@ -63,7 +63,7 @@ public class EndE extends SubsystemBase {
         // }
     }
 
-    private void setIntakePower(double power) {
+    public void setIntakePower(double power) {
         intakeMotor.set(power);
     }
 

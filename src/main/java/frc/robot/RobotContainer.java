@@ -56,7 +56,7 @@ public class RobotContainer {
   private final CommandXboxController m_driverController = new CommandXboxController(OIConstants.kDriverControllerPort);
   private final CommandXboxController m_operatorController = new CommandXboxController(
       OIConstants.kOperatorControllerPort);
-  Trigger CoralEngaged = new Trigger(m_EndE::isCoralEngaged);
+
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
