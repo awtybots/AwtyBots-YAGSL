@@ -10,7 +10,7 @@ public class CoralIntake extends Command {
     private EndE intake;
     private LaserCan lc = new LaserCan(29);
     
-    private double forward = IntakeSetpoints.kForward;
+    private double forward = IntakeSetpoints.kReverse;
 
 
     public CoralIntake(EndE intake) {
