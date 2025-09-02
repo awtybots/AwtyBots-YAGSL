@@ -57,8 +57,15 @@ public class EndE {
 
     public Command runIntakeCommand() {
         return Commands.startEnd(
+<<<<<<< Updated upstream
                 () -> setIntakePower(IntakeSetpoints.kForward), 
                 () -> setIntakePower(0.0));
+=======
+            () -> this.setIntakePower(IntakeSetpoints.kReverse), () -> this.setIntakePower(0.0)).until(this::isCoralEngaged);
+                                        // Continuously check while running
+                                         // return Commands.startEnd(
+                                         // () -> setIntakePower(IntakeSetpoints.kForward), () -> setIntakePower(0.0));
+>>>>>>> Stashed changes
     }
 public Command runIntakeCommandFeeder() {
     return Commands.startEnd(

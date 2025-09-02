@@ -190,7 +190,13 @@ public class RobotContainer {
             }));
 
     // Left Bumper -> Run tube intake
+<<<<<<< Updated upstream
     m_operatorController.leftBumper().onTrue(m_EndE.runIntakeCommandFeeder().until(() -> m_EndE.isCoralEngaged()));
+=======
+    m_operatorController.leftBumper().whileTrue(m_EndE.BrunIntakeCommandFeeder().andThen(m_EndE.reverseIntakeCommand().withTimeout(.05)));//.finallyDo(() -> m_EndE.NorunIntakeCommand()));
+
+    //m_operatorController.leftBumper().whileTrue(new CoralIntake(m_EndE));
+>>>>>>> Stashed changes
 
     // m_operatorController.start().whileTrue(m_coralSubsystem.manualElevatorDown());
     // Right Bumper -> Run tube intake in reverse
