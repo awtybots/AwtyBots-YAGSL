@@ -16,11 +16,11 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Configs;
 import frc.robot.Constants.ArmConstants;
-import frc.robot.Constants.ArmSetpoints;
+// import frc.robot.Constants.ArmSetpoints;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.ElevatorSetpoints;
 import frc.robot.Constants.IntakeSetpoints;
-import frc.robot.Constants.WristSetpoints;
+// import frc.robot.Constants.WristSetpoints;
 import au.grapplerobotics.LaserCan;
 
 public class CoralSubsystem extends SubsystemBase {
@@ -63,19 +63,29 @@ public class CoralSubsystem extends SubsystemBase {
     // r_elevatorMotor.getClosedLoopController();
     private RelativeEncoder elevatorEncoder = r_elevatorMotor.getEncoder();
 
+    // arm setup
+    // private SparkFlex l_armMotor = new SparkFlex(ArmConstants.ArmLeftCanID, MotorType.kBrushless);
+    // private SparkFlex r_armMotor = new SparkFlex(ArmConstants.ArmRightCanID, MotorType.kBrushless);
+    // private SparkFlex intakeMotor = new SparkFlex(ArmConstants.IntakeCanID, MotorType.kBrushless);
+    // private AbsoluteEncoder armEncoder = l_armMotor.getAbsoluteEncoder();
+
+
+
+    /*
     // wrist setup
     private SparkFlex wristMotor = new SparkFlex(ArmConstants.WristCanID, MotorType.kBrushless);
     private SparkClosedLoopController wristController = wristMotor.getClosedLoopController();
     // private RelativeEncoder wristEncoder = wristMotor.getEncoder();
     private AbsoluteEncoder wristEncoder = wristMotor.getAbsoluteEncoder();
+*/
 
     private boolean wasReset = false;
     // private double armCurrentTarget = ArmSetpoints.FeederStation;
-    private double wristCurrentTarget = WristSetpoints.FeederStation;
+    // private double wristCurrentTarget = WristSetpoints.FeederStation;
     private double elevatorCurrentTarget = ElevatorSetpoints.FeederStation;
     private boolean wristExecutionEnabled = true;
     private boolean elevatorExecutionEnabled = true;
-    private double wristPendingTarget = WristSetpoints.FeederStation;
+    // private double wristPendingTarget = WristSetpoints.FeederStation;
     private double elevatorPendingTarget = ElevatorSetpoints.FeederStation;
  
 
@@ -93,21 +103,6 @@ public class CoralSubsystem extends SubsystemBase {
                 ResetMode.kResetSafeParameters,
                 PersistMode.kPersistParameters);
 
-        // r_armMotor.configure(
-        // Configs.CoralSubsystem.r_armMotorConfig,
-        // ResetMode.kResetSafeParameters,
-        // PersistMode.kPersistParameters);
-
-        // l_armMotor.configure(
-        // Configs.CoralSubsystem.l_armMotorConfig,
-        // ResetMode.kResetSafeParameters,
-        // PersistMode.kPersistParameters);
-
-        wristMotor.configure(
-                Configs.CoralSubsystem.wristMotorConfig,
-                ResetMode.kResetSafeParameters,
-                PersistMode.kPersistParameters);
-
         elevatorEncoder.setPosition(0);
         // armEncoder.setPosition(0);
 
@@ -122,9 +117,9 @@ public class CoralSubsystem extends SubsystemBase {
         if (elevatorExecutionEnabled) {
             l_elevatorController.setReference(elevatorCurrentTarget, ControlType.kMAXMotionPositionControl);
         }
-        if (wristExecutionEnabled) {
-            wristController.setReference(wristCurrentTarget, ControlType.kMAXMotionPositionControl);
-        }
+        // if (wristExecutionEnabled) {
+        //     wristController.setReference(wristCurrentTarget, ControlType.kMAXMotionPositionControl);
+        // }
 
         // if(runFunnelIntake){
         // double elevatorPos = elevatorEncoder.getPosition();
@@ -190,13 +185,13 @@ public class CoralSubsystem extends SubsystemBase {
                         elevatorExecutionEnabled = false;
                     }
                     
-                    if (executeWrist) {
-                        wristCurrentTarget = WristSetpoints.FeederStation;
-                        wristExecutionEnabled = true;
-                    } else {
-                        wristPendingTarget = WristSetpoints.FeederStation;
-                        wristExecutionEnabled = false;
-                    }
+                    // if (executeWrist) {
+                    //     wristCurrentTarget = WristSetpoints.FeederStation;
+                    //     wristExecutionEnabled = true;
+                    // } else {
+                    //     wristPendingTarget = WristSetpoints.FeederStation;
+                    //     wristExecutionEnabled = false;
+                    // }
                     break;
 
                 case L1:
@@ -210,14 +205,16 @@ public class CoralSubsystem extends SubsystemBase {
                         elevatorPendingTarget = ElevatorSetpoints.L1;
                         elevatorExecutionEnabled = false;
                     }
+
+
                     
-                    if (executeWrist) {
-                        wristCurrentTarget = WristSetpoints.L1;
-                        wristExecutionEnabled = true;
-                    } else {
-                        wristPendingTarget = WristSetpoints.L1;
-                        wristExecutionEnabled = false;
-                    }
+                    // if (executeWrist) {
+                    //     wristCurrentTarget = WristSetpoints.L1;
+                    //     wristExecutionEnabled = true;
+                    // } else {
+                    //     wristPendingTarget = WristSetpoints.L1;
+                    //     wristExecutionEnabled = false;
+                    // }
                     break;
 
                 case L2:
@@ -232,13 +229,13 @@ public class CoralSubsystem extends SubsystemBase {
                         elevatorExecutionEnabled = false;
                     }
                     
-                    if (executeWrist) {
-                        wristCurrentTarget = WristSetpoints.L2;
-                        wristExecutionEnabled = true;
-                    } else {
-                        wristPendingTarget = WristSetpoints.L2;
-                        wristExecutionEnabled = false;
-                    }
+                    // if (executeWrist) {
+                    //     wristCurrentTarget = WristSetpoints.L2;
+                    //     wristExecutionEnabled = true;
+                    // } else {
+                    //     wristPendingTarget = WristSetpoints.L2;
+                    //     wristExecutionEnabled = false;
+                    // }
                     break;
 
                 case L3:
@@ -253,13 +250,13 @@ public class CoralSubsystem extends SubsystemBase {
                         elevatorExecutionEnabled = false;
                     }
                     
-                    if (executeWrist) {
-                        wristCurrentTarget = WristSetpoints.L3;
-                        wristExecutionEnabled = true;
-                    } else {
-                        wristPendingTarget = WristSetpoints.L3;
-                        wristExecutionEnabled = false;
-                    }
+                    // if (executeWrist) {
+                    //     wristCurrentTarget = WristSetpoints.L3;
+                    //     wristExecutionEnabled = true;
+                    // } else {
+                    //     wristPendingTarget = WristSetpoints.L3;
+                    //     wristExecutionEnabled = false;
+                    // }
                     break;
 
                 case L4:
@@ -274,13 +271,13 @@ public class CoralSubsystem extends SubsystemBase {
                         elevatorExecutionEnabled = false;
                     }
                     
-                    if (executeWrist) {
-                        wristCurrentTarget = WristSetpoints.L4;
-                        wristExecutionEnabled = true;
-                    } else {
-                        wristPendingTarget = WristSetpoints.L4;
-                        wristExecutionEnabled = false;
-                    }
+                    // if (executeWrist) {
+                    //     wristCurrentTarget = WristSetpoints.L4;
+                    //     wristExecutionEnabled = true;
+                    // } else {
+                    //     wristPendingTarget = WristSetpoints.L4;
+                    //     wristExecutionEnabled = false;
+                    // }
                     break;
 
                 case AlgaeLow:
@@ -295,13 +292,13 @@ public class CoralSubsystem extends SubsystemBase {
                         elevatorExecutionEnabled = false;
                     }
                     
-                    if (executeWrist) {
-                        wristCurrentTarget = WristSetpoints.AlgaeLow;
-                        wristExecutionEnabled = true;
-                    } else {
-                        wristPendingTarget = WristSetpoints.AlgaeLow;
-                        wristExecutionEnabled = false;
-                    }
+                    // if (executeWrist) {
+                    //     wristCurrentTarget = WristSetpoints.AlgaeLow;
+                    //     wristExecutionEnabled = true;
+                    // } else {
+                    //     wristPendingTarget = WristSetpoints.AlgaeLow;
+                    //     wristExecutionEnabled = false;
+                    // }
                     break;
 
                 case AlgaeHigh:
@@ -316,13 +313,13 @@ public class CoralSubsystem extends SubsystemBase {
                         elevatorExecutionEnabled = false;
                     }
                     
-                    if (executeWrist) {
-                        wristCurrentTarget = WristSetpoints.AlgaeHigh;
-                        wristExecutionEnabled = true;
-                    } else {
-                        wristPendingTarget = WristSetpoints.AlgaeHigh;
-                        wristExecutionEnabled = false;
-                    }
+                    // if (executeWrist) {
+                    //     wristCurrentTarget = WristSetpoints.AlgaeHigh;
+                    //     wristExecutionEnabled = true;
+                    // } else {
+                    //     wristPendingTarget = WristSetpoints.AlgaeHigh;
+                    //     wristExecutionEnabled = false;
+                    // }
                     break;
 
                 case Barge:
@@ -337,13 +334,13 @@ public class CoralSubsystem extends SubsystemBase {
                         elevatorExecutionEnabled = false;
                     }
                     
-                    if (executeWrist) {
-                        wristCurrentTarget = WristSetpoints.Barge;
-                        wristExecutionEnabled = true;
-                    } else {
-                        wristPendingTarget = WristSetpoints.Barge;
-                        wristExecutionEnabled = false;
-                    }
+                    // if (executeWrist) {
+                    //     wristCurrentTarget = WristSetpoints.Barge;
+                    //     wristExecutionEnabled = true;
+                    // } else {
+                    //     wristPendingTarget = WristSetpoints.Barge;
+                    //     wristExecutionEnabled = false;
+                    // }
                     break;
             }
             lastSetpoint = setpoint;

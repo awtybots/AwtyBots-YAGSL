@@ -71,11 +71,11 @@ public final class Constants {
     public static final int RightElevatorCanID = 11;
   }
 
-  public static final class ArmConstants {
-    public static final int ArmLeftCanID = 12;
-    public static final int ArmRightCanID = 13;
-    public static final int WristCanID = 17;
-    public static final int IntakeCanID = 18;
+  public static final class ArmConstants {  // CAN id's updated
+    public static final int ArmLeftCanID = 17;
+    public static final int ArmRightCanID = 19;
+    // public static final int WristCanID = 17;
+    public static final int IntakeCanID = 18;  // coral intake
   }
 
   public static final class FunnelConstants {
@@ -99,25 +99,20 @@ public final class Constants {
     public static final int Barge = 27;
   }
 
-  public static final class ArmSetpoints {
-    public static final double FeederStation = -1.9;// -1.9 //
-    public static final double L1 = -3; // -3
-    public static final double AlgaeLow = -9;
-    public static final double L2 = -3;
-    public static final double AlgaeHigh = -9;
-    public static final double L3 = -13.583; // -12.5
-    public static final double L4 = -13;
-    public static final double Barge = -14;
-    // public static final double FeederStation = 1.375;//-1.9 //
-    // public static final double L1 = 0.224; //-3
-    // public static final double AlgaeLow = 0.1;
-    // public static final double L2 = 0.224;
-    // public static final double AlgaeHigh = 0.1;
-    // public static final double L3 = 0.954;
-    // public static final double L4 = 0.9775;
-    // public static final double Barge = 0.1;
+  // UNUSED SETPOINTS
 
+  public static final class ArmSetpoints {
+
+    public static final int GroundIntake = 0;
+    public static final int AlgaeIntake = 0;
+    public static final int Stow = 0;
+    public static final int Barge = 0;
+    public static final int Processor = 0;
+    
+    
   }
+
+  /*
 
   public static final class WristSetpoints {
     public static final double FeederStation = 0;//0.55
@@ -137,6 +132,8 @@ public final class Constants {
     public static final double kReverse = -.5;
     public static final double kHold = 0.0;
   }
+
+  */
 
   public static final class ClimbSetPoints {
     public static final double start = 0;

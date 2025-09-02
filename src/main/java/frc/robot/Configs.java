@@ -74,7 +74,7 @@ public final class Configs {
                         r_armMotorConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(50).voltageCompensation(12);
                         l_armMotorConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(50).voltageCompensation(12);
                         //r_armMotorConfig.inverted(true);
-                        r_armMotorConfig.follow(12, true);
+                        r_armMotorConfig.follow(17, true);
 
                         r_armMotorConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder)
                                         .p(0.1)
