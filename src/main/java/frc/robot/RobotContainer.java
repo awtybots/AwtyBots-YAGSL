@@ -4,8 +4,10 @@
 
 package frc.robot;
 
+import frc.robot.commands.CoralIntake;
 import frc.robot.commands.LAlignToReefTagRelative;
 import frc.robot.commands.RAlignToReefTagRelative;
+import frc.robot.Constants.IntakeSetpoints;
 import frc.robot.Constants.OIConstants;
 //import frc.robot.commands.Autos;
 import frc.robot.subsystems.CoralSubsystem;
@@ -85,7 +87,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("Stop", Commands.runOnce(() -> drivebase.stop()));
     NamedCommands.registerCommand("test", Commands.print("Hello World"));
     NamedCommands.registerCommand("outtake", m_EndE.reverseIntakeCommand().withTimeout(1));
-    NamedCommands.registerCommand("outtakeLD",m_EndE.runIntakeCommandFeeder());
+    NamedCommands.registerCommand("outtakeLD",m_EndE.ArunIntakeCommandFeeder());
     NamedCommands.registerCommand("outtake0.5", m_EndE.reverseIntakeCommand().withTimeout(0.5));
     NamedCommands.registerCommand("fintake", m_funnelIntakeSubsystem.runIntakeCommand().withTimeout(1));
     NamedCommands.registerCommand("FeederStation", m_coralSubsystem.setSetpointCommand(Setpoint.FeederStation));
@@ -190,13 +192,9 @@ public class RobotContainer {
             }));
 
     // Left Bumper -> Run tube intake
-<<<<<<< Updated upstream
-    m_operatorController.leftBumper().onTrue(m_EndE.runIntakeCommandFeeder().until(() -> m_EndE.isCoralEngaged()));
-=======
-    m_operatorController.leftBumper().whileTrue(m_EndE.BrunIntakeCommandFeeder().andThen(m_EndE.reverseIntakeCommand().withTimeout(.05)));//.finallyDo(() -> m_EndE.NorunIntakeCommand()));
+    m_operatorController.leftBumper().whileTrue(m_EndE.ArunIntakeCommandFeeder().finallyDo(() -> m_EndE.NorunIntakeCommand()));
 
     //m_operatorController.leftBumper().whileTrue(new CoralIntake(m_EndE));
->>>>>>> Stashed changes
 
     // m_operatorController.start().whileTrue(m_coralSubsystem.manualElevatorDown());
     // Right Bumper -> Run tube intake in reverse
