@@ -4,7 +4,7 @@
 
 package frc.robot;
 
-import frc.robot.commands.CoralIntake;
+
 import frc.robot.commands.LAlignToReefTagRelative;
 import frc.robot.commands.RAlignToReefTagRelative;
 import frc.robot.Constants.IntakeSetpoints;
@@ -192,7 +192,7 @@ public class RobotContainer {
             }));
 
     // Left Bumper -> Run tube intake
-    m_operatorController.leftBumper().whileTrue(m_EndE.ArunIntakeCommandFeeder().finallyDo(() -> m_EndE.NorunIntakeCommand()));
+    m_operatorController.leftBumper().whileTrue(m_EndE.BrunIntakeCommandFeeder().finallyDo(() -> m_EndE.runIntakeCommand().withTimeout(0.20)));
 
     //m_operatorController.leftBumper().whileTrue(new CoralIntake(m_EndE));
 
