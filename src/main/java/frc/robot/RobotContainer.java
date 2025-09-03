@@ -192,7 +192,7 @@ public class RobotContainer {
             }));
 
     // Left Bumper -> Run tube intake
-    m_operatorController.leftBumper().whileTrue(m_EndE.BrunIntakeCommandFeeder().finallyDo(() -> m_EndE.runIntakeCommand().withTimeout(0.20)));
+    m_operatorController.leftBumper().whileTrue(m_EndE.BrunIntakeCommandFeeder().andThen(m_EndE.reverseIntakeCommand().withTimeout(.05)));
 
     //m_operatorController.leftBumper().whileTrue(new CoralIntake(m_EndE));
 
