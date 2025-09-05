@@ -5,7 +5,7 @@ Modern FRC 2025 robot project using WPILib’s Command-Based framework with a YA
 This README orients new contributors to the project layout, subsystems, controls, configs, and tuning workflow.
 
 **Quick Links**
-- Build/deploy: `./gradlew build` / `./gradlew deploy`
+- Build/deploy: Use the WPILib VS Code palette (see below)
 - Autos and paths: `src/main/deploy/pathplanner`
 - Swerve config (YAGSL): `src/main/deploy/swerve`
 - Main code: `src/main/java/frc/robot`
@@ -141,9 +141,13 @@ Tip: The numeric CAN IDs in `Constants.DriveConstants` are from a MAXSwerve temp
   - Adjust MAXMotion velocity/acceleration and PID in `Configs` for your mechanism.
   - Use `setSetpointDelayed` when you need sequencing (elevator first, then wrist/arm if re-enabled).
 
-## Build, Deploy, and Run
-- Build: `./gradlew build`
-- Deploy to roboRIO: `./gradlew deploy` (robot must be reachable on network)
+## Build, Deploy, and Run (WPILib Palette)
+- Open Command Palette (`Ctrl+Shift+P`) and use:
+  - `WPILib: Set Team Number` (once per machine).
+  - `WPILib: Build Robot Code` to compile.
+  - `WPILib: Deploy Robot Code` to deploy to the roboRIO.
+  - `WPILib: Simulate Robot Code` for desktop simulation.
+- Logs: Check the VS Code `Terminal` panel for WPILib/GradleRIO task output.
 - Driver Station
   - Select the desired auto from SmartDashboard "Auto Chooser".
   - Field-oriented: ensure heading is set appropriate for alliance before driving (Start button mapped).
