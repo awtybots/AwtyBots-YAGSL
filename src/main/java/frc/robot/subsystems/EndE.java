@@ -84,7 +84,7 @@ public class EndE extends SubsystemBase {
     public Command BrunIntakeCommandFeeder() {
 
         return Commands.startEnd(
-            () -> this.setIntakePower(IntakeSetpoints.kForward), () -> this.setIntakePower(0.0)).until(this::isCoralEngaged);
+            () -> this.setIntakePower(IntakeSetpoints.kReverse), () -> this.setIntakePower(0.0)).until(this::isCoralEngaged);
                                         // Continuously check while running
                                          // return Commands.startEnd(
                                          // () -> setIntakePower(IntakeSetpoints.kForward), () -> setIntakePower(0.0));

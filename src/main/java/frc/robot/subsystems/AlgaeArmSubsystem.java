@@ -28,7 +28,7 @@ public class AlgaeArmSubsystem extends SubsystemBase {
 
     private SparkFlex l_armMotor = new SparkFlex(ArmConstants.ArmLeftCanID, MotorType.kBrushless);
     private SparkFlex r_armMotor = new SparkFlex(ArmConstants.ArmRightCanID, MotorType.kBrushless);
-
+    
     private SparkClosedLoopController l_armController = l_armMotor.getClosedLoopController();
     
     private AbsoluteEncoder armEncoder = l_armMotor.getAbsoluteEncoder();
@@ -59,9 +59,9 @@ public class AlgaeArmSubsystem extends SubsystemBase {
         // wristController.setReference(wristCurrentTarget,
         // ControlType.kMAXMotionPositionControl);
 
-        if (armExecutionEnabled) {
+        // if (armExecutionEnabled) {
             l_armController.setReference(armCurrentTarget, ControlType.kMAXMotionPositionControl);
-        }        
+        // }        
 
     }
 

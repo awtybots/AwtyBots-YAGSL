@@ -70,25 +70,27 @@ public final class Configs {
                 public static final SparkFlexConfig intakeMotorConfig = new SparkFlexConfig();
 
                 static {
-
-                        r_armMotorConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(50).voltageCompensation(12);
                         l_armMotorConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(50).voltageCompensation(12);
+                        r_armMotorConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(50).voltageCompensation(12);
+                        
                         //r_armMotorConfig.inverted(true);
                         r_armMotorConfig.follow(17, true);
 
-                        r_armMotorConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-                                        .p(0.1)
-                                        .outputRange(-0.5, 0.5).maxMotion
-                                        .maxVelocity(1500)
+                        r_armMotorConfig.closedLoop.feedbackSensor(FeedbackSensor.kAlternateOrExternalEncoder)
+                                        .p(0.3)
+                                        .d(.01)
+                                        .outputRange(-1, 1).maxMotion
+                                        .maxVelocity(3000)
                                         .maxAcceleration(4500)
-                                        .allowedClosedLoopError(.25);
+                                        .allowedClosedLoopError(.2);
 
-                        l_armMotorConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-                                        .p(0.1)
-                                        .outputRange(-0.5, 0.5).maxMotion
-                                        .maxVelocity(1500)
+                        l_armMotorConfig.closedLoop.feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
+                                        .p(0.3)
+                                        .d(.01)
+                                        .outputRange(-1, 1).maxMotion
+                                        .maxVelocity(3000)
                                         .maxAcceleration(4500)
-                                        .allowedClosedLoopError(.25);
+                                        .allowedClosedLoopError(.01);
 
                         // r_armMotorSlowConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(50).voltageCompensation(12);
                         // l_armMotorSlowConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(50).voltageCompensation(12);
@@ -111,8 +113,8 @@ public final class Configs {
                         //                 .maxAcceleration(1700)
                         //                 .allowedClosedLoopError(.25);
 
-                        l_elevatorMotorConfig.idleMode(IdleMode.kCoast).smartCurrentLimit(50).voltageCompensation(12);
-                        r_elevatorMotorConfig.idleMode(IdleMode.kCoast).smartCurrentLimit(50).voltageCompensation(12);
+                        l_elevatorMotorConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(50).voltageCompensation(12);
+                        r_elevatorMotorConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(50).voltageCompensation(12);
                         r_elevatorMotorConfig.follow(10, true);
 
                         l_elevatorMotorConfig.closedLoop

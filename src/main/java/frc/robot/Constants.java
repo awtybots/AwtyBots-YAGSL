@@ -75,7 +75,9 @@ public final class Constants {
     public static final int ArmLeftCanID = 17;
     public static final int ArmRightCanID = 19;
     // public static final int WristCanID = 17;
-    public static final int IntakeCanID = 18;  // coral intake
+    public static final int IntakeCanID = 18;  // coral intake\
+    public static final int AlgaeCanID = 16; // algae intake
+
   }
 
   public static final class FunnelConstants {

@@ -17,7 +17,7 @@ import frc.robot.subsystems.FunnelIntake;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.SwerveSubsystem;
 import swervelib.SwerveInputStream;
-
+import frc.robot.subsystems.Algae;
 import java.io.File;
 
 import com.ctre.phoenix6.hardware.core.CoreCANcoder;
@@ -53,7 +53,7 @@ public class RobotContainer {
   private final FunnelIntake m_funnelIntakeSubsystem = new FunnelIntake();
   private final Climber m_climber = new Climber();
   private final SendableChooser<Command> autoChooser;
-
+    private final Algae m_algae = new Algae();
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController = new CommandXboxController(OIConstants.kDriverControllerPort);
   private final CommandXboxController m_operatorController = new CommandXboxController(
@@ -192,13 +192,13 @@ public class RobotContainer {
             }));
 
     // Left Bumper -> Run tube intake
-    m_operatorController.leftBumper().whileTrue(m_EndE.BrunIntakeCommandFeeder().andThen(m_EndE.reverseIntakeCommand().withTimeout(.05)));
+    m_operatorController.leftBumper().whileTrue(m_EndE.BrunIntakeCommandFeeder().andThen(m_EndE.reverseIntakeCommand().withTimeout(.6)));//.onlyIf(m_operatorController.leftBumper()));
 
     //m_operatorController.leftBumper().whileTrue(new CoralIntake(m_EndE));
 
     // m_operatorController.start().whileTrue(m_coralSubsystem.manualElevatorDown());
     // Right Bumper -> Run tube intake in reverse
-
+    m_driverController.y().whileTrue(m_algae.runAlgaeInCommand());
     m_operatorController.rightBumper().whileTrue(this.ScoreUniversal());
     m_driverController.rightTrigger().whileTrue(this.ScoreUniversal());
 
