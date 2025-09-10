@@ -7,7 +7,8 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-
+import frc.robot.subsystems.CoralSubsystem;
+import frc.robot.subsystems.Algae.Setpoint;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Configs;
@@ -18,12 +19,11 @@ import frc.robot.Constants.ArmSetpoints;
 
 public class AlgaeArmSubsystem extends SubsystemBase {
     
-    public enum Setpoint {
+    public enum AlgaeSetpoint {
         GroundIntake,
-        AlgaeIntake,
+        Reef,
         Stow,
         Barge,
-        Processor,
     }
 
     private SparkFlex l_armMotor = new SparkFlex(ArmConstants.ArmLeftCanID, MotorType.kBrushless);
@@ -35,8 +35,8 @@ public class AlgaeArmSubsystem extends SubsystemBase {
 
 
     private double armCurrentTarget = ArmSetpoints.Stow;
-    private boolean armExecutionEnabled = true;
-    private double armPendingTarget = ArmSetpoints.Stow;
+    // private boolean armExecutionEnabled = true;
+    // private double armPendingTarget = ArmSetpoints.Stow;
 
     public AlgaeArmSubsystem() {
 
@@ -59,48 +59,63 @@ public class AlgaeArmSubsystem extends SubsystemBase {
         // wristController.setReference(wristCurrentTarget,
         // ControlType.kMAXMotionPositionControl);
 
-        // if (armExecutionEnabled) {
+        //  if (CoralSubsystem.elevatorCurrentTarget == ElevatorSetpoints.FeederStation) {
             l_armController.setReference(armCurrentTarget, ControlType.kMAXMotionPositionControl);
-        // }        
+        //  }
+
+        
 
     }
 
-    public Command setSetpointCommand(Setpoint setpoint, boolean executeArm) {
+    public Command coralToAlgae() {
+    return this.runOnce(() -> {
+        if (CoralSubsystem.elevatorCurrentTarget == ElevatorSetpoints.FeederStation) {
+            armCurrentTarget = ArmSetpoints.GroundIntake;
+        } else if (CoralSubsystem.elevatorCurrentTarget == ElevatorSetpoints.L1) {
+            armCurrentTarget = ArmSetpoints.AlgaeIntake;
+        } else if (CoralSubsystem.elevatorCurrentTarget == ElevatorSetpoints.L2) {
+            armCurrentTarget = ArmSetpoints.AlgaeIntake;
+        } else if (CoralSubsystem.elevatorCurrentTarget == ElevatorSetpoints.L4) {
+            armCurrentTarget = ArmSetpoints.Barge;
+        }
+    });
+}
+
+    // Return a no-op command as a fallback
+    
+
+
+    public Command setSetpointCommand(AlgaeSetpoint setpoint) {
         return this.runOnce(() -> {
             switch (setpoint) {
 
                 case GroundIntake:
                     armCurrentTarget = ArmSetpoints.GroundIntake;
-                    armExecutionEnabled = true;
+                    // armExecutionEnabled = true;
                     break;
 
-                case AlgaeIntake:  // intaking from reef
+                case Reef:  // intaking from reef
                     armCurrentTarget = ArmSetpoints.AlgaeIntake;
-                    armExecutionEnabled = true;
+                    // armExecutionEnabled = true;
                     break;
 
                 case Stow:
                     armCurrentTarget = ArmSetpoints.Stow;
-                    armExecutionEnabled = false;
+                    // armExecutionEnabled = true;
                     break;
 
                 case Barge:
                     armCurrentTarget = ArmSetpoints.Barge;
-                    armExecutionEnabled = true;
-                    break;
-
-                case Processor:
-                    armCurrentTarget = ArmSetpoints.Processor;
-                    armExecutionEnabled = true;
+                    // armExecutionEnabled = true;
                     break;
 
             }
         });
     }
 
-    public Command setSetpointCommand(Setpoint setpoint) {  // it has the same name but somehow is recognized as different because of the # of args???
-        return setSetpointCommand(setpoint, true);
-    }
+   
+        // if (CoralSubsystem.elevatorCurrentTarget == ElevatorSetpoints.FeederStation)
+        
 
     public void periodic() {
         moveToSetpoint();

@@ -18,6 +18,8 @@ import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.SwerveSubsystem;
 import swervelib.SwerveInputStream;
 import frc.robot.subsystems.Algae;
+import frc.robot.subsystems.AlgaeArmSubsystem;
+
 import java.io.File;
 
 import com.ctre.phoenix6.hardware.core.CoreCANcoder;
@@ -54,6 +56,7 @@ public class RobotContainer {
   private final Climber m_climber = new Climber();
   private final SendableChooser<Command> autoChooser;
     private final Algae m_algae = new Algae();
+  private final AlgaeArmSubsystem m_AlgaeArmSubsystem = new AlgaeArmSubsystem();
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController = new CommandXboxController(OIConstants.kDriverControllerPort);
   private final CommandXboxController m_operatorController = new CommandXboxController(
@@ -245,7 +248,7 @@ public class RobotContainer {
     m_driverController.a().whileTrue(m_climber.runReverseClimberCommand());
     // Resets all encoders
     // m_operatorController.start().onTrue(m_coralSubsystem.resetAllEncoders());
-
+    m_operatorController.leftBumper().whileTrue(m_AlgaeArmSubsystem.coralToAlgae());
   }
 
   /**

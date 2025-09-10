@@ -91,25 +91,25 @@ public final class Constants {
   }
 
   public static final class ElevatorSetpoints {
-    public static final int FeederStation = 0;
-    public static final int L1 = 5;
-    public static final int AlgaeLow = 0;
-    public static final int L2 = 15;
-    public static final int AlgaeHigh = 14;
-    public static final int L3 = 0;
-    public static final int L4 = 26;
-    public static final int Barge = 27;
+    public static final double FeederStation = 0.0;
+    public static final double L1 = 5.0;
+    public static final double AlgaeLow = 0.0;
+    public static final double L2 = 15.0;
+    public static final double AlgaeHigh = 14.0;
+    public static final double L3 = 0.0;
+    public static final double L4 = 26.0;
+    public static final double Barge = 27.0;
   }
 
   // UNUSED SETPOINTS
 
   public static final class ArmSetpoints {
-
-    public static final int GroundIntake = 0;
-    public static final int AlgaeIntake = 0;
-    public static final int Stow = 0;
-    public static final int Barge = 0;
-    public static final int Processor = 0;
+//aboslute encoder goes from 0 to 1
+    public static final double GroundIntake = 0.35;
+    public static final double AlgaeIntake = 0.1;
+    public static final double Stow = 0;
+    public static final double Barge = 0.1;
+    // public static final double Processor = 0;
     
     
   }
