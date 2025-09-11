@@ -107,7 +107,7 @@ public final class Constants {
 //aboslute encoder goes from 0 to 1
     public static final double GroundIntake = 0.35;
     public static final double AlgaeIntake = 0.1;
-    public static final double Stow = 0;
+    public static final double Stow = 0.25;
     public static final double Barge = 0.1;
     // public static final double Processor = 0;
     

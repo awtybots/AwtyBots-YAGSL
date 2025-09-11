@@ -9,6 +9,7 @@ import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import frc.robot.subsystems.CoralSubsystem;
 import frc.robot.subsystems.Algae.Setpoint;
+import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Configs;
@@ -28,7 +29,7 @@ public class AlgaeArmSubsystem extends SubsystemBase {
 
     private SparkFlex l_armMotor = new SparkFlex(ArmConstants.ArmLeftCanID, MotorType.kBrushless);
     private SparkFlex r_armMotor = new SparkFlex(ArmConstants.ArmRightCanID, MotorType.kBrushless);
-    
+    private SparkClosedLoopController r_armController = r_armMotor.getClosedLoopController();
     private SparkClosedLoopController l_armController = l_armMotor.getClosedLoopController();
     
     private AbsoluteEncoder armEncoder = l_armMotor.getAbsoluteEncoder();
@@ -40,16 +41,17 @@ public class AlgaeArmSubsystem extends SubsystemBase {
 
     public AlgaeArmSubsystem() {
 
+       l_armMotor.configure(
+            Configs.CoralSubsystem.l_armMotorConfig,  // update configs
+            ResetMode.kResetSafeParameters,
+            PersistMode.kPersistParameters);
+    
         r_armMotor.configure(
         Configs.CoralSubsystem.r_armMotorConfig,  // update configs
         ResetMode.kResetSafeParameters,
         PersistMode.kPersistParameters);
 
-        l_armMotor.configure(
-        Configs.CoralSubsystem.l_armMotorConfig,  // update configs
-        ResetMode.kResetSafeParameters,
-        PersistMode.kPersistParameters);
-
+       
 
     }
 
@@ -70,7 +72,7 @@ public class AlgaeArmSubsystem extends SubsystemBase {
     public Command coralToAlgae() {
     return this.runOnce(() -> {
         if (CoralSubsystem.elevatorCurrentTarget == ElevatorSetpoints.FeederStation) {
-            armCurrentTarget = ArmSetpoints.GroundIntake;
+            armCurrentTarget = ArmSetpoints.Stow;
         } else if (CoralSubsystem.elevatorCurrentTarget == ElevatorSetpoints.L1) {
             armCurrentTarget = ArmSetpoints.AlgaeIntake;
         } else if (CoralSubsystem.elevatorCurrentTarget == ElevatorSetpoints.L2) {

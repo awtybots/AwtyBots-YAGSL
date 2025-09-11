@@ -74,24 +74,26 @@ public final class Configs {
                         r_armMotorConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(50).voltageCompensation(12);
                         
                         //r_armMotorConfig.inverted(true);
-                        r_armMotorConfig.follow(17, true);
-
-                        r_armMotorConfig.closedLoop.feedbackSensor(FeedbackSensor.kAlternateOrExternalEncoder)
-                                        .p(0.3)
-                                        .d(.01)
-                                        .outputRange(-1, 1).maxMotion
-                                        .maxVelocity(3000)
-                                        .maxAcceleration(4500)
-                                        .allowedClosedLoopError(.2);
+                        r_armMotorConfig.follow(17,true);
 
                         l_armMotorConfig.closedLoop.feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
                                         .p(0.3)
                                         .d(.01)
                                         .outputRange(-1, 1).maxMotion
-                                        .maxVelocity(3000)
-                                        .maxAcceleration(4500)
+                                        .maxVelocity(10)
+                                        .maxAcceleration(10)
+                                        .allowedClosedLoopError(.01)
+                                        ;
+
+                        r_armMotorConfig.closedLoop.feedbackSensor(FeedbackSensor.kNoSensor)
+                                        .p(0.3)
+                                        .d(.01)
+                                        .outputRange(-1, 1).maxMotion
+                                        .maxVelocity(10)
+                                        .maxAcceleration(10)
                                         .allowedClosedLoopError(.01);
 
+                        
                         // r_armMotorSlowConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(50).voltageCompensation(12);
                         // l_armMotorSlowConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(50).voltageCompensation(12);
                         // //r_armMotorSlowConfig.inverted(true);
