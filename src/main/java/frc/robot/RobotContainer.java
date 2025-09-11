@@ -219,27 +219,27 @@ public class RobotContainer {
 
     // B Button -> Elevator/Arm to human player position, set ball intake to stow
     // when idle
-    m_operatorController.back().onTrue(m_coralSubsystem.setSetpointDelayed(Setpoint.FeederStation));
+    m_operatorController.back().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.FeederStation));
 
     // A Button -> Elevator/Arm to level 1 position
-    m_operatorController.a().onTrue(m_coralSubsystem.setSetpointDelayed(Setpoint.L1));
+    m_operatorController.a().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.L1));
 
     // B Button -> Elevator/Arm to level 2 position
-    m_operatorController.b().onTrue(m_coralSubsystem.setSetpointDelayed(Setpoint.L2));
+    m_operatorController.b().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.L2));
 
     // X Button -> Elevator/Arm to level 3 position
-    m_operatorController.x().onTrue(m_coralSubsystem.setSetpointDelayed(Setpoint.L3));
+    m_operatorController.x().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.L3));
 
     // Y Button -> Elevator/Arm to level 4 position
-    m_operatorController.y().onTrue(m_coralSubsystem.setSetpointDelayed(Setpoint.L4));
+    m_operatorController.y().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.L4));
 
     // D-Pad Up -> Elevator to 2st Algae pickup position
-    m_operatorController.povUp().onTrue(m_coralSubsystem.setSetpointDelayed(Setpoint.AlgaeHigh));
+    m_operatorController.povUp().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeHigh));
 
     // D-Pad Down -> Elevator to 1st Algae pickup position
-    m_operatorController.povDown().onTrue(m_coralSubsystem.setSetpointDelayed(Setpoint.AlgaeLow));
+    m_operatorController.povDown().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeLow));
     // D-Pad Left -> Elevator to Barge position
-    m_operatorController.povLeft().onTrue(m_coralSubsystem.setSetpointDelayed(Setpoint.Barge));
+    m_operatorController.povLeft().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.Barge));
 
     m_driverController.start().onTrue(new InstantCommand(() -> drivebase.setInitialHeading(180), drivebase));
     // A Button -> Climber Goes In
@@ -248,7 +248,7 @@ public class RobotContainer {
     m_driverController.a().whileTrue(m_climber.runReverseClimberCommand());
     // Resets all encoders
     // m_operatorController.start().onTrue(m_coralSubsystem.resetAllEncoders());
-    m_operatorController.leftBumper().whileTrue(m_AlgaeArmSubsystem.coralToAlgae());
+    //m_operatorController.leftBumper().whileTrue(m_AlgaeArmSubsystem.coralToAlgae());
   }
 
   /**

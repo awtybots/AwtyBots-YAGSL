@@ -64,7 +64,7 @@ public class CoralSubsystem extends SubsystemBase {
     private SparkClosedLoopController l_elevatorController = l_elevatorMotor.getClosedLoopController();
     // private SparkClosedLoopController r_elevatorController =
     // r_elevatorMotor.getClosedLoopController();
-    private RelativeEncoder elevatorEncoder = r_elevatorMotor.getEncoder();
+    private RelativeEncoder elevatorEncoder = l_elevatorMotor.getEncoder();
 
     // arm setup
     // private SparkFlex l_armMotor = new SparkFlex(ArmConstants.ArmLeftCanID,

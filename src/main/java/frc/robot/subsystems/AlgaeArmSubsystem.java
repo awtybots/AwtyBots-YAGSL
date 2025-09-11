@@ -68,36 +68,37 @@ public class AlgaeArmSubsystem extends SubsystemBase {
 
     }
 
-    public Command coralToAlgae() {
-        return this.runOnce(() -> {
-            // Use the enum setpoint rather than elevator target doubles,
-            // since several elevator setpoints share the same numeric value (e.g. 0.0)
-            switch (CoralSubsystem.coralCurrentSetpoint) {
-                case FeederStation:
-                    armCurrentTarget = ArmSetpoints.Stow;
-                    break;
-                case L1:
-                case L2:
-                    armCurrentTarget = ArmSetpoints.AlgaeIntake;
-                    break;
-                case L4:
-                    // Preserve previous behavior mapping L4 to barge position
-                    armCurrentTarget = ArmSetpoints.Barge;
-                    break;
-                case AlgaeLow:
-                case AlgaeHigh:
-                    armCurrentTarget = ArmSetpoints.AlgaeIntake;
-                    break;
-                case Barge:
-                    armCurrentTarget = ArmSetpoints.Barge;
-                    break;
-                case L3:
-                default:
-                    // No change for unspecified cases
-                    break;
-            }
-        });
-    }
+    // public Command coralToAlgae() {
+    //     System.out.println("Coral to Algae command started");
+    //     return this.runOnce(() -> {
+    //         // Use the enum setpoint rather than elevator target doubles,
+    //         // since several elevator setpoints share the same numeric value (e.g. 0.0)
+    //         switch (CoralSubsystem.coralCurrentSetpoint) {
+    //             case FeederStation:
+    //                 armCurrentTarget = ArmSetpoints.Stow;
+    //                 break;
+    //             case L1:
+    //             case L2:
+    //                 armCurrentTarget = ArmSetpoints.AlgaeIntake;
+    //                 break;
+    //             case L4:
+    //                 // Preserve previous behavior mapping L4 to barge position
+    //                 armCurrentTarget = ArmSetpoints.Barge;
+    //                 break;
+    //             case AlgaeLow:
+    //             case AlgaeHigh:
+    //                 armCurrentTarget = ArmSetpoints.AlgaeIntake;
+    //                 break;
+    //             case Barge:
+    //                 armCurrentTarget = ArmSetpoints.Barge;
+    //                 break;
+    //             case L3:
+    //             default:
+    //                 // No change for unspecified cases
+    //                 break;
+    //         }
+    //     });
+    // }
 
     // Return a no-op command as a fallback
 
