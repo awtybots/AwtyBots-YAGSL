@@ -52,7 +52,7 @@ public class AlgaeArmSubsystem extends SubsystemBase {
                 PersistMode.kPersistParameters);
 
         // Initialize target to current arm position to avoid motion on boot
-        armCurrentTarget = armEncoder.getPosition();
+        armCurrentTarget = ArmSetpoints.Stow;
     }
 
     private void moveToSetpoint() {
