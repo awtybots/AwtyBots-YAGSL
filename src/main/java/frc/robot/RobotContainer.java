@@ -26,6 +26,7 @@ import com.ctre.phoenix6.hardware.core.CoreCANcoder;
 import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveRequest.RobotCentric;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
@@ -111,6 +112,7 @@ public class RobotContainer {
         m_coralSubsystem.setSetpointCommand(Setpoint.L4),
         new LAlignToReefTagRelative(drivebase),  this.ScoreUniversal().withTimeout(1)));
 
+        
     autoChooser = AutoBuilder.buildAutoChooser();
 
     SmartDashboard.putData("Auto Chooser", autoChooser);
@@ -256,7 +258,12 @@ public class RobotContainer {
    *
    * @return the command to run in autonomous
    */
+  // public PathPlannerAuto pathPlannerAuto(boolean mirror) {
+  //   return new PathPlannerAuto("Vision3CRight", true);
+  // }
+ 
   public Command getAutonomousCommand() {
     return autoChooser.getSelected();
   }
+  
 }
