@@ -9,6 +9,7 @@ import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import frc.robot.subsystems.CoralSubsystem;
 import frc.robot.subsystems.Algae.Setpoint;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -17,9 +18,8 @@ import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ElevatorSetpoints;
 import frc.robot.Constants.ArmSetpoints;
 
-
 public class AlgaeArmSubsystem extends SubsystemBase {
-    
+
     public enum AlgaeSetpoint {
         GroundIntake,
         Reef,
@@ -31,28 +31,28 @@ public class AlgaeArmSubsystem extends SubsystemBase {
     private SparkFlex r_armMotor = new SparkFlex(ArmConstants.ArmRightCanID, MotorType.kBrushless);
     private SparkClosedLoopController r_armController = r_armMotor.getClosedLoopController();
     private SparkClosedLoopController l_armController = l_armMotor.getClosedLoopController();
-    
+
     private AbsoluteEncoder armEncoder = l_armMotor.getAbsoluteEncoder();
 
+    private double armCurrentTarget;
 
-    private double armCurrentTarget = ArmSetpoints.Stow;
     // private boolean armExecutionEnabled = true;
     // private double armPendingTarget = ArmSetpoints.Stow;
 
     public AlgaeArmSubsystem() {
 
-       l_armMotor.configure(
-            Configs.CoralSubsystem.l_armMotorConfig,  // update configs
-            ResetMode.kResetSafeParameters,
-            PersistMode.kPersistParameters);
-    
+        l_armMotor.configure(
+                Configs.CoralSubsystem.l_armMotorConfig, // update configs
+                ResetMode.kResetSafeParameters,
+                PersistMode.kPersistParameters);
+
         r_armMotor.configure(
-        Configs.CoralSubsystem.r_armMotorConfig,  // update configs
-        ResetMode.kResetSafeParameters,
-        PersistMode.kPersistParameters);
+                Configs.CoralSubsystem.r_armMotorConfig, // update configs
+                ResetMode.kResetSafeParameters,
+                PersistMode.kPersistParameters);
 
-       
-
+        // Initialize target to current arm position to avoid motion on boot
+        armCurrentTarget = armEncoder.getPosition();
     }
 
     private void moveToSetpoint() {
@@ -61,31 +61,45 @@ public class AlgaeArmSubsystem extends SubsystemBase {
         // wristController.setReference(wristCurrentTarget,
         // ControlType.kMAXMotionPositionControl);
 
-        //  if (CoralSubsystem.elevatorCurrentTarget == ElevatorSetpoints.FeederStation) {
-            l_armController.setReference(armCurrentTarget, ControlType.kMAXMotionPositionControl);
-        //  }
-
-        
+        // if (CoralSubsystem.elevatorCurrentTarget == ElevatorSetpoints.FeederStation)
+        // {
+        l_armController.setReference(armCurrentTarget, ControlType.kMAXMotionPositionControl);
+        // }
 
     }
 
     public Command coralToAlgae() {
-    return this.runOnce(() -> {
-        if (CoralSubsystem.elevatorCurrentTarget == ElevatorSetpoints.FeederStation) {
-            armCurrentTarget = ArmSetpoints.Stow;
-        } else if (CoralSubsystem.elevatorCurrentTarget == ElevatorSetpoints.L1) {
-            armCurrentTarget = ArmSetpoints.AlgaeIntake;
-        } else if (CoralSubsystem.elevatorCurrentTarget == ElevatorSetpoints.L2) {
-            armCurrentTarget = ArmSetpoints.AlgaeIntake;
-        } else if (CoralSubsystem.elevatorCurrentTarget == ElevatorSetpoints.L4) {
-            armCurrentTarget = ArmSetpoints.Barge;
-        }
-    });
-}
+        return this.runOnce(() -> {
+            // Use the enum setpoint rather than elevator target doubles,
+            // since several elevator setpoints share the same numeric value (e.g. 0.0)
+            switch (CoralSubsystem.coralCurrentSetpoint) {
+                case FeederStation:
+                    armCurrentTarget = ArmSetpoints.Stow;
+                    break;
+                case L1:
+                case L2:
+                    armCurrentTarget = ArmSetpoints.AlgaeIntake;
+                    break;
+                case L4:
+                    // Preserve previous behavior mapping L4 to barge position
+                    armCurrentTarget = ArmSetpoints.Barge;
+                    break;
+                case AlgaeLow:
+                case AlgaeHigh:
+                    armCurrentTarget = ArmSetpoints.AlgaeIntake;
+                    break;
+                case Barge:
+                    armCurrentTarget = ArmSetpoints.Barge;
+                    break;
+                case L3:
+                default:
+                    // No change for unspecified cases
+                    break;
+            }
+        });
+    }
 
     // Return a no-op command as a fallback
-    
-
 
     public Command setSetpointCommand(AlgaeSetpoint setpoint) {
         return this.runOnce(() -> {
@@ -96,7 +110,7 @@ public class AlgaeArmSubsystem extends SubsystemBase {
                     // armExecutionEnabled = true;
                     break;
 
-                case Reef:  // intaking from reef
+                case Reef: // intaking from reef
                     armCurrentTarget = ArmSetpoints.AlgaeIntake;
                     // armExecutionEnabled = true;
                     break;
@@ -115,13 +129,10 @@ public class AlgaeArmSubsystem extends SubsystemBase {
         });
     }
 
-   
-        // if (CoralSubsystem.elevatorCurrentTarget == ElevatorSetpoints.FeederStation)
-        
+    // if (CoralSubsystem.elevatorCurrentTarget == ElevatorSetpoints.FeederStation)
 
     public void periodic() {
         moveToSetpoint();
     }
-
 
 }

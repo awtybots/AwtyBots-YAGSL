@@ -42,9 +42,8 @@ public class CoralSubsystem extends SubsystemBase {
     public static boolean runFunnelIntake;
     public Setpoint lastSetpoint = Setpoint.FeederStation;
 
-
-
-    public Setpoint coralCurrentSetpoint = Setpoint.FeederStation;
+    // Track current setpoint as an enum for other subsystems to reference safely
+    public static Setpoint coralCurrentSetpoint = Setpoint.FeederStation;
 
     // arm setup
     // private SparkFlex r_armMotor = new SparkFlex(ArmConstants.ArmRightCanID,
@@ -68,20 +67,23 @@ public class CoralSubsystem extends SubsystemBase {
     private RelativeEncoder elevatorEncoder = r_elevatorMotor.getEncoder();
 
     // arm setup
-    // private SparkFlex l_armMotor = new SparkFlex(ArmConstants.ArmLeftCanID, MotorType.kBrushless);
-    // private SparkFlex r_armMotor = new SparkFlex(ArmConstants.ArmRightCanID, MotorType.kBrushless);
-    // private SparkFlex intakeMotor = new SparkFlex(ArmConstants.IntakeCanID, MotorType.kBrushless);
+    // private SparkFlex l_armMotor = new SparkFlex(ArmConstants.ArmLeftCanID,
+    // MotorType.kBrushless);
+    // private SparkFlex r_armMotor = new SparkFlex(ArmConstants.ArmRightCanID,
+    // MotorType.kBrushless);
+    // private SparkFlex intakeMotor = new SparkFlex(ArmConstants.IntakeCanID,
+    // MotorType.kBrushless);
     // private AbsoluteEncoder armEncoder = l_armMotor.getAbsoluteEncoder();
 
-
-
     /*
-    // wrist setup
-    private SparkFlex wristMotor = new SparkFlex(ArmConstants.WristCanID, MotorType.kBrushless);
-    private SparkClosedLoopController wristController = wristMotor.getClosedLoopController();
-    // private RelativeEncoder wristEncoder = wristMotor.getEncoder();
-    private AbsoluteEncoder wristEncoder = wristMotor.getAbsoluteEncoder();
-*/
+     * // wrist setup
+     * private SparkFlex wristMotor = new SparkFlex(ArmConstants.WristCanID,
+     * MotorType.kBrushless);
+     * private SparkClosedLoopController wristController =
+     * wristMotor.getClosedLoopController();
+     * // private RelativeEncoder wristEncoder = wristMotor.getEncoder();
+     * private AbsoluteEncoder wristEncoder = wristMotor.getAbsoluteEncoder();
+     */
 
     private boolean wasReset = false;
     // private double armCurrentTarget = ArmSetpoints.FeederStation;
@@ -91,7 +93,6 @@ public class CoralSubsystem extends SubsystemBase {
     private boolean elevatorExecutionEnabled = true;
     // private double wristPendingTarget = WristSetpoints.FeederStation;
     private double elevatorPendingTarget = ElevatorSetpoints.FeederStation;
- 
 
     public CoralSubsystem() {
         ElevatorAtL4 = false;
@@ -122,7 +123,8 @@ public class CoralSubsystem extends SubsystemBase {
             l_elevatorController.setReference(elevatorCurrentTarget, ControlType.kMAXMotionPositionControl);
         }
         // if (wristExecutionEnabled) {
-        //     wristController.setReference(wristCurrentTarget, ControlType.kMAXMotionPositionControl);
+        // wristController.setReference(wristCurrentTarget,
+        // ControlType.kMAXMotionPositionControl);
         // }
 
         // if(runFunnelIntake){
@@ -139,7 +141,6 @@ public class CoralSubsystem extends SubsystemBase {
 
         // l_armController.setReference(armCurrentTarget,
         // ControlType.kMAXMotionPositionControl);
-        
 
     }
 
@@ -180,174 +181,174 @@ public class CoralSubsystem extends SubsystemBase {
                 case FeederStation:
                     runFunnelIntake = true;
                     ElevatorAtL4 = false;
-                    
+
                     // if (executeElevator) {
-                        elevatorCurrentTarget = ElevatorSetpoints.FeederStation;
-                        elevatorExecutionEnabled = true;
+                    elevatorCurrentTarget = ElevatorSetpoints.FeederStation;
+                    elevatorExecutionEnabled = true;
                     // } else {
-                    //     elevatorPendingTarget = ElevatorSetpoints.FeederStation;
-                    //     elevatorExecutionEnabled = false;
+                    // elevatorPendingTarget = ElevatorSetpoints.FeederStation;
+                    // elevatorExecutionEnabled = false;
                     // }
-                    
+
                     // if (executeWrist) {
-                    //     wristCurrentTarget = WristSetpoints.FeederStation;
-                    //     wristExecutionEnabled = true;
+                    // wristCurrentTarget = WristSetpoints.FeederStation;
+                    // wristExecutionEnabled = true;
                     // } else {
-                    //     wristPendingTarget = WristSetpoints.FeederStation;
-                    //     wristExecutionEnabled = false;
+                    // wristPendingTarget = WristSetpoints.FeederStation;
+                    // wristExecutionEnabled = false;
                     // }
                     break;
 
                 case L1:
                     ElevatorAtL4 = false;
                     runFunnelIntake = false;
-                    
+
                     // if (executeElevator) {
-                        elevatorCurrentTarget = ElevatorSetpoints.L1;
-                        elevatorExecutionEnabled = true;
+                    elevatorCurrentTarget = ElevatorSetpoints.L1;
+                    elevatorExecutionEnabled = true;
                     // } else {
-                    //     elevatorPendingTarget = ElevatorSetpoints.L1;
-                    //     elevatorExecutionEnabled = false;
+                    // elevatorPendingTarget = ElevatorSetpoints.L1;
+                    // elevatorExecutionEnabled = false;
                     // }
 
-
-                    
                     // if (executeWrist) {
-                    //     wristCurrentTarget = WristSetpoints.L1;
-                    //     wristExecutionEnabled = true;
+                    // wristCurrentTarget = WristSetpoints.L1;
+                    // wristExecutionEnabled = true;
                     // } else {
-                    //     wristPendingTarget = WristSetpoints.L1;
-                    //     wristExecutionEnabled = false;
+                    // wristPendingTarget = WristSetpoints.L1;
+                    // wristExecutionEnabled = false;
                     // }
                     break;
 
                 case L2:
                     ElevatorAtL4 = false;
                     runFunnelIntake = false;
-                    
+
                     // if (executeElevator) {
-                        elevatorCurrentTarget = ElevatorSetpoints.L2;
-                        elevatorExecutionEnabled = true;
+                    elevatorCurrentTarget = ElevatorSetpoints.L2;
+                    elevatorExecutionEnabled = true;
                     // } else {
-                    //     elevatorPendingTarget = ElevatorSetpoints.L2;
-                    //     elevatorExecutionEnabled = false;
+                    // elevatorPendingTarget = ElevatorSetpoints.L2;
+                    // elevatorExecutionEnabled = false;
                     // }
-                    
+
                     // if (executeWrist) {
-                    //     wristCurrentTarget = WristSetpoints.L2;
-                    //     wristExecutionEnabled = true;
+                    // wristCurrentTarget = WristSetpoints.L2;
+                    // wristExecutionEnabled = true;
                     // } else {
-                    //     wristPendingTarget = WristSetpoints.L2;
-                    //     wristExecutionEnabled = false;
+                    // wristPendingTarget = WristSetpoints.L2;
+                    // wristExecutionEnabled = false;
                     // }
                     break;
 
                 case L3:
                     ElevatorAtL4 = true;
                     runFunnelIntake = false;
-                    
+
                     // if (executeElevator) {
-                        elevatorCurrentTarget = ElevatorSetpoints.L3;
-                        elevatorExecutionEnabled = true;
+                    elevatorCurrentTarget = ElevatorSetpoints.L3;
+                    elevatorExecutionEnabled = true;
                     // } else {
-                    //     elevatorPendingTarget = ElevatorSetpoints.L3;
-                    //     elevatorExecutionEnabled = false;
+                    // elevatorPendingTarget = ElevatorSetpoints.L3;
+                    // elevatorExecutionEnabled = false;
                     // }
-                    
+
                     // if (executeWrist) {
-                    //     wristCurrentTarget = WristSetpoints.L3;
-                    //     wristExecutionEnabled = true;
+                    // wristCurrentTarget = WristSetpoints.L3;
+                    // wristExecutionEnabled = true;
                     // } else {
-                    //     wristPendingTarget = WristSetpoints.L3;
-                    //     wristExecutionEnabled = false;
+                    // wristPendingTarget = WristSetpoints.L3;
+                    // wristExecutionEnabled = false;
                     // }
                     break;
 
                 case L4:
                     ElevatorAtL4 = true;
                     runFunnelIntake = false;
-                    
+
                     // if (executeElevator) {
-                        elevatorCurrentTarget = ElevatorSetpoints.L4;
-                        elevatorExecutionEnabled = true;
+                    elevatorCurrentTarget = ElevatorSetpoints.L4;
+                    elevatorExecutionEnabled = true;
                     // } else {
-                    //     elevatorPendingTarget = ElevatorSetpoints.L4;
-                    //     elevatorExecutionEnabled = false;
+                    // elevatorPendingTarget = ElevatorSetpoints.L4;
+                    // elevatorExecutionEnabled = false;
                     // }
-                    
+
                     // if (executeWrist) {
-                    //     wristCurrentTarget = WristSetpoints.L4;
-                    //     wristExecutionEnabled = true;
+                    // wristCurrentTarget = WristSetpoints.L4;
+                    // wristExecutionEnabled = true;
                     // } else {
-                    //     wristPendingTarget = WristSetpoints.L4;
-                    //     wristExecutionEnabled = false;
+                    // wristPendingTarget = WristSetpoints.L4;
+                    // wristExecutionEnabled = false;
                     // }
                     break;
 
                 case AlgaeLow:
                     runFunnelIntake = false;
                     ElevatorAtL4 = false;
-                    
+
                     // if (executeElevator) {
-                        elevatorCurrentTarget = ElevatorSetpoints.AlgaeLow;
-                        elevatorExecutionEnabled = true;
+                    elevatorCurrentTarget = ElevatorSetpoints.AlgaeLow;
+                    elevatorExecutionEnabled = true;
                     // } else {
-                    //     elevatorPendingTarget = ElevatorSetpoints.AlgaeLow;
-                    //     elevatorExecutionEnabled = false;
+                    // elevatorPendingTarget = ElevatorSetpoints.AlgaeLow;
+                    // elevatorExecutionEnabled = false;
                     // }
-                    
+
                     // if (executeWrist) {
-                    //     wristCurrentTarget = WristSetpoints.AlgaeLow;
-                    //     wristExecutionEnabled = true;
+                    // wristCurrentTarget = WristSetpoints.AlgaeLow;
+                    // wristExecutionEnabled = true;
                     // } else {
-                    //     wristPendingTarget = WristSetpoints.AlgaeLow;
-                    //     wristExecutionEnabled = false;
+                    // wristPendingTarget = WristSetpoints.AlgaeLow;
+                    // wristExecutionEnabled = false;
                     // }
                     break;
 
                 case AlgaeHigh:
                     runFunnelIntake = false;
                     ElevatorAtL4 = false;
-                    
+
                     // if (executeElevator) {
-                        elevatorCurrentTarget = ElevatorSetpoints.AlgaeHigh;
-                        elevatorExecutionEnabled = true;
+                    elevatorCurrentTarget = ElevatorSetpoints.AlgaeHigh;
+                    elevatorExecutionEnabled = true;
                     // } else {
-                    //     elevatorPendingTarget = ElevatorSetpoints.AlgaeHigh;
-                    //     elevatorExecutionEnabled = false;
+                    // elevatorPendingTarget = ElevatorSetpoints.AlgaeHigh;
+                    // elevatorExecutionEnabled = false;
                     // }
-                    
+
                     // if (executeWrist) {
-                    //     wristCurrentTarget = WristSetpoints.AlgaeHigh;
-                    //     wristExecutionEnabled = true;
+                    // wristCurrentTarget = WristSetpoints.AlgaeHigh;
+                    // wristExecutionEnabled = true;
                     // } else {
-                    //     wristPendingTarget = WristSetpoints.AlgaeHigh;
-                    //     wristExecutionEnabled = false;
+                    // wristPendingTarget = WristSetpoints.AlgaeHigh;
+                    // wristExecutionEnabled = false;
                     // }
                     break;
 
                 case Barge:
                     ElevatorAtL4 = true;
                     runFunnelIntake = false;
-                    
+
                     // if (executeElevator) {
-                        elevatorCurrentTarget = ElevatorSetpoints.Barge;
-                        elevatorExecutionEnabled = true;
+                    elevatorCurrentTarget = ElevatorSetpoints.Barge;
+                    elevatorExecutionEnabled = true;
                     // } else {
-                    //     elevatorPendingTarget = ElevatorSetpoints.Barge;
-                    //     elevatorExecutionEnabled = false;
+                    // elevatorPendingTarget = ElevatorSetpoints.Barge;
+                    // elevatorExecutionEnabled = false;
                     // }
-                    
+
                     // if (executeWrist) {
-                    //     wristCurrentTarget = WristSetpoints.Barge;
-                    //     wristExecutionEnabled = true;
+                    // wristCurrentTarget = WristSetpoints.Barge;
+                    // wristExecutionEnabled = true;
                     // } else {
-                    //     wristPendingTarget = WristSetpoints.Barge;
-                    //     wristExecutionEnabled = false;
+                    // wristPendingTarget = WristSetpoints.Barge;
+                    // wristExecutionEnabled = false;
                     // }
                     break;
             }
             lastSetpoint = setpoint;
+            // Ensure the current setpoint enum is always updated
+            coralCurrentSetpoint = setpoint;
         });
     }
 
