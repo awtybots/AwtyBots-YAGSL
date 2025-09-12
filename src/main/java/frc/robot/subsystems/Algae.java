@@ -31,23 +31,23 @@ public class Algae extends SubsystemBase {
   }
 
   private SparkFlex Algae = new SparkFlex(ArmConstants.AlgaeCanID, MotorType.kBrushless);
-  private SparkClosedLoopController climberController = Algae.getClosedLoopController();
-  private RelativeEncoder climberEncoder = Algae.getEncoder();
+  private SparkClosedLoopController roller = Algae.getClosedLoopController();
+  private RelativeEncoder algae = Algae.getEncoder();
   private double climberCurrentTarget;
 
 
   /** Creates a new Climber. */
   public Algae() {
     Algae.configure(
-      Configs.FunnelIntakeSubsystem.l_funnelMotorConfig,
+      Configs.CoralSubsystem.RollerwristMotorConfig,
       ResetMode.kResetSafeParameters,
       PersistMode.kPersistParameters);
 
-    climberEncoder.setPosition(0);
+    algae.setPosition(0);
   }
 
   private void moveToSetpoint(){
-    climberController.setReference(climberCurrentTarget, ControlType.kMAXMotionPositionControl);
+    roller.setReference(climberCurrentTarget, ControlType.kMAXMotionPositionControl);
   }
 
  /*  public Command setSetpointCommand(Setpoint setpoint){
@@ -67,17 +67,17 @@ public class Algae extends SubsystemBase {
 
   public Command runAlgaeOutCommand() {
     return new RunCommand(
-            () -> setClimberPower(ClimbSetPoints.kIn), this)
-            .finallyDo(interrupted -> setClimberPower(0));
+            () -> setRollerPower(ClimbSetPoints.kIn), this)
+            .finallyDo(interrupted -> setRollerPower(0));
 }
   public Command runAlgaeInCommand() {
     return new RunCommand(
-      () -> setClimberPower(ClimbSetPoints.kOut), this)
-      .finallyDo(interrupted -> setClimberPower(0));
+      () -> setRollerPower(ClimbSetPoints.kOut), this)
+      .finallyDo(interrupted -> setRollerPower(0));
   }
   
   
-    public void setClimberPower(double power){
+    public void setRollerPower(double power){
     Algae.set(power);
   }
 

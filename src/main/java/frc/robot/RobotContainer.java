@@ -248,7 +248,9 @@ public class RobotContainer {
     m_driverController.a().whileTrue(m_climber.runReverseClimberCommand());
     // Resets all encoders
     // m_operatorController.start().onTrue(m_coralSubsystem.resetAllEncoders());
-    //m_operatorController.leftBumper().whileTrue(m_AlgaeArmSubsystem.coralToAlgae());
+    //m_operatorController.leftTrigger(0.3).whileTrue(m_AlgaeArmSubsystem.coralToAlgae());
+    m_operatorController.leftTrigger(0.5).whileTrue((m_AlgaeArmSubsystem.coralToAlgae()));
+    m_operatorController.rightTrigger(0.5).whileTrue((m_AlgaeArmSubsystem.runGroundArmAlgaeCommand()));
   }
 
   /**

@@ -162,9 +162,9 @@ public class CoralSubsystem extends SubsystemBase {
         // wristController.setReference(wristCurrentTarget,
         // ControlType.kMAXMotionPositionControl);
 
-        if (elevatorExecutionEnabled) {
+        // if (elevatorExecutionEnabled) {
             l_elevatorController.setReference(elevatorCurrentTarget, ControlType.kMAXMotionPositionControl);
-        }
+        // }
         // if (wristExecutionEnabled) {
         // wristController.setReference(wristCurrentTarget,
         // ControlType.kMAXMotionPositionControl);

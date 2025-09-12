@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import frc.robot.Configs;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ElevatorSetpoints;
@@ -76,39 +77,45 @@ public class AlgaeArmSubsystem extends SubsystemBase {
             // since several elevator setpoints share the same numeric value (e.g. 0.0)
             switch (CoralSubsystem.coralCurrentSetpoint) {
                 case FeederStation:
+
                     armCurrentTarget = ArmSetpoints.Stow;
                     break;
                 case L1:
+                    // if (coralSubsystem.isElevatorProgressAt(0.40)) {
+                    armCurrentTarget = ArmSetpoints.Stow;
+                    // }
                     break;
                 case L2:
-                    if (coralSubsystem.isElevatorProgressAt(0.40)) {
-                        armCurrentTarget = ArmSetpoints.AlgaeIntake;
-                    }
+                    // if (coralSubsystem.isElevatorProgressAt(0.40)) {
+                    armCurrentTarget = ArmSetpoints.Stow;
+                    // }
                     break;
                 case L3:
+                    armCurrentTarget = ArmSetpoints.Stow;
                     break;
                 case L4:
                     // Preserve previous behavior mapping L4 to barge position
-                    if (coralSubsystem.isElevatorProgressAt(0.40)) {
-                        armCurrentTarget = ArmSetpoints.Barge;
-                    }
+                    // if (coralSubsystem.isElevatorProgressAt(0.40)) {
+                    armCurrentTarget = ArmSetpoints.Stow;
+                    // }
                     break;
                 case AlgaeLow:
+                    armCurrentTarget = ArmSetpoints.AlgaeIntake;
                     break;
                 case AlgaeHigh:
-                    if (coralSubsystem.isElevatorProgressAt(0.40)) {
-                        armCurrentTarget = ArmSetpoints.AlgaeIntake;
-                    }
+                    // if (coralSubsystem.isElevatorProgressAt(0.40)) {
+                    armCurrentTarget = ArmSetpoints.AlgaeIntake;
+                    // }
                     break;
                 case Barge:
-                    if (coralSubsystem.isElevatorProgressAt(.05)) {
-                        armCurrentTarget = ArmSetpoints.Barge;
-                    }
+                    // if (coralSubsystem.isElevatorProgressAt(.05)) {
+                    armCurrentTarget = ArmSetpoints.Barge;
+                    // }
 
                     break;
-                default:
-                    // No change for unspecified cases
-                    break;
+                // default:
+                // // No change for unspecified cases
+                // break;
             }
         });
     }
@@ -142,8 +149,29 @@ public class AlgaeArmSubsystem extends SubsystemBase {
             }
         });
     }
+    public Command armtoStowCommand() {
+        return this.runOnce(() -> {
+            armCurrentTarget = ArmSetpoints.Stow;
+        });
+    }
 
-    // if (CoralSubsystem.elevatorCurrentTarget == ElevatorSetpoints.FeederStation)
+    public Command armOutCommand() {
+        return this.runOnce(() -> {
+            armCurrentTarget = ArmSetpoints.GroundIntake;
+        });
+    }
+    public Command runGroundArmAlgaeCommand() {
+        if (CoralSubsystem.elevatorCurrentTarget == ElevatorSetpoints.FeederStation) {
+            return new RunCommand(
+              () -> armOutCommand(), this)
+              .finallyDo(interrupted -> armtoStowCommand());
+        }
+        else {
+            return armtoStowCommand();
+        }
+        // Add a fallback or return null if no condition is met
+        
+    }
 
     public void periodic() {
         moveToSetpoint();

@@ -66,7 +66,7 @@ public final class Configs {
                 public static final SparkFlexConfig l_armMotorConfig = new SparkFlexConfig();
                 // public static final SparkFlexConfig r_armMotorSlowConfig = new SparkFlexConfig();
                 // public static final SparkFlexConfig l_armMotorSlowConfig = new SparkFlexConfig();
-                public static final SparkFlexConfig wristMotorConfig = new SparkFlexConfig();
+                public static final SparkFlexConfig RollerwristMotorConfig = new SparkFlexConfig();
                 public static final SparkFlexConfig intakeMotorConfig = new SparkFlexConfig();
 
                 static {
@@ -137,10 +137,10 @@ public final class Configs {
                                         .maxAcceleration(500)
                                         .allowedClosedLoopError(.5);
 
-                        wristMotorConfig.idleMode(IdleMode.kCoast).smartCurrentLimit(50).voltageCompensation(12);
+                        RollerwristMotorConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(50).voltageCompensation(12);
 
-                        wristMotorConfig.closedLoop
-                                        .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
+                        RollerwristMotorConfig.closedLoop
+                                        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
                                         .p(0.02)
                                         .outputRange(-1, 1).maxMotion
                                         .maxVelocity(6000)
