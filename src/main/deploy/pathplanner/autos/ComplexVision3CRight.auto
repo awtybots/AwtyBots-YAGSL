@@ -1,0 +1,142 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Path1S1"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "AlignL"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "ElevatorLiftL4"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "outtake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Path2"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "outtakeLD"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Path3S2"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "AlignR"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "ElevatorLiftL4"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "outtake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Path4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "outtakeLD"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Path5S3"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "AlignL"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "ElevatorLiftL4"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "outtake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Path6"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "outtakeLD"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": "VisionAuto",
+  "choreoAuto": false
+}
