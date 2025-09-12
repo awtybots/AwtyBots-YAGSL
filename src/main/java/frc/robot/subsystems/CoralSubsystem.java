@@ -86,6 +86,9 @@ public class CoralSubsystem extends SubsystemBase {
      */
 
     private boolean wasReset = false;
+    // Track elevator motion progress
+    private double elevatorStartPosition = 0;
+    private double lastElevatorTarget = ElevatorSetpoints.FeederStation;
     // private double armCurrentTarget = ArmSetpoints.FeederStation;
     // private double wristCurrentTarget = WristSetpoints.FeederStation;
     public static double elevatorCurrentTarget = ElevatorSetpoints.FeederStation;
@@ -109,8 +112,48 @@ public class CoralSubsystem extends SubsystemBase {
                 PersistMode.kPersistParameters);
 
         elevatorEncoder.setPosition(0);
+        elevatorStartPosition = 0;
+        lastElevatorTarget = ElevatorSetpoints.FeederStation;
         // armEncoder.setPosition(0);
 
+    }
+
+    /**
+     * Update elevator target and capture progress start position when it changes.
+     */
+    private void setElevatorTarget(double target) {
+        if (elevatorCurrentTarget != target) {
+            elevatorStartPosition = elevatorEncoder.getPosition();
+            lastElevatorTarget = target;
+        }
+        elevatorCurrentTarget = target;
+        elevatorExecutionEnabled = true;
+    }
+
+    /**
+     * Returns how far the elevator has progressed from the position when the
+     * current target was set, as a fraction 0.0–1.0.
+     */
+    public double getElevatorPercentToTarget() {
+        double total = Math.abs(lastElevatorTarget - elevatorStartPosition);
+        if (total < 1e-6) {
+            return 1.0; // already at target
+        }
+        double moved = Math.abs(elevatorEncoder.getPosition() - elevatorStartPosition);
+        double frac = moved / total;
+        if (frac < 0)
+            return 0.0;
+        if (frac > 1)
+            return 1.0;
+        return frac;
+    }
+
+    /**
+     * Convenience check: has the elevator reached at least the given fraction
+     * of motion toward its current target?
+     */
+    public boolean isElevatorProgressAt(double fraction) {
+        return getElevatorPercentToTarget() >= fraction;
     }
 
     private void moveToSetpoint() {
@@ -183,8 +226,7 @@ public class CoralSubsystem extends SubsystemBase {
                     ElevatorAtL4 = false;
 
                     // if (executeElevator) {
-                    elevatorCurrentTarget = ElevatorSetpoints.FeederStation;
-                    elevatorExecutionEnabled = true;
+                    setElevatorTarget(ElevatorSetpoints.FeederStation);
                     // } else {
                     // elevatorPendingTarget = ElevatorSetpoints.FeederStation;
                     // elevatorExecutionEnabled = false;
@@ -204,8 +246,7 @@ public class CoralSubsystem extends SubsystemBase {
                     runFunnelIntake = false;
 
                     // if (executeElevator) {
-                    elevatorCurrentTarget = ElevatorSetpoints.L1;
-                    elevatorExecutionEnabled = true;
+                    setElevatorTarget(ElevatorSetpoints.L1);
                     // } else {
                     // elevatorPendingTarget = ElevatorSetpoints.L1;
                     // elevatorExecutionEnabled = false;
@@ -225,8 +266,7 @@ public class CoralSubsystem extends SubsystemBase {
                     runFunnelIntake = false;
 
                     // if (executeElevator) {
-                    elevatorCurrentTarget = ElevatorSetpoints.L2;
-                    elevatorExecutionEnabled = true;
+                    setElevatorTarget(ElevatorSetpoints.L2);
                     // } else {
                     // elevatorPendingTarget = ElevatorSetpoints.L2;
                     // elevatorExecutionEnabled = false;
@@ -246,8 +286,7 @@ public class CoralSubsystem extends SubsystemBase {
                     runFunnelIntake = false;
 
                     // if (executeElevator) {
-                    elevatorCurrentTarget = ElevatorSetpoints.L3;
-                    elevatorExecutionEnabled = true;
+                    setElevatorTarget(ElevatorSetpoints.L3);
                     // } else {
                     // elevatorPendingTarget = ElevatorSetpoints.L3;
                     // elevatorExecutionEnabled = false;
@@ -267,8 +306,7 @@ public class CoralSubsystem extends SubsystemBase {
                     runFunnelIntake = false;
 
                     // if (executeElevator) {
-                    elevatorCurrentTarget = ElevatorSetpoints.L4;
-                    elevatorExecutionEnabled = true;
+                    setElevatorTarget(ElevatorSetpoints.L4);
                     // } else {
                     // elevatorPendingTarget = ElevatorSetpoints.L4;
                     // elevatorExecutionEnabled = false;
@@ -288,8 +326,7 @@ public class CoralSubsystem extends SubsystemBase {
                     ElevatorAtL4 = false;
 
                     // if (executeElevator) {
-                    elevatorCurrentTarget = ElevatorSetpoints.AlgaeLow;
-                    elevatorExecutionEnabled = true;
+                    setElevatorTarget(ElevatorSetpoints.AlgaeLow);
                     // } else {
                     // elevatorPendingTarget = ElevatorSetpoints.AlgaeLow;
                     // elevatorExecutionEnabled = false;
@@ -309,8 +346,7 @@ public class CoralSubsystem extends SubsystemBase {
                     ElevatorAtL4 = false;
 
                     // if (executeElevator) {
-                    elevatorCurrentTarget = ElevatorSetpoints.AlgaeHigh;
-                    elevatorExecutionEnabled = true;
+                    setElevatorTarget(ElevatorSetpoints.AlgaeHigh);
                     // } else {
                     // elevatorPendingTarget = ElevatorSetpoints.AlgaeHigh;
                     // elevatorExecutionEnabled = false;
@@ -330,8 +366,7 @@ public class CoralSubsystem extends SubsystemBase {
                     runFunnelIntake = false;
 
                     // if (executeElevator) {
-                    elevatorCurrentTarget = ElevatorSetpoints.Barge;
-                    elevatorExecutionEnabled = true;
+                    setElevatorTarget(ElevatorSetpoints.Barge);
                     // } else {
                     // elevatorPendingTarget = ElevatorSetpoints.Barge;
                     // elevatorExecutionEnabled = false;

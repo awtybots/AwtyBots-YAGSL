@@ -35,11 +35,13 @@ public class AlgaeArmSubsystem extends SubsystemBase {
     private AbsoluteEncoder armEncoder = l_armMotor.getAbsoluteEncoder();
 
     private double armCurrentTarget;
+    private final CoralSubsystem coralSubsystem;
 
     // private boolean armExecutionEnabled = true;
     // private double armPendingTarget = ArmSetpoints.Stow;
 
-    public AlgaeArmSubsystem() {
+    public AlgaeArmSubsystem(CoralSubsystem coralSubsystem) {
+        this.coralSubsystem = coralSubsystem;
 
         l_armMotor.configure(
                 Configs.CoralSubsystem.l_armMotorConfig, // update configs
@@ -68,37 +70,48 @@ public class AlgaeArmSubsystem extends SubsystemBase {
 
     }
 
-    // public Command coralToAlgae() {
-    //     System.out.println("Coral to Algae command started");
-    //     return this.runOnce(() -> {
-    //         // Use the enum setpoint rather than elevator target doubles,
-    //         // since several elevator setpoints share the same numeric value (e.g. 0.0)
-    //         switch (CoralSubsystem.coralCurrentSetpoint) {
-    //             case FeederStation:
-    //                 armCurrentTarget = ArmSetpoints.Stow;
-    //                 break;
-    //             case L1:
-    //             case L2:
-    //                 armCurrentTarget = ArmSetpoints.AlgaeIntake;
-    //                 break;
-    //             case L4:
-    //                 // Preserve previous behavior mapping L4 to barge position
-    //                 armCurrentTarget = ArmSetpoints.Barge;
-    //                 break;
-    //             case AlgaeLow:
-    //             case AlgaeHigh:
-    //                 armCurrentTarget = ArmSetpoints.AlgaeIntake;
-    //                 break;
-    //             case Barge:
-    //                 armCurrentTarget = ArmSetpoints.Barge;
-    //                 break;
-    //             case L3:
-    //             default:
-    //                 // No change for unspecified cases
-    //                 break;
-    //         }
-    //     });
-    // }
+    public Command coralToAlgae() {
+        return this.runOnce(() -> {
+            // Use the enum setpoint rather than elevator target doubles,
+            // since several elevator setpoints share the same numeric value (e.g. 0.0)
+            switch (CoralSubsystem.coralCurrentSetpoint) {
+                case FeederStation:
+                    armCurrentTarget = ArmSetpoints.Stow;
+                    break;
+                case L1:
+                    break;
+                case L2:
+                    if (coralSubsystem.isElevatorProgressAt(0.40)) {
+                        armCurrentTarget = ArmSetpoints.AlgaeIntake;
+                    }
+                    break;
+                case L3:
+                    break;
+                case L4:
+                    // Preserve previous behavior mapping L4 to barge position
+                    if (coralSubsystem.isElevatorProgressAt(0.40)) {
+                        armCurrentTarget = ArmSetpoints.Barge;
+                    }
+                    break;
+                case AlgaeLow:
+                    break;
+                case AlgaeHigh:
+                    if (coralSubsystem.isElevatorProgressAt(0.40)) {
+                        armCurrentTarget = ArmSetpoints.AlgaeIntake;
+                    }
+                    break;
+                case Barge:
+                    if (coralSubsystem.isElevatorProgressAt(.05)) {
+                        armCurrentTarget = ArmSetpoints.Barge;
+                    }
+
+                    break;
+                default:
+                    // No change for unspecified cases
+                    break;
+            }
+        });
+    }
 
     // Return a no-op command as a fallback
 

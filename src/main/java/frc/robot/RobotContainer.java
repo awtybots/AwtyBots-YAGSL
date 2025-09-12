@@ -56,7 +56,7 @@ public class RobotContainer {
   private final Climber m_climber = new Climber();
   private final SendableChooser<Command> autoChooser;
     private final Algae m_algae = new Algae();
-  private final AlgaeArmSubsystem m_AlgaeArmSubsystem = new AlgaeArmSubsystem();
+  private final AlgaeArmSubsystem m_AlgaeArmSubsystem = new AlgaeArmSubsystem(m_coralSubsystem);
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController = new CommandXboxController(OIConstants.kDriverControllerPort);
   private final CommandXboxController m_operatorController = new CommandXboxController(
