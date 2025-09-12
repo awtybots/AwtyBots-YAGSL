@@ -4,7 +4,6 @@
 
 package frc.robot;
 
-
 import frc.robot.commands.LAlignToReefTagRelative;
 import frc.robot.commands.RAlignToReefTagRelative;
 import frc.robot.Constants.IntakeSetpoints;
@@ -26,6 +25,7 @@ import com.ctre.phoenix6.hardware.core.CoreCANcoder;
 import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveRequest.RobotCentric;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
@@ -55,7 +55,7 @@ public class RobotContainer {
   private final FunnelIntake m_funnelIntakeSubsystem = new FunnelIntake();
   private final Climber m_climber = new Climber();
   private final SendableChooser<Command> autoChooser;
-    private final Algae m_algae = new Algae();
+  private final Algae m_algae = new Algae();
   private final AlgaeArmSubsystem m_AlgaeArmSubsystem = new AlgaeArmSubsystem(m_coralSubsystem);
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController = new CommandXboxController(OIConstants.kDriverControllerPort);
@@ -90,7 +90,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("Stop", Commands.runOnce(() -> drivebase.stop()));
     NamedCommands.registerCommand("test", Commands.print("Hello World"));
     NamedCommands.registerCommand("outtake", m_EndE.reverseIntakeCommand().withTimeout(1));
-    NamedCommands.registerCommand("outtakeLD",m_EndE.ArunIntakeCommandFeeder());
+    NamedCommands.registerCommand("outtakeLD", m_EndE.ArunIntakeCommandFeeder());
     NamedCommands.registerCommand("outtake0.5", m_EndE.reverseIntakeCommand().withTimeout(0.5));
     NamedCommands.registerCommand("fintake", m_funnelIntakeSubsystem.runIntakeCommand().withTimeout(1));
     NamedCommands.registerCommand("FeederStation", m_coralSubsystem.setSetpointCommand(Setpoint.FeederStation));
@@ -103,13 +103,13 @@ public class RobotContainer {
     NamedCommands.registerCommand("Gyroreset", new InstantCommand(() -> drivebase.setInitialHeading(180), drivebase));
     NamedCommands.registerCommand("Gyroreset1", new InstantCommand(() -> drivebase.setInitialHeading(0), drivebase));
     NamedCommands.registerCommand("AlignR", new SequentialCommandGroup(
-      Commands.waitUntil(() -> m_EndE.isCoralEngaged()),
-      m_coralSubsystem.setSetpointCommand(Setpoint.L4),
-      new RAlignToReefTagRelative(drivebase),  this.ScoreUniversal().withTimeout(1)));
+        Commands.waitUntil(() -> m_EndE.isCoralEngaged()),
+        m_coralSubsystem.setSetpointCommand(Setpoint.L4),
+        new RAlignToReefTagRelative(drivebase), this.ScoreUniversal().withTimeout(1)));
     NamedCommands.registerCommand("AlignL", new SequentialCommandGroup(
         Commands.waitUntil(() -> m_EndE.isCoralEngaged()),
         m_coralSubsystem.setSetpointCommand(Setpoint.L4),
-        new LAlignToReefTagRelative(drivebase),  this.ScoreUniversal().withTimeout(1)));
+        new LAlignToReefTagRelative(drivebase), this.ScoreUniversal().withTimeout(1)));
 
     autoChooser = AutoBuilder.buildAutoChooser();
 
@@ -138,8 +138,8 @@ public class RobotContainer {
 
   Command driveFieldOrientedAngluarVelocity = drivebase.driveFieldOriented(driveAngulareVelocity);
 
-  Command ScoreUniversal () {
-    return  Commands.either(
+  Command ScoreUniversal() {
+    return Commands.either(
         Commands.either(
             Commands.parallel(
                 m_funnelIntakeSubsystem.runIntakeCommand(), // Run Funnel Intake
@@ -154,7 +154,8 @@ public class RobotContainer {
         ),
         m_EndE.runIntakeCommand(), // Do nothing
         () -> CoralSubsystem.runFunnelIntake || CoralSubsystem.ElevatorAtL4);
-}
+  }
+
   /**
    * Use this method to define your trigger->command mappings. Triggers can be
    * created via the
@@ -195,9 +196,10 @@ public class RobotContainer {
             }));
 
     // Left Bumper -> Run tube intake
-    m_operatorController.leftBumper().whileTrue(m_EndE.BrunIntakeCommandFeeder().andThen(m_EndE.reverseIntakeCommand().withTimeout(.6)));//.onlyIf(m_operatorController.leftBumper()));
+    m_operatorController.leftBumper()
+        .whileTrue(m_EndE.BrunIntakeCommandFeeder().andThen(m_EndE.reverseIntakeCommand().withTimeout(.6)));// .onlyIf(m_operatorController.leftBumper()));
 
-    //m_operatorController.leftBumper().whileTrue(new CoralIntake(m_EndE));
+    // m_operatorController.leftBumper().whileTrue(new CoralIntake(m_EndE));
 
     // m_operatorController.start().whileTrue(m_coralSubsystem.manualElevatorDown());
     // Right Bumper -> Run tube intake in reverse
@@ -213,9 +215,9 @@ public class RobotContainer {
     m_driverController.rightBumper().whileTrue(new SequentialCommandGroup(
         Commands.waitUntil(() -> m_EndE.isCoralEngaged()),
         m_coralSubsystem.setSetpointCommand(m_coralSubsystem.lastSetpoint),
-        new RAlignToReefTagRelative(drivebase),  this.ScoreUniversal().withTimeout(1)));
+        new RAlignToReefTagRelative(drivebase), this.ScoreUniversal().withTimeout(1)));
     m_driverController.leftBumper().whileTrue(new LAlignToReefTagRelative(drivebase));
-    //m_operatorController.rightStick().onTrue(m_coralSubsystem.resetElevatorEncoder());
+    // m_operatorController.rightStick().onTrue(m_coralSubsystem.resetElevatorEncoder());
 
     // B Button -> Elevator/Arm to human player position, set ball intake to stow
     // when idle
@@ -248,9 +250,13 @@ public class RobotContainer {
     m_driverController.a().whileTrue(m_climber.runReverseClimberCommand());
     // Resets all encoders
     // m_operatorController.start().onTrue(m_coralSubsystem.resetAllEncoders());
-    //m_operatorController.leftTrigger(0.3).whileTrue(m_AlgaeArmSubsystem.coralToAlgae());
+    // m_operatorController.leftTrigger(0.3).whileTrue(m_AlgaeArmSubsystem.coralToAlgae());
     m_operatorController.leftTrigger(0.5).whileTrue((m_AlgaeArmSubsystem.coralToAlgae()));
     m_operatorController.rightTrigger(0.5).whileTrue((m_AlgaeArmSubsystem.runGroundArmAlgaeCommand()));
+  }
+
+  public PathPlannerAuto pathPlannerAuto() {
+    return new PathPlannerAuto("Vision3CLeft", true);
   }
 
   /**
