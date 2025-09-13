@@ -67,8 +67,8 @@ public final class Constants {
   }
 
   public static final class ElevatorConstants {
-    public static final int LeftElevatorCanID = 10;
-    public static final int RightElevatorCanID = 11;
+    public static final int LeftElevatorCanID = 30;//10
+    public static final int RightElevatorCanID = 31; //11
   }
 
   public static final class ArmConstants {  // CAN id's updated
