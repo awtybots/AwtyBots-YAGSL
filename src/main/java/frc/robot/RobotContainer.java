@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Meters;
 import frc.robot.commands.LAlignToReefTagRelative;
 import frc.robot.commands.RAlignToReefTagRelative;
 import frc.robot.Constants.IntakeSetpoints;
@@ -26,7 +27,7 @@ import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveRequest.RobotCentric;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
-
+import frc.robot.subsystems.ElevatorSubsystem;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -57,6 +58,7 @@ public class RobotContainer {
   private final SendableChooser<Command> autoChooser;
   private final Algae m_algae = new Algae();
   private final AlgaeArmSubsystem m_AlgaeArmSubsystem = new AlgaeArmSubsystem(m_coralSubsystem);
+  private final ElevatorSubsystem m_elevator = new ElevatorSubsystem();
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController = new CommandXboxController(OIConstants.kDriverControllerPort);
   private final CommandXboxController m_operatorController = new CommandXboxController(
@@ -242,7 +244,7 @@ public class RobotContainer {
     m_operatorController.povDown().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeLow));
     // D-Pad Left -> Elevator to Barge position
     m_operatorController.povLeft().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.Barge));
-
+    m_elevator.setDefaultCommand(m_elevator.setHeight(Meters.of(0)));
     m_driverController.start().onTrue(new InstantCommand(() -> drivebase.setInitialHeading(180), drivebase));
     // A Button -> Climber Goes In
     m_driverController.b().whileTrue(m_climber.runClimberCommand());
@@ -253,6 +255,12 @@ public class RobotContainer {
     // m_operatorController.leftTrigger(0.3).whileTrue(m_AlgaeArmSubsystem.coralToAlgae());
     m_operatorController.leftTrigger(0.5).whileTrue((m_AlgaeArmSubsystem.coralToAlgae()));
     m_operatorController.rightTrigger(0.5).whileTrue((m_AlgaeArmSubsystem.runGroundArmAlgaeCommand()));
+    m_driverController.a().whileTrue(m_elevator.setHeight(Meters.of(0.5)));
+    m_driverController.b().whileTrue(m_elevator.setHeight(Meters.of(1)));
+    // Schedule `set` when the Xbox controller's B button is pressed,
+    // cancelling on release.
+    m_driverController.x().whileTrue(m_elevator.set(0.3));
+    m_driverController.y().whileTrue(m_elevator.set(-0.3));
   }
 
   public PathPlannerAuto pathPlannerAuto() {

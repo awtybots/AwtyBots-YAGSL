@@ -5,34 +5,29 @@
     "data": {
       "commands": [
         {
-          "type": "path",
-          "data": {
-            "pathName": "Path1S1"
-          }
-        },
-        {
-          "type": "parallel",
+          "type": "sequential",
           "data": {
             "commands": [
               {
-                "type": "named",
+                "type": "parallel",
                 "data": {
-                  "name": "AlignL"
+                  "commands": [
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "AlignL"
+                      }
+                    }
+                  ]
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "ElevatorLiftL4"
+                  "name": "outtake"
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "outtake"
           }
         },
         {
@@ -48,34 +43,29 @@
           }
         },
         {
-          "type": "path",
-          "data": {
-            "pathName": "Path3S2"
-          }
-        },
-        {
-          "type": "parallel",
+          "type": "sequential",
           "data": {
             "commands": [
               {
-                "type": "named",
+                "type": "parallel",
                 "data": {
-                  "name": "AlignR"
+                  "commands": [
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "ElevatorLiftL4"
+                      }
+                    }
+                  ]
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "ElevatorLiftL4"
+                  "name": "outtake"
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "outtake"
           }
         },
         {
@@ -91,25 +81,26 @@
           }
         },
         {
-          "type": "path",
-          "data": {
-            "pathName": "Path5S3"
-          }
-        },
-        {
-          "type": "parallel",
+          "type": "sequential",
           "data": {
             "commands": [
               {
-                "type": "named",
+                "type": "parallel",
                 "data": {
-                  "name": "AlignL"
+                  "commands": [
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "ElevatorLiftL4"
+                      }
+                    }
+                  ]
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "ElevatorLiftL4"
+                  "name": "outtake"
                 }
               }
             ]
