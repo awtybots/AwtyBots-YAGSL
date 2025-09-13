@@ -77,20 +77,20 @@ public final class Configs {
                         r_armMotorConfig.follow(17,true);
 
                         l_armMotorConfig.closedLoop.feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
-                                        .p(0.3)
-                                        .d(.01)
+                                        .p(0.2)
+                                        .d(.03)
                                         .outputRange(-1, 1).maxMotion
-                                        .maxVelocity(10)
-                                        .maxAcceleration(10)
+                                        .maxVelocity(500)
+                                        .maxAcceleration(500)
                                         .allowedClosedLoopError(.01)
                                         ;
 
                         r_armMotorConfig.closedLoop.feedbackSensor(FeedbackSensor.kNoSensor)
-                                        .p(0.3)
-                                        .d(.01)
+                                        .p(0.2)
+                                        .d(.03)
                                         .outputRange(-1, 1).maxMotion
-                                        .maxVelocity(10)
-                                        .maxAcceleration(10)
+                                        .maxVelocity(500)
+                                        .maxAcceleration(500)
                                         .allowedClosedLoopError(.01);
 
                         
@@ -115,37 +115,40 @@ public final class Configs {
                         //                 .maxAcceleration(1700)
                         //                 .allowedClosedLoopError(.25);
 
-                        l_elevatorMotorConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(50).voltageCompensation(12);
-                        r_elevatorMotorConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(50).voltageCompensation(12);
+                        l_elevatorMotorConfig.idleMode(IdleMode.kCoast).smartCurrentLimit(50).voltageCompensation(12);
+                        r_elevatorMotorConfig.idleMode(IdleMode.kCoast).smartCurrentLimit(50).voltageCompensation(12);
                         r_elevatorMotorConfig.follow(10, true);
 
                         l_elevatorMotorConfig.closedLoop
                                         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-                                        .p(0.3)
+                                        .p(0.35)
                                         .d(.003)
+                                        // .velocityFF(10)
                                         .outputRange(-1, 1).maxMotion
-                                        .maxVelocity(500)
-                                        .maxAcceleration(500)
+                                        .maxVelocity(5000)
+                                        .maxAcceleration(5000)
                                         .allowedClosedLoopError(.5);
 
                         r_elevatorMotorConfig.closedLoop
                                         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-                                        .p(0.3)
+                                        
+                                        .p(0.35)
                                         .d(.003)
+                                        // .velocityFF(10)
                                         .outputRange(-1, 1).maxMotion
-                                        .maxVelocity(500)
-                                        .maxAcceleration(500)
+                                        .maxVelocity(5000)
+                                        .maxAcceleration(5000)
                                         .allowedClosedLoopError(.5);
 
-                        RollerwristMotorConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(50).voltageCompensation(12);
+                        RollerwristMotorConfig.inverted(true).idleMode(IdleMode.kBrake).smartCurrentLimit(50).voltageCompensation(12);
 
-                        RollerwristMotorConfig.closedLoop
-                                        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-                                        .p(0.02)
-                                        .outputRange(-1, 1).maxMotion
-                                        .maxVelocity(6000)
-                                        .maxAcceleration(8000)
-                                        .allowedClosedLoopError(.01);
+                        // RollerwristMotorConfig.closedLoop
+                        //                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+                        //                 .p(0.02)
+                        //                 .outputRange(-1, 1).maxMotion
+                        //                 .maxVelocity(1000)
+                        //                 .maxAcceleration(1000)
+                        //                 .allowedClosedLoopError(.01);
 
                         intakeMotorConfig.inverted(true).idleMode(IdleMode.kBrake).smartCurrentLimit(50);
 

@@ -62,6 +62,9 @@ public class RobotContainer {
   private final CommandXboxController m_operatorController = new CommandXboxController(
       OIConstants.kOperatorControllerPort);
 
+
+  public static boolean hasLostContact = false;
+
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
@@ -90,7 +93,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("Stop", Commands.runOnce(() -> drivebase.stop()));
     NamedCommands.registerCommand("test", Commands.print("Hello World"));
     NamedCommands.registerCommand("outtake", m_EndE.reverseIntakeCommand().withTimeout(1));
-    NamedCommands.registerCommand("outtakeLD", m_EndE.ArunIntakeCommandFeeder());
+    NamedCommands.registerCommand("outtakeLD", m_EndE.BrunIntakeCommandFeeder(hasLostContact).andThen(m_EndE.reverseIntakeCommand().withTimeout(.2)));
     NamedCommands.registerCommand("outtake0.5", m_EndE.reverseIntakeCommand().withTimeout(0.5));
     NamedCommands.registerCommand("fintake", m_funnelIntakeSubsystem.runIntakeCommand().withTimeout(1));
     NamedCommands.registerCommand("FeederStation", m_coralSubsystem.setSetpointCommand(Setpoint.FeederStation));
@@ -102,14 +105,20 @@ public class RobotContainer {
     NamedCommands.registerCommand("AlgaeHigh", m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeHigh));
     NamedCommands.registerCommand("Gyroreset", new InstantCommand(() -> drivebase.setInitialHeading(180), drivebase));
     NamedCommands.registerCommand("Gyroreset1", new InstantCommand(() -> drivebase.setInitialHeading(0), drivebase));
+    // NamedCommands.registerCommand("AlignR", new SequentialCommandGroup(
+    //     Commands.waitUntil(() -> m_EndE.isCoralEngaged()),
+    //     m_coralSubsystem.setSetpointCommand(Setpoint.L4),
+    //     new RAlignToReefTagRelative(drivebase), this.ScoreUniversal().withTimeout(1)));
+    // NamedCommands.registerCommand("AlignL", new SequentialCommandGroup(
+    //     Commands.waitUntil(() -> m_EndE.isCoralEngaged()),
+    //     m_coralSubsystem.setSetpointCommand(Setpoint.L4),
+    //     new LAlignToReefTagRelative(drivebase), this.ScoreUniversal().withTimeout(1)));
     NamedCommands.registerCommand("AlignR", new SequentialCommandGroup(
         Commands.waitUntil(() -> m_EndE.isCoralEngaged()),
-        m_coralSubsystem.setSetpointCommand(Setpoint.L4),
-        new RAlignToReefTagRelative(drivebase), this.ScoreUniversal().withTimeout(1)));
+        new RAlignToReefTagRelative(drivebase)));
     NamedCommands.registerCommand("AlignL", new SequentialCommandGroup(
         Commands.waitUntil(() -> m_EndE.isCoralEngaged()),
-        m_coralSubsystem.setSetpointCommand(Setpoint.L4),
-        new LAlignToReefTagRelative(drivebase), this.ScoreUniversal().withTimeout(1)));
+        new LAlignToReefTagRelative(drivebase)));
 
     autoChooser = AutoBuilder.buildAutoChooser();
 
@@ -126,7 +135,7 @@ public class RobotContainer {
       () -> m_driverController.getLeftX() * 1)
       .withControllerRotationAxis(m_driverController::getRightX)
       .deadband(OIConstants.DEADBAND)
-      .scaleTranslation(1)
+      .scaleTranslation(0.8)
       .allianceRelativeControl(true);
 
   SwerveInputStream driveDirectAngle = driveAngulareVelocity
@@ -146,7 +155,7 @@ public class RobotContainer {
                 m_EndE.runIntakeCommand() // Run Coral Intake at the same time
             ),
             Commands.either(
-                m_EndE.reverseIntakeCommand(), // If ElevatorAtL4 is true, run Reverse Intake
+                m_EndE.runIntakeCommand(), // If ElevatorAtL4 is true, run Reverse Intake
                 m_EndE.runIntakeCommand(), // Otherwise, run normal intake
                 () -> CoralSubsystem.ElevatorAtL4 // Condition for reverse intake
             ),
@@ -197,25 +206,25 @@ public class RobotContainer {
 
     // Left Bumper -> Run tube intake
     m_operatorController.leftBumper()
-        .whileTrue(m_EndE.BrunIntakeCommandFeeder().andThen(m_EndE.reverseIntakeCommand().withTimeout(.6)));// .onlyIf(m_operatorController.leftBumper()));
+        .whileTrue(m_EndE.BrunIntakeCommandFeeder(hasLostContact).andThen(m_EndE.reverseIntakeCommand().withTimeout(.2)));// .onlyIf(m_operatorController.leftBumper()));
 
     // m_operatorController.leftBumper().whileTrue(new CoralIntake(m_EndE));
 
     // m_operatorController.start().whileTrue(m_coralSubsystem.manualElevatorDown());
     // Right Bumper -> Run tube intake in reverse
     m_driverController.y().whileTrue(m_algae.runAlgaeInCommand());
-    m_operatorController.rightBumper().whileTrue(this.ScoreUniversal());
-    m_driverController.rightTrigger().whileTrue(this.ScoreUniversal());
+    m_operatorController.rightBumper().whileTrue(m_EndE.reverseIntakeCommand());
+   // m_driverController.rightTrigger().whileTrue(this.ScoreUniversal());
 
     // Reef alignment
     // m_driverController.rightBumper().whileTrue(new
     // RAlignToReefTagRelative(drivebase));
     // m_driverController.leftBumper().whileTrue(new
     // LAlignToReefTagRelative(drivebase));
-    m_driverController.rightBumper().whileTrue(new SequentialCommandGroup(
-        Commands.waitUntil(() -> m_EndE.isCoralEngaged()),
-        m_coralSubsystem.setSetpointCommand(m_coralSubsystem.lastSetpoint),
-        new RAlignToReefTagRelative(drivebase), this.ScoreUniversal().withTimeout(1)));
+    m_driverController.rightBumper().whileTrue(new RAlignToReefTagRelative(drivebase));//new SequentialCommandGroup(
+        // Commands.waitUntil(() -> m_EndE.isCoralEngaged()),
+        // m_coralSubsystem.setSetpointCommand(m_coralSubsystem.lastSetpoint),
+        // new RAlignToReefTagRelative(drivebase), this.ScoreUniversal().withTimeout(1)));
     m_driverController.leftBumper().whileTrue(new LAlignToReefTagRelative(drivebase));
     // m_operatorController.rightStick().onTrue(m_coralSubsystem.resetElevatorEncoder());
 
@@ -252,7 +261,8 @@ public class RobotContainer {
     // m_operatorController.start().onTrue(m_coralSubsystem.resetAllEncoders());
     // m_operatorController.leftTrigger(0.3).whileTrue(m_AlgaeArmSubsystem.coralToAlgae());
     m_operatorController.leftTrigger(0.5).whileTrue((m_AlgaeArmSubsystem.coralToAlgae()));
-    m_operatorController.rightTrigger(0.5).whileTrue((m_AlgaeArmSubsystem.runGroundArmAlgaeCommand()));
+    m_operatorController.rightTrigger(0.5).whileTrue((m_AlgaeArmSubsystem.runGroundArmAlgaeCommand().alongWith(m_algae.runAlgaeInCommand())));
+    m_operatorController.povRight().whileTrue(m_algae.runAlgaeOutCommand());
   }
 
   public PathPlannerAuto pathPlannerAuto() {

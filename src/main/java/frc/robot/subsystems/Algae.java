@@ -21,6 +21,7 @@ import frc.robot.Configs;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ClimbConstants;
 import frc.robot.Constants.ClimbSetPoints;
+import frc.robot.Constants.RollerSetpoints;
 
 
 public class Algae extends SubsystemBase {
@@ -67,13 +68,13 @@ public class Algae extends SubsystemBase {
 
   public Command runAlgaeOutCommand() {
     return new RunCommand(
-            () -> setRollerPower(ClimbSetPoints.kIn), this)
-            .finallyDo(interrupted -> setRollerPower(0));
+            () -> setRollerPower(RollerSetpoints.kIn), this)
+            .finallyDo(interrupted -> setRollerPower(RollerSetpoints.kOut));
 }
   public Command runAlgaeInCommand() {
     return new RunCommand(
-      () -> setRollerPower(ClimbSetPoints.kOut), this)
-      .finallyDo(interrupted -> setRollerPower(0));
+      () -> setRollerPower(RollerSetpoints.kOut), this)
+      .finallyDo(interrupted -> setRollerPower(RollerSetpoints.kOut));
   }
   
   

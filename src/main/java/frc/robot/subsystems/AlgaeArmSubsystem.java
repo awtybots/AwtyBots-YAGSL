@@ -12,11 +12,13 @@ import frc.robot.subsystems.Algae.Setpoint;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import frc.robot.Configs;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ElevatorSetpoints;
+import frc.robot.Constants.IntakeSetpoints;
 import frc.robot.Constants.ArmSetpoints;
 
 public class AlgaeArmSubsystem extends SubsystemBase {
@@ -72,6 +74,7 @@ public class AlgaeArmSubsystem extends SubsystemBase {
     }
 
     public Command coralToAlgae() {
+        // System.out.println("Coral to Algae Command is Running");
         return this.runOnce(() -> {
             // Use the enum setpoint rather than elevator target doubles,
             // since several elevator setpoints share the same numeric value (e.g. 0.0)
@@ -162,12 +165,11 @@ public class AlgaeArmSubsystem extends SubsystemBase {
     }
     public Command runGroundArmAlgaeCommand() {
         if (CoralSubsystem.elevatorCurrentTarget == ElevatorSetpoints.FeederStation) {
-            return new RunCommand(
-              () -> armOutCommand(), this)
-              .finallyDo(interrupted -> armtoStowCommand());
+            return Commands.startEnd(
+                () -> armCurrentTarget = ArmSetpoints.GroundIntake, () -> armCurrentTarget = ArmSetpoints.Stow);
         }
         else {
-            return armtoStowCommand();
+            return Commands.runOnce(() -> armCurrentTarget = ArmSetpoints.Stow);
         }
         // Add a fallback or return null if no condition is met
         

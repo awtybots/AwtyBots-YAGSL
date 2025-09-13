@@ -92,20 +92,20 @@ public final class Constants {
 
   public static final class ElevatorSetpoints {
     public static final double FeederStation = 0.0;
-    public static final double L1 = 5.0;
+    public static final double L1 = 2.0;
     public static final double AlgaeLow = 0.0;
-    public static final double L2 = 15.0;
-    public static final double AlgaeHigh = 14.0;
-    public static final double L3 = 0.0;
-    public static final double L4 = 26.0;
-    public static final double Barge = 27.0;
+    public static final double L2 = 21.0;
+    public static final double AlgaeHigh = 0.0;
+    public static final double L3 = 41.0;
+    public static final double L4 = 75.3;
+    public static final double Barge = 80.0;
   }
 
   // UNUSED SETPOINTS
 
   public static final class ArmSetpoints {
 //aboslute encoder goes from 0 to 1
-public static final double GroundIntake = 0.275;
+public static final double GroundIntake = 0.21;
 public static final double AlgaeIntake = 0.3;
 public static final double Stow = 0.445;
 public static final double Barge = 0.35;
@@ -154,10 +154,16 @@ public static final double Barge = 0.35;
   }
 
   public static final class IntakeSetpoints {
-    public static final double kForward = -.6;
-    public static final double kReverse = .6;
+    public static final double kForward = -.4;
+    public static final double kReverse = .4;
     public static final double kHold = .25;
   }
+
+  public static final class RollerSetpoints {
+    public static final double kIn = 0.5;
+    public static final double kOut = -0.5;
+    public static final double kDefault = 0.2;
+   }
 
   public static final class ModuleConstants {
     // The MAXSwerve module can be configured with one of three pinion gears: 12T,
@@ -194,9 +200,9 @@ public static final double Barge = 0.35;
 
   public static final double ROT_SETPOINT_REEF_ALIGNMENT = 0; // Rotation
   public static final double ROT_TOLERANCE_REEF_ALIGNMENT = 0.5;
-  public static final double X_SETPOINT_REEF_ALIGNMENT = -0.275; // Vertical pose
+  public static final double X_SETPOINT_REEF_ALIGNMENT = 0.4; // Vertical pose
   public static final double X_TOLERANCE_REEF_ALIGNMENT = 0.05;
-  public static final double Y_L_SETPOINT_REEF_ALIGNMENT = -0.36; // Horizontal pose
+  public static final double Y_L_SETPOINT_REEF_ALIGNMENT = -0.40; // Horizontal pose
   public static final double Y_R_SETPOINT_REEF_ALIGNMENT = 0.0; // Horizontal pose
   public static final double Y_TOLERANCE_REEF_ALIGNMENT = 0.02;
 

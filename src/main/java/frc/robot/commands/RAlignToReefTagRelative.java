@@ -80,7 +80,7 @@ public class RAlignToReefTagRelative extends Command {
       double ySpeed = yController.calculate(postions[0]);
       double rotValue = rotController.calculate(postions[4]);
 
-      drivebase.drive(new Translation2d(xSpeed, ySpeed), rotValue, false);
+       drivebase.drive(new Translation2d(xSpeed, ySpeed), rotValue, false);
 
       if (!rotController.atSetpoint() ||
           !yController.atSetpoint() ||
@@ -88,7 +88,7 @@ public class RAlignToReefTagRelative extends Command {
         stopTimer.reset();
       }
     } else {
-      drivebase.drive(new Translation2d(), 0, false);
+       drivebase.drive(new Translation2d(), 0, false);
     }
 
     SmartDashboard.putNumber("poseValidTimer", stopTimer.get());
@@ -96,7 +96,7 @@ public class RAlignToReefTagRelative extends Command {
 
   @Override
   public void end(boolean interrupted) {
-    drivebase.drive(new Translation2d(), 0, false);
+     drivebase.drive(new Translation2d(), 0, false);
   }
 
   @Override
