@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import frc.robot.Constants.NeoMotorConstants;
 import frc.robot.LimelightHelpers;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -53,6 +54,7 @@ public final class Constants {
     public static final double kBackRightChassisAngularOffset = Math.PI / 2;
 
     // SPARK MAX CAN IDs
+      // SPARK MAX CAN IDs
     public static final int kFrontLeftDrivingCanId = 1;
     public static final int kRearLeftDrivingCanId = 3;
     public static final int kFrontRightDrivingCanId = 7;
@@ -64,70 +66,72 @@ public final class Constants {
     public static final int kRearRightTurningCanId = 8;
 
     public static final boolean kGyroReversed = false;
-  }
+  } 
 
-  public static final class ElevatorConstants {
-    public static final int LeftElevatorCanID = 10;
+  public static final class ElevatorConstants{
+    public static final int LeftElevatorCanID = 10;            
     public static final int RightElevatorCanID = 11;
   }
 
-  public static final class ArmConstants {  // CAN id's updated
-    public static final int ArmLeftCanID = 17;
-    public static final int ArmRightCanID = 19;
-    // public static final int WristCanID = 17;
-    public static final int IntakeCanID = 18;  // coral intake\
-    public static final int AlgaeCanID = 16; // algae intake
-
+  public static final class ArmConstants{
+    public static final int ArmLeftCanID = 12;
+    public static final int ArmRightCanID = 13;
+    public static final int WristCanID = 17;
+    public static final int IntakeCanID = 18;
   }
 
-  public static final class FunnelConstants {
-
+  public static final class FunnelConstants{
+  
     public static final int FunnelLIntake = 22;
 
   }
 
-  public static final class ClimbConstants {
+  public static final class ClimbConstants{
     public static final int ClimbMotor = 21;
   }
 
-  public static final class ElevatorSetpoints {
-    public static final double FeederStation = 0.0;
-    public static final double L1 = 2.0;
-    public static final double AlgaeLow = 0.0;
-    public static final double L2 = 21.0;
-    public static final double AlgaeHigh = 0.0;
-    public static final double L3 = 41.0;
-    public static final double L4 = 75.3;
-    public static final double Barge = 80.0;
+  public static final class ElevatorSetpoints{
+    public static final int FeederStation = 0;
+    public static final int L1 = 15;
+    public static final int AlgaeLow = 0;
+    public static final int L2 = 47;
+    public static final int AlgaeHigh = 42;
+    public static final int L3 = 0 ;
+    public static final int L4 = 75;
+    public static final int Barge = 27;
   }
 
-  // UNUSED SETPOINTS
+  public static final class ArmSetpoints{
+    public static final double FeederStation = -1.9;//-1.9 //
+    public static final double L1 = -3; //-3
+    public static final double AlgaeLow = -9;
+    public static final double L2 = -3;
+    public static final double AlgaeHigh = -9;
+    public static final double L3 = -13.583; //-12.5
+    public static final double L4 = -13;
+    public static final double Barge = -14;
+    // public static final double FeederStation = 1.375;//-1.9 //
+    // public static final double L1 = 0.224; //-3
+    // public static final double AlgaeLow = 0.1;
+    // public static final double L2 = 0.224;
+    // public static final double AlgaeHigh = 0.1;
+    // public static final double L3 = 0.954;
+    // public static final double L4 = 0.9775;
+    // public static final double Barge = 0.1;
 
-  public static final class ArmSetpoints {
-//aboslute encoder goes from 0 to 1
-public static final double GroundIntake = 0.21;
-public static final double AlgaeIntake = 0.3;
-public static final double Stow = 0.445;
-public static final double Barge = 0.35;
-    // public static final double Processor = 0;
-    
-    
   }
-
-  /*
-
-  public static final class WristSetpoints {
-    public static final double FeederStation = 0;//0.55
+  public static final class WristSetpoints{
+    public static final double FeederStation = 0.55;
     public static final double L1 = 0.8;
     public static final double AlgaeLow = .27;
     public static final double L2 = .5;
     public static final double AlgaeHigh = .27;
     public static final double L3 = .66;
-    public static final double L4 = .56;
+    public static final double L4 = .61;
     public static final double Barge = .9;
   }
 
-  public static final class FunnelWristSetpoints {
+  public static final class FunnelWristSetpoints{
     public static final double FeederStation = -2;
     public static final double Climb = 12;
     public static final double kForward = 0.5;
@@ -135,9 +139,7 @@ public static final double Barge = 0.35;
     public static final double kHold = 0.0;
   }
 
-  */
-
-  public static final class ClimbSetPoints {
+  public static final class ClimbSetPoints{
     public static final double start = 0;
     public static final double climb = 30;
     public static final double kExtend = 0.5;
@@ -147,23 +149,17 @@ public static final double Barge = 0.35;
     public static final double kOut = -1;
   }
 
-  public static final class FunnelIntakeSetpoints {
+  public static final class FunnelIntakeSetpoints{
     public static final double kForward = 0.20;
     public static final double kReverse = 0.30;
     public static final double kHold = 0.0;
   }
 
-  public static final class IntakeSetpoints {
-    public static final double kForward = -.4;
-    public static final double kReverse = .4;
+  public static final class IntakeSetpoints{
+    public static final double kForward = -.6;
+    public static final double kReverse = .6;
     public static final double kHold = .25;
   }
-
-  public static final class RollerSetpoints {
-    public static final double kIn = 0.5;
-    public static final double kOut = -0.5;
-    public static final double kDefault = 0.2;
-   }
 
   public static final class ModuleConstants {
     // The MAXSwerve module can be configured with one of three pinion gears: 12T,
@@ -185,28 +181,27 @@ public static final double Barge = 0.35;
   public static final class OIConstants {
     public static final int kDriverControllerPort = 0;
     public static final int kOperatorControllerPort = 1;
-    public static final double DEADBAND = 0.13;
+    public static final double DEADBAND = 0.2;
     public static final double kTriggerThreshold = 0.2;
   }
-
   public static final class NeoMotorConstants {
     public static final double kFreeSpeedRpm = 6784;
   }
-
   // AutoAlign constants
-  public static final double X_REEF_ALIGNMENT_P = 0.8;
-  public static final double Y_REEF_ALIGNMENT_P = 1.5;
-  public static final double ROT_REEF_ALIGNMENT_P = 0.05;
+  public static final double X_REEF_ALIGNMENT_P = 1;
+  public static final double Y_REEF_ALIGNMENT_P = 1.74;
+  public static final double ROT_REEF_ALIGNMENT_P = 0.08;
 
   public static final double ROT_SETPOINT_REEF_ALIGNMENT = 0; // Rotation
-  public static final double ROT_TOLERANCE_REEF_ALIGNMENT = 0.5;
-  public static final double X_SETPOINT_REEF_ALIGNMENT = 0.4; // Vertical pose
-  public static final double X_TOLERANCE_REEF_ALIGNMENT = 0.05;
-  public static final double Y_L_SETPOINT_REEF_ALIGNMENT = -0.40; // Horizontal pose
-  public static final double Y_R_SETPOINT_REEF_ALIGNMENT = 0.0; // Horizontal pose
+  public static final double ROT_TOLERANCE_REEF_ALIGNMENT = 0.3;
+  public static final double X_SETPOINT_REEF_ALIGNMENT = -0.1;//-0.43 // Vertical pose
+  public static final double X_TOLERANCE_REEF_ALIGNMENT = 0.08;
+  public static final double Y_L_SETPOINT_REEF_ALIGNMENT = -0.359; // Horizontal pose
+  public static final double Y_R_SETPOINT_REEF_ALIGNMENT = 0.3; // Horizontal pose
   public static final double Y_TOLERANCE_REEF_ALIGNMENT = 0.02;
 
-  public static final double DONT_SEE_TAG_WAIT_TIME = 0.2;
+
+  public static final double DONT_SEE_TAG_WAIT_TIME = 0.4;
   public static final double POSE_VALIDATION_TIME = 0.4;
 
   // public static final class LimelightConstants {

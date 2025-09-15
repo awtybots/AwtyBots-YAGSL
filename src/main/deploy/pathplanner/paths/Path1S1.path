@@ -16,12 +16,12 @@
     },
     {
       "anchor": {
-        "x": 5.274971590909091,
-        "y": 2.6439346590909087
+        "x": 5.63422131147541,
+        "y": 2.1249487704918035
       },
       "prevControl": {
-        "x": 5.512880197075096,
-        "y": 2.5671264882225104
+        "x": 5.872129917641415,
+        "y": 2.0481405996234052
       },
       "nextControl": null,
       "isLocked": false,
@@ -31,7 +31,19 @@
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "ElevatorLiftL4",
+      "waypointRelativePos": 0.08974358974359067,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "ElevatorLiftL4"
+        }
+      }
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 2.0,
     "maxAcceleration": 3.0,

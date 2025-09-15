@@ -11,7 +11,7 @@
     "VisionAuto",
     "Red and Blue Comp"
   ],
-  "defaultMaxVel": 3.0,
+  "defaultMaxVel": 5.0,
   "defaultMaxAccel": 4.0,
   "defaultMaxAngVel": 180.0,
   "defaultMaxAngAccel": 360.0,
@@ -24,7 +24,7 @@
   "maxDriveSpeed": 5.742,
   "driveMotorType": "vortex",
   "driveCurrentLimit": 60.0,
-  "wheelCOF": 1.1,
+  "wheelCOF": 0.8,
   "flModuleX": 0.33,
   "flModuleY": 0.33,
   "frModuleX": 0.33,

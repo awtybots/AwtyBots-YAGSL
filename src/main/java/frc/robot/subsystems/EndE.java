@@ -35,7 +35,7 @@ public class EndE extends SubsystemBase {
     }
 
     public boolean isCoralEngaged() {
-        return lc.getMeasurement().distance_mm <= 85;
+        return lc.getMeasurement().distance_mm <= 30;
     }
 
     public void periodic() {
@@ -61,7 +61,7 @@ public class EndE extends SubsystemBase {
         intakeMotor.set(power);
     }
 
-    public Command runIntakeCommand() {
+    public Command arunIntakeCommand() {
         return Commands.run(
                 () -> setIntakePower(IntakeSetpoints.kForward));
     }
@@ -80,7 +80,7 @@ public class EndE extends SubsystemBase {
         // () -> setIntakePower(IntakeSetpoints.kForward), () -> setIntakePower(0.0));
     }
 
-    public Command BrunIntakeCommandFeeder(boolean hasLostContact) {
+    public Command BrunIntakeCommandFeeder() {
 
         // if (hasLostContact) {
         //     hasLostContact = false;
@@ -89,18 +89,35 @@ public class EndE extends SubsystemBase {
         //             .until(this::isCoralEngaged);
         // }
         return Commands.startEnd(
-                () -> this.setIntakePower(IntakeSetpoints.kReverse), () -> this.setIntakePower(0.0))
+                () -> this.setIntakePower(-0.4), () -> this.setIntakePower(0.0))
                 .until(this::isCoralEngaged);
         // Continuously check while running
         // return Commands.startEnd(
         // () -> setIntakePower(IntakeSetpoints.kForward), () -> setIntakePower(0.0));
     }
 
-    public Command reverseIntakeCommand() {
+    public Command areverseIntakeCommand() {
         return Commands.startEnd(
                 () -> this.setIntakePower(IntakeSetpoints.kReverse), () -> this.setIntakePower(0.0));
     }
 
+    public Command runIntakeCommand() {
+
+        /*if(measurement.status > 10){
+            return Commands.startEnd(
+                () -> setIntakePower(IntakeSetpoints.kForward), () -> setIntakePower(0.0));
+        }else{
+            return Commands.startEnd(
+                () -> setIntakePower(0.0), () -> setIntakePower(0.0));
+        }*/
+        return Commands.startEnd(
+                () -> setIntakePower(IntakeSetpoints.kForward), () -> setIntakePower(0.0));
+    }
+
+    public Command reverseIntakeCommand() {
+        return this.startEnd(
+                () -> this.setIntakePower(IntakeSetpoints.kReverse), () -> this.setIntakePower(0.0));
+    }
     // public boolean isCoralEngaged() {
     // return CoralEngaged;
     // }

@@ -17,6 +17,12 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "outtake"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "Path2"
@@ -41,6 +47,12 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "outtake"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "Path4"
@@ -62,6 +74,12 @@
           "type": "named",
           "data": {
             "name": "AlignL"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "outtake"
           }
         },
         {

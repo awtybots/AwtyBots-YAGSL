@@ -16,8 +16,8 @@ import frc.robot.subsystems.FunnelIntake;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.SwerveSubsystem;
 import swervelib.SwerveInputStream;
-import frc.robot.subsystems.Algae;
-import frc.robot.subsystems.AlgaeArmSubsystem;
+// import frc.robot.subsystems.Algae;
+// import frc.robot.subsystems.AlgaeArmSubsystem;
 
 import java.io.File;
 
@@ -55,8 +55,8 @@ public class RobotContainer {
   private final FunnelIntake m_funnelIntakeSubsystem = new FunnelIntake();
   private final Climber m_climber = new Climber();
   private final SendableChooser<Command> autoChooser;
-  private final Algae m_algae = new Algae();
-  private final AlgaeArmSubsystem m_AlgaeArmSubsystem = new AlgaeArmSubsystem(m_coralSubsystem);
+  // private final Algae m_algae = new Algae();
+  // private final AlgaeArmSubsystem m_AlgaeArmSubsystem = new AlgaeArmSubsystem(m_coralSubsystem);
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController = new CommandXboxController(OIConstants.kDriverControllerPort);
   private final CommandXboxController m_operatorController = new CommandXboxController(
@@ -93,7 +93,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("Stop", Commands.runOnce(() -> drivebase.stop()));
     NamedCommands.registerCommand("test", Commands.print("Hello World"));
     NamedCommands.registerCommand("outtake", m_EndE.reverseIntakeCommand().withTimeout(1));
-    NamedCommands.registerCommand("outtakeLD", m_EndE.BrunIntakeCommandFeeder(hasLostContact).andThen(m_EndE.reverseIntakeCommand().withTimeout(.2)));
+    NamedCommands.registerCommand("outtakeLD", m_EndE.BrunIntakeCommandFeeder().andThen(m_EndE.runIntakeCommand().withTimeout(.2)));
     NamedCommands.registerCommand("outtake0.5", m_EndE.reverseIntakeCommand().withTimeout(0.5));
     NamedCommands.registerCommand("fintake", m_funnelIntakeSubsystem.runIntakeCommand().withTimeout(1));
     NamedCommands.registerCommand("FeederStation", m_coralSubsystem.setSetpointCommand(Setpoint.FeederStation));
@@ -113,14 +113,14 @@ public class RobotContainer {
     //     Commands.waitUntil(() -> m_EndE.isCoralEngaged()),
     //     m_coralSubsystem.setSetpointCommand(Setpoint.L4),
     //     new LAlignToReefTagRelative(drivebase), this.ScoreUniversal().withTimeout(1)));
-    NamedCommands.registerCommand("AlignR", new SequentialCommandGroup(
-        Commands.waitUntil(() -> m_EndE.isCoralEngaged()),
-        new RAlignToReefTagRelative(drivebase)));
-    NamedCommands.registerCommand("AlignL", new SequentialCommandGroup(
-        Commands.waitUntil(() -> m_EndE.isCoralEngaged()),
-        new LAlignToReefTagRelative(drivebase)));
-
+    NamedCommands.registerCommand("AlignRFeeder",
+        new RAlignToReefTagRelative(drivebase).withTimeout(5));
+    NamedCommands.registerCommand("AlignL",
+        new LAlignToReefTagRelative(drivebase).withTimeout(3));
+        NamedCommands.registerCommand("AlignLFeeder",
+        new LAlignToReefTagRelative(drivebase).withTimeout(5));
     autoChooser = AutoBuilder.buildAutoChooser();
+
 
     SmartDashboard.putData("Auto Chooser", autoChooser);
 
@@ -205,14 +205,14 @@ public class RobotContainer {
             }));
 
     // Left Bumper -> Run tube intake
-    m_operatorController.leftBumper()
-        .whileTrue(m_EndE.BrunIntakeCommandFeeder(hasLostContact).andThen(m_EndE.reverseIntakeCommand().withTimeout(.2)));// .onlyIf(m_operatorController.leftBumper()));
+    m_operatorController.leftBumper().whileTrue(m_EndE.BrunIntakeCommandFeeder().andThen(m_EndE.runIntakeCommand().withTimeout(.2)));
+     //   .whileTrue(m_EndE.BrunIntakeCommandFeeder(hasLostContact).andThen(m_EndE.reverseIntakeCommand().withTimeout(.2)));// .onlyIf(m_operatorController.leftBumper()));
 
     // m_operatorController.leftBumper().whileTrue(new CoralIntake(m_EndE));
 
     // m_operatorController.start().whileTrue(m_coralSubsystem.manualElevatorDown());
     // Right Bumper -> Run tube intake in reverse
-    m_driverController.y().whileTrue(m_algae.runAlgaeInCommand());
+    // m_driverController.y().whileTrue(m_algae.runAlgaeInCommand());
     m_operatorController.rightBumper().whileTrue(m_EndE.reverseIntakeCommand());
    // m_driverController.rightTrigger().whileTrue(this.ScoreUniversal());
 
@@ -260,9 +260,9 @@ public class RobotContainer {
     // Resets all encoders
     // m_operatorController.start().onTrue(m_coralSubsystem.resetAllEncoders());
     // m_operatorController.leftTrigger(0.3).whileTrue(m_AlgaeArmSubsystem.coralToAlgae());
-    m_operatorController.leftTrigger(0.5).whileTrue((m_AlgaeArmSubsystem.coralToAlgae()));
-    m_operatorController.rightTrigger(0.5).whileTrue((m_AlgaeArmSubsystem.runGroundArmAlgaeCommand().alongWith(m_algae.runAlgaeInCommand())));
-    m_operatorController.povRight().whileTrue(m_algae.runAlgaeOutCommand());
+    // m_operatorController.leftTrigger(0.5).whileTrue((m_AlgaeArmSubsystem.coralToAlgae()));
+    // m_operatorController.rightTrigger(0.5).whileTrue((m_AlgaeArmSubsystem.runGroundArmAlgaeCommand().alongWith(m_algae.runAlgaeInCommand())));
+    // m_operatorController.povRight().whileTrue(m_algae.runAlgaeOutCommand());
   }
 
   public PathPlannerAuto pathPlannerAuto() {
