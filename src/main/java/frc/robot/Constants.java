@@ -188,16 +188,18 @@ public final class Constants {
     public static final double kFreeSpeedRpm = 6784;
   }
   // AutoAlign constants
+  // Holonomic controller gains (tag-space Z forward/back, tag-space X left/right, yaw).
   public static final double X_REEF_ALIGNMENT_P = 1;
   public static final double Y_REEF_ALIGNMENT_P = 1.74;
   public static final double ROT_REEF_ALIGNMENT_P = 0.08;
 
+  // Desired robot pose relative to the reef tag when aligned, plus allowed error bands.
   public static final double ROT_SETPOINT_REEF_ALIGNMENT = 0; // Rotation
   public static final double ROT_TOLERANCE_REEF_ALIGNMENT = 0.3;
-  public static final double X_SETPOINT_REEF_ALIGNMENT = -0.1;//-0.43 // Vertical pose
+  public static final double X_SETPOINT_REEF_ALIGNMENT = -0.1; // tag-space Z (forward/back)
   public static final double X_TOLERANCE_REEF_ALIGNMENT = 0.08;
-  public static final double Y_L_SETPOINT_REEF_ALIGNMENT = -0.359; // Horizontal pose
-  public static final double Y_R_SETPOINT_REEF_ALIGNMENT = 0.3; // Horizontal pose
+  public static final double Y_L_SETPOINT_REEF_ALIGNMENT = -0.359; // tag-space X for left auto
+  public static final double Y_R_SETPOINT_REEF_ALIGNMENT = 0.3; // tag-space X for right auto
   public static final double Y_TOLERANCE_REEF_ALIGNMENT = 0.02;
 
 
