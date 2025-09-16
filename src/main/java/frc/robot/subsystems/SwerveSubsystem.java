@@ -206,6 +206,16 @@ public class SwerveSubsystem extends SubsystemBase {
     swerveDrive.drive(velocity);
   }
 
+  /**
+   * Get current robot-relative chassis speeds from the swerve library.
+   * Useful for latency compensation and predictive control.
+   *
+   * @return {@link ChassisSpeeds} in the robot frame.
+   */
+  public ChassisSpeeds getRobotRelativeSpeeds() {
+    return swerveDrive.getRobotVelocity();
+  }
+
   public void setInitialHeading(double angleDegrees) {
     gyro.setAngleAdjustment(angleDegrees);
     swerveDrive.resetOdometry(new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(angleDegrees)));

@@ -69,18 +69,45 @@ public class RAlignToReefTagRelative extends Command {
 
   @Override
   public void execute() {
-    if (LimelightHelpers.getTV("limelight-left") && LimelightHelpers.getFiducialID("limelight-left") == tagID) {
+    final String llName = "limelight-left";
+    if (LimelightHelpers.getTV(llName) && LimelightHelpers.getFiducialID(llName) == tagID) {
       this.dontSeeTagTimer.reset();
 
-      double[] postions = LimelightHelpers.getBotPose_TargetSpace("limelight-left");
-      SmartDashboard.putNumber("x", postions[2]);
+      // Target-space pose of robot (translation: [0]=X, [2]=Z, rotation yaw: [4])
+      double[] positions = LimelightHelpers.getBotPose_TargetSpace(llName);
 
-      double xSpeed = -xController.calculate(postions[2]);
+      // Latency compensation: predict where the robot is NOW in target-space
+      // based on robot-relative velocity and limelight latency.
+      double llLatencySec =
+          (LimelightHelpers.getLatency_Pipeline(llName) + LimelightHelpers.getLatency_Capture(llName)) / 1000.0;
+
+      // Robot relative chassis speeds
+      var speeds = drivebase.getRobotRelativeSpeeds();
+      double vx = speeds.vxMetersPerSecond; // +X forward
+      double vy = speeds.vyMetersPerSecond; // +Y left
+      double omega = speeds.omegaRadiansPerSecond; // CCW +
+
+      // Robot yaw relative to target-space (degrees in LL array -> radians)
+      double rYawRad = Math.toRadians(positions[4]);
+
+      // Transform robot-frame velocity into target-space components (Z forward/back, X left/right)
+      double vTargetZ = vx * Math.cos(rYawRad) - vy * Math.sin(rYawRad);
+      double vTargetX = vx * Math.sin(rYawRad) + vy * Math.cos(rYawRad);
+
+      // Predict current target-space pose by subtracting motion during latency
+      double predZ = positions[2] - vTargetZ * llLatencySec;
+      double predX = positions[0] - vTargetX * llLatencySec;
+      double predYawDeg = positions[4] + Math.toDegrees(omega * llLatencySec);
+
+      SmartDashboard.putNumber("Align_Z_meas", positions[2]);
+      SmartDashboard.putNumber("Align_Z_pred", predZ);
+
+      double xSpeed = -xController.calculate(predZ);
       SmartDashboard.putNumber("xspeed", xSpeed);
-      double ySpeed = yController.calculate(postions[0]);
-      double rotValue = rotController.calculate(postions[4]);
+      double ySpeed = yController.calculate(predX);
+      double rotValue = rotController.calculate(predYawDeg);
 
-       drivebase.drive(new Translation2d(xSpeed, ySpeed), rotValue, false);
+      drivebase.drive(new Translation2d(xSpeed, ySpeed), rotValue, false);
 
       if (!rotController.atSetpoint() ||
           !yController.atSetpoint() ||
