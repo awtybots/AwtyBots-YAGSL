@@ -7,7 +7,9 @@ package frc.robot.commands;
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -17,34 +19,31 @@ import frc.robot.LimelightHelpers;
 import frc.robot.subsystems.SwerveSubsystem;
 
 public class LAlignToReefTagRelative extends Command {
-  private PIDController xController, yController, rotController;
-  private ProfiledPIDController rotControllerProfiled;
-  // private boolean isRightScore;
+  // Controllers for HolonomicDriveController
+  private final PIDController xController; // Tag-space Z axis mapped to X in controller frame
+  private final PIDController yController; // Tag-space X axis mapped to Y in controller frame
+  private final ProfiledPIDController thetaController;
+  private final HolonomicDriveController holonomic;
+
   private Timer dontSeeTagTimer, stopTimer;
-  private SwerveSubsystem drivebase;
-  private double tagID = -1;
+  private final SwerveSubsystem drivebase;
+  private int tagID = -1;
 
   public LAlignToReefTagRelative(SwerveSubsystem drivebase) {
-    xController = new PIDController(Constants.X_REEF_ALIGNMENT_P, 0.0, 0);
-    // Vertical movement
-    yController = new PIDController(Constants.Y_REEF_ALIGNMENT_P, 0.0, 0);
-    // Horitontal movement
-    rotController = new PIDController(Constants.ROT_REEF_ALIGNMENT_P, 0, 0);
-    // Rotation
-    // rotControllerProfiled = new
-    // ProfiledPIDController(Constants.ROT_REEF_ALIGNMENT_P, 0, 0,
-    // new TrapezoidProfile.Constraints(6.28, 3.14));
-    // Rotation using holonic drive controller
+    // PID gains tune how aggressively we correct tag-space Z (forward/back) error.
+    // increase X_REEF_ALIGNMENT_P for faster approach or tweak D term to reduce overshoot.
+    this.xController = new PIDController(Constants.X_REEF_ALIGNMENT_P, 0.0, 0.01);
+    // Controls tag-space X (left/right) correction while holding yaw constant.
+    this.yController = new PIDController(Constants.Y_REEF_ALIGNMENT_P, 0.0, 0.01);
 
-    // var controller = new HolonomicDriveController(
-    // new PIDController(Constants.X_REEF_ALIGNMENT_P, 0, 0), new
-    // PIDController(Constants.Y_REEF_ALIGNMENT_P, 0, 0),
-    // new ProfiledPIDController(Constants.ROT_REEF_ALIGNMENT_P, 0, 0,
-    // new TrapezoidProfile.Constraints(6.28, 3.14)));
-    // // Here, our rotation profile constraints were a max velocity
-    // // of 1 rotation per second and a max acceleration of 180 degrees
-    // // per second squared.
-    // this.isRightScore = isRightScore;
+    // Profiled PID governs yaw error toward the reef; adjust ROT_REEF_ALIGNMENT_P for rotation response.
+    this.thetaController = new ProfiledPIDController(
+        Constants.ROT_REEF_ALIGNMENT_P, 0.0, 0.0,
+        new TrapezoidProfile.Constraints(6.28, 3.14));
+    this.thetaController.enableContinuousInput(-Math.PI, Math.PI);
+
+    this.holonomic = new HolonomicDriveController(xController, yController, thetaController);
+
     this.drivebase = drivebase;
     addRequirements(drivebase);
   }
@@ -56,31 +55,43 @@ public class LAlignToReefTagRelative extends Command {
     this.dontSeeTagTimer = new Timer();
     this.dontSeeTagTimer.start();
 
-    rotController.setSetpoint(Constants.ROT_SETPOINT_REEF_ALIGNMENT);
-    rotController.setTolerance(Constants.ROT_TOLERANCE_REEF_ALIGNMENT);
+    this.tagID = -1; // Lazily latch target tag when we first see it
 
-    xController.setSetpoint(Constants.X_SETPOINT_REEF_ALIGNMENT);
+    // Tolerances for setpoint checks (HolonomicDriveController handles control)
     xController.setTolerance(Constants.X_TOLERANCE_REEF_ALIGNMENT);
-
-    yController.setSetpoint(Constants.Y_L_SETPOINT_REEF_ALIGNMENT);
     yController.setTolerance(Constants.Y_TOLERANCE_REEF_ALIGNMENT);
+    thetaController.setTolerance(Math.toRadians(Constants.ROT_TOLERANCE_REEF_ALIGNMENT));
 
-    tagID = LimelightHelpers.getFiducialID("limelight-right");
   }
 
   @Override
   public void execute() {
     final String llName = "limelight-right";
-    if (LimelightHelpers.getTV(llName) && LimelightHelpers.getFiducialID(llName) == tagID) {
+    // Only align when the Limelight has a valid tag and it matches the one we latched
+    boolean hasTarget = LimelightHelpers.getTV(llName);
+    if (hasTarget) {
+      int seenTag = (int) Math.round(LimelightHelpers.getFiducialID(llName));
+      if (seenTag <= 0) {
+        hasTarget = false;
+      } else {
+        if (tagID < 0) {
+          // First valid detection since init – remember which tag we want to finish on
+          tagID = seenTag;
+        }
+        hasTarget = (seenTag == tagID);
+      }
+    }
+
+    if (hasTarget) {
       this.dontSeeTagTimer.reset();
 
       // Target-space pose of robot (translation: [0]=X, [2]=Z, rotation yaw: [4])
       double[] positions = LimelightHelpers.getBotPose_TargetSpace(llName);
-      SmartDashboard.putNumber("x", positions[2]);
-      // Latency compensation: predict where the robot is NOW in target-space
-      // based on robot-relative velocity and limelight latency.
-      double llLatencySec = (LimelightHelpers.getLatency_Pipeline(llName) + LimelightHelpers.getLatency_Capture(llName))
-          / 1000.0;
+
+      // Latency compensation: predict where the robot is NOW in target-space based on
+      // robot-relative velocity and Limelight latency.
+      double llLatencySec =
+          (LimelightHelpers.getLatency_Pipeline(llName) + LimelightHelpers.getLatency_Capture(llName)) / 1000.0;
 
       // Robot relative chassis speeds
       var speeds = drivebase.getRobotRelativeSpeeds();
@@ -91,33 +102,72 @@ public class LAlignToReefTagRelative extends Command {
       // Robot yaw relative to target-space (degrees in LL array -> radians)
       double rYawRad = Math.toRadians(positions[4]);
 
-      // Transform robot-frame velocity into target-space components (Z forward/back,
-      // X left/right)
+      // Transform robot-frame velocity into target-space components (Z forward/back, X left/right)
       double vTargetZ = vx * Math.cos(rYawRad) - vy * Math.sin(rYawRad);
       double vTargetX = vx * Math.sin(rYawRad) + vy * Math.cos(rYawRad);
 
       // Predict current target-space pose by subtracting motion during latency
-      double predZ = positions[2] - vTargetZ * llLatencySec;
-      double predX = positions[0] - vTargetX * llLatencySec;
+      double predZ = positions[2] - vTargetZ * llLatencySec; // tag-space forward/back
+      double predX = positions[0] - vTargetX * llLatencySec; // tag-space left/right
       double predYawDeg = positions[4] + Math.toDegrees(omega * llLatencySec);
 
-      SmartDashboard.putNumber("Align_Z_meas", positions[2]);
-      SmartDashboard.putNumber("Align_Z_pred", predZ);
+      // Map tag-space Z -> controller X, tag-space X -> controller Y
+      Pose2d currentTagRelativePose = new Pose2d(
+          predZ,
+          predX,
+          Rotation2d.fromDegrees(predYawDeg));
 
-      double xSpeed = -xController.calculate(predZ);
-      SmartDashboard.putNumber("xspeed", xSpeed);
-      double ySpeed = yController.calculate(predX);
-      double rotValue = rotController.calculate(predYawDeg);
+      Pose2d goalTagRelativePose = new Pose2d(
+          Constants.X_SETPOINT_REEF_ALIGNMENT,
+          Constants.Y_L_SETPOINT_REEF_ALIGNMENT,
+          Rotation2d.fromDegrees(Constants.ROT_SETPOINT_REEF_ALIGNMENT));
 
-      drivebase.drive(new Translation2d(xSpeed, ySpeed), rotValue, false);
+      // Calculate robot-relative speeds (tag-relative control frame)
+      ChassisSpeeds outputSpeeds = holonomic.calculate(
+          currentTagRelativePose,
+          goalTagRelativePose,
+          0.0,
+          Rotation2d.fromDegrees(Constants.ROT_SETPOINT_REEF_ALIGNMENT));
 
-      if (!rotController.atSetpoint() ||
-          !yController.atSetpoint() ||
-          !xController.atSetpoint()) {
+      // Drive using robot-relative speeds (equivalent to fieldRelative=false)
+      drivebase.drive(outputSpeeds);
+
+      // Setpoint adherence logic (same behavior as before)
+      double xErr = Constants.X_SETPOINT_REEF_ALIGNMENT - predZ;
+      double yErr = Constants.Y_L_SETPOINT_REEF_ALIGNMENT - predX;
+      double rotErrDeg = Constants.ROT_SETPOINT_REEF_ALIGNMENT - predYawDeg;
+
+      boolean atX = Math.abs(xErr) <= Constants.X_TOLERANCE_REEF_ALIGNMENT;
+      boolean atY = Math.abs(yErr) <= Constants.Y_TOLERANCE_REEF_ALIGNMENT;
+      boolean atRot = Math.abs(rotErrDeg) <= Constants.ROT_TOLERANCE_REEF_ALIGNMENT;
+
+      if (!(atX && atY && atRot)) {
         stopTimer.reset();
       }
+
+      // SmartDashboard logging for tuning
+      SmartDashboard.putNumber("Align_Z_meas", positions[2]);
+      SmartDashboard.putNumber("Align_Z_pred", predZ);
+      SmartDashboard.putNumber("Align_X_meas", positions[0]);
+      SmartDashboard.putNumber("Align_X_pred", predX);
+      SmartDashboard.putNumber("Align_Yaw_meas_deg", positions[4]);
+      SmartDashboard.putNumber("Align_Yaw_pred_deg", predYawDeg);
+
+      SmartDashboard.putNumber("Align_err_X(m)", xErr);
+      SmartDashboard.putNumber("Align_err_Y(m)", yErr);
+      SmartDashboard.putNumber("Align_err_Yaw(deg)", rotErrDeg);
+
+      SmartDashboard.putBoolean("Align_atX", atX);
+      SmartDashboard.putBoolean("Align_atY", atY);
+      SmartDashboard.putBoolean("Align_atRot", atRot);
+      SmartDashboard.putBoolean("Align_atAll", atX && atY && atRot);
+
+      SmartDashboard.putNumber("Align_cmd_vx(mps)", outputSpeeds.vxMetersPerSecond);
+      SmartDashboard.putNumber("Align_cmd_vy(mps)", outputSpeeds.vyMetersPerSecond);
+      SmartDashboard.putNumber("Align_cmd_omega(rps)", outputSpeeds.omegaRadiansPerSecond);
     } else {
-      drivebase.drive(new Translation2d(), 0, false);
+      // No valid tag - stop
+      drivebase.drive(new ChassisSpeeds(0.0, 0.0, 0.0));
     }
 
     SmartDashboard.putNumber("poseValidTimer", stopTimer.get());
@@ -125,14 +175,14 @@ public class LAlignToReefTagRelative extends Command {
 
   @Override
   public void end(boolean interrupted) {
-    drivebase.drive(new Translation2d(), 0, false);
+    drivebase.drive(new ChassisSpeeds(0.0, 0.0, 0.0));
   }
 
   @Override
   public boolean isFinished() {
     // Requires the robot to stay in the correct position for 0.3 seconds, as long
     // as it gets a tag in the camera
-    return this.dontSeeTagTimer.hasElapsed(Constants.DONT_SEE_TAG_WAIT_TIME) ||
-        stopTimer.hasElapsed(Constants.POSE_VALIDATION_TIME);
+    return this.dontSeeTagTimer.hasElapsed(Constants.DONT_SEE_TAG_WAIT_TIME)
+        || stopTimer.hasElapsed(Constants.POSE_VALIDATION_TIME);
   }
 }
