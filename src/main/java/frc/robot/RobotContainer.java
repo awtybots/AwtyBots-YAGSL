@@ -92,7 +92,7 @@ public class RobotContainer {
     drivebase.setDefaultCommand(driveFieldOrientedAngluarVelocity);
     NamedCommands.registerCommand("Stop", Commands.runOnce(() -> drivebase.stop()));
     NamedCommands.registerCommand("test", Commands.print("Hello World"));
-    NamedCommands.registerCommand("outtake", m_EndE.reverseIntakeCommand().withTimeout(1));
+    NamedCommands.registerCommand("outtake", m_EndE.reverseIntakeCommandFast().withTimeout(0.5));
     NamedCommands.registerCommand("outtakeLD", m_EndE.BrunIntakeCommandFeeder().andThen(m_EndE.runIntakeCommand().withTimeout(.2)));
     NamedCommands.registerCommand("outtake0.5", m_EndE.reverseIntakeCommand().withTimeout(0.5));
     NamedCommands.registerCommand("fintake", m_funnelIntakeSubsystem.runIntakeCommand().withTimeout(1));

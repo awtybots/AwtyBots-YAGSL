@@ -32,9 +32,9 @@ public class LAlignToReefTagRelative extends Command {
   public LAlignToReefTagRelative(SwerveSubsystem drivebase) {
     // PID gains tune how aggressively we correct tag-space Z (forward/back) error.
     // increase X_REEF_ALIGNMENT_P for faster approach or tweak D term to reduce overshoot.
-    this.xController = new PIDController(Constants.X_REEF_ALIGNMENT_P, 0.0, 0.01);
+    this.xController = new PIDController(Constants.X_REEF_ALIGNMENT_P, 0.0, 0.0);
     // Controls tag-space X (left/right) correction while holding yaw constant.
-    this.yController = new PIDController(Constants.Y_REEF_ALIGNMENT_P, 0.0, 0.01);
+    this.yController = new PIDController(Constants.Y_REEF_ALIGNMENT_P, 0.0, 0.0);
 
     // Profiled PID governs yaw error toward the reef; adjust ROT_REEF_ALIGNMENT_P for rotation response.
     this.thetaController = new ProfiledPIDController(
@@ -66,11 +66,11 @@ public class LAlignToReefTagRelative extends Command {
 
   @Override
   public void execute() {
-    final String llName = "limelight-right";
+    final String llNameR = "limelight-right";
     // Only align when the Limelight has a valid tag and it matches the one we latched
-    boolean hasTarget = LimelightHelpers.getTV(llName);
+    boolean hasTarget = LimelightHelpers.getTV(llNameR);
     if (hasTarget) {
-      int seenTag = (int) Math.round(LimelightHelpers.getFiducialID(llName));
+      int seenTag = (int) Math.round(LimelightHelpers.getFiducialID(llNameR));
       if (seenTag <= 0) {
         hasTarget = false;
       } else {
@@ -86,12 +86,12 @@ public class LAlignToReefTagRelative extends Command {
       this.dontSeeTagTimer.reset();
 
       // Target-space pose of robot (translation: [0]=X, [2]=Z, rotation yaw: [4])
-      double[] positions = LimelightHelpers.getBotPose_TargetSpace(llName);
+      double[] positions = LimelightHelpers.getBotPose_TargetSpace(llNameR);
 
       // Latency compensation: predict where the robot is NOW in target-space based on
       // robot-relative velocity and Limelight latency.
       double llLatencySec =
-          (LimelightHelpers.getLatency_Pipeline(llName) + LimelightHelpers.getLatency_Capture(llName)) / 1000.0;
+          (LimelightHelpers.getLatency_Pipeline(llNameR) + LimelightHelpers.getLatency_Capture(llNameR)) / 1000.0;
 
       // Robot relative chassis speeds
       var speeds = drivebase.getRobotRelativeSpeeds();
@@ -146,25 +146,25 @@ public class LAlignToReefTagRelative extends Command {
       }
 
       // SmartDashboard logging for tuning
-      SmartDashboard.putNumber("Align_Z_meas", positions[2]);
-      SmartDashboard.putNumber("Align_Z_pred", predZ);
-      SmartDashboard.putNumber("Align_X_meas", positions[0]);
-      SmartDashboard.putNumber("Align_X_pred", predX);
-      SmartDashboard.putNumber("Align_Yaw_meas_deg", positions[4]);
-      SmartDashboard.putNumber("Align_Yaw_pred_deg", predYawDeg);
+      // SmartDashboard.putNumber("Align_Z_meas", positions[2]);
+      // SmartDashboard.putNumber("Align_Z_pred", predZ);
+      // SmartDashboard.putNumber("Align_X_meas", positions[0]);
+      // SmartDashboard.putNumber("Align_X_pred", predX);
+      // SmartDashboard.putNumber("Align_Yaw_meas_deg", positions[4]);
+      // SmartDashboard.putNumber("Align_Yaw_pred_deg", predYawDeg);
 
-      SmartDashboard.putNumber("Align_err_X(m)", xErr);
-      SmartDashboard.putNumber("Align_err_Y(m)", yErr);
-      SmartDashboard.putNumber("Align_err_Yaw(deg)", rotErrDeg);
+      // SmartDashboard.putNumber("Align_err_X(m)", xErr);
+      // SmartDashboard.putNumber("Align_err_Y(m)", yErr);
+      // SmartDashboard.putNumber("Align_err_Yaw(deg)", rotErrDeg);
 
-      SmartDashboard.putBoolean("Align_atX", atX);
-      SmartDashboard.putBoolean("Align_atY", atY);
-      SmartDashboard.putBoolean("Align_atRot", atRot);
-      SmartDashboard.putBoolean("Align_atAll", atX && atY && atRot);
+      // SmartDashboard.putBoolean("Align_atX", atX);
+      // SmartDashboard.putBoolean("Align_atY", atY);
+      // SmartDashboard.putBoolean("Align_atRot", atRot);
+      // SmartDashboard.putBoolean("Align_atAll", atX && atY && atRot);
 
-      SmartDashboard.putNumber("Align_cmd_vx(mps)", outputSpeeds.vxMetersPerSecond);
-      SmartDashboard.putNumber("Align_cmd_vy(mps)", outputSpeeds.vyMetersPerSecond);
-      SmartDashboard.putNumber("Align_cmd_omega(rps)", outputSpeeds.omegaRadiansPerSecond);
+      // SmartDashboard.putNumber("Align_cmd_vx(mps)", outputSpeeds.vxMetersPerSecond);
+      // SmartDashboard.putNumber("Align_cmd_vy(mps)", outputSpeeds.vyMetersPerSecond);
+      // SmartDashboard.putNumber("Align_cmd_omega(rps)", outputSpeeds.omegaRadiansPerSecond);
     } else {
       // No valid tag - stop
       drivebase.drive(new ChassisSpeeds(0.0, 0.0, 0.0));

@@ -63,11 +63,11 @@ public class RAlignToReefTagRelative extends Command {
 
   @Override
   public void execute() {
-    final String llName = "limelight-left";
+    final String llNameL = "limelight-left";
     // Only drive when the Limelight reports a valid target and it matches the latched tag ID
-    boolean hasTarget = LimelightHelpers.getTV(llName);
+    boolean hasTarget = LimelightHelpers.getTV(llNameL);
     if (hasTarget) {
-      int seenTag = (int) Math.round(LimelightHelpers.getFiducialID(llName));
+      int seenTag = (int) Math.round(LimelightHelpers.getFiducialID(llNameL));
       if (seenTag <= 0) {
         hasTarget = false;
       } else {
@@ -83,11 +83,11 @@ public class RAlignToReefTagRelative extends Command {
       this.dontSeeTagTimer.reset();
 
       // Target-space pose of robot (translation: [0]=X, [2]=Z, rotation yaw: [4])
-      double[] positions = LimelightHelpers.getBotPose_TargetSpace(llName);
+      double[] positions = LimelightHelpers.getBotPose_TargetSpace(llNameL);
 
       // Latency compensation: use current robot velocity to predict present-time tag pose
-      double llLatencySec = (LimelightHelpers.getLatency_Pipeline(llName)
-          + LimelightHelpers.getLatency_Capture(llName)) / 1000.0;
+      double llLatencySec = (LimelightHelpers.getLatency_Pipeline(llNameL)
+          + LimelightHelpers.getLatency_Capture(llNameL)) / 1000.0;
 
       // Robot relative chassis speeds
       var speeds = drivebase.getRobotRelativeSpeeds();
@@ -142,25 +142,25 @@ public class RAlignToReefTagRelative extends Command {
       }
 
       // Logging for tuning
-      SmartDashboard.putNumber("Align_Z_meas", positions[2]);
-      SmartDashboard.putNumber("Align_Z_pred", predZ);
-      SmartDashboard.putNumber("Align_X_meas", positions[0]);
-      SmartDashboard.putNumber("Align_X_pred", predX);
-      SmartDashboard.putNumber("Align_Yaw_meas_deg", positions[4]);
-      SmartDashboard.putNumber("Align_Yaw_pred_deg", predYawDeg);
+      // SmartDashboard.putNumber("Align_Z_meas", positions[2]);
+      // SmartDashboard.putNumber("Align_Z_pred", predZ);
+      // SmartDashboard.putNumber("Align_X_meas", positions[0]);
+      // SmartDashboard.putNumber("Align_X_pred", predX);
+      // SmartDashboard.putNumber("Align_Yaw_meas_deg", positions[4]);
+      // SmartDashboard.putNumber("Align_Yaw_pred_deg", predYawDeg);
 
-      SmartDashboard.putNumber("Align_err_X(m)", xErr);
-      SmartDashboard.putNumber("Align_err_Y(m)", yErr);
-      SmartDashboard.putNumber("Align_err_Yaw(deg)", rotErrDeg);
+      // SmartDashboard.putNumber("Align_err_X(m)", xErr);
+      // SmartDashboard.putNumber("Align_err_Y(m)", yErr);
+      // SmartDashboard.putNumber("Align_err_Yaw(deg)", rotErrDeg);
 
-      SmartDashboard.putBoolean("Align_atX", atX);
-      SmartDashboard.putBoolean("Align_atY", atY);
-      SmartDashboard.putBoolean("Align_atRot", atRot);
-      SmartDashboard.putBoolean("Align_atAll", atX && atY && atRot);
+      // SmartDashboard.putBoolean("Align_atX", atX);
+      // SmartDashboard.putBoolean("Align_atY", atY);
+      // SmartDashboard.putBoolean("Align_atRot", atRot);
+      // SmartDashboard.putBoolean("Align_atAll", atX && atY && atRot);
 
-      SmartDashboard.putNumber("Align_cmd_vx(mps)", outputSpeeds.vxMetersPerSecond);
-      SmartDashboard.putNumber("Align_cmd_vy(mps)", outputSpeeds.vyMetersPerSecond);
-      SmartDashboard.putNumber("Align_cmd_omega(rps)", outputSpeeds.omegaRadiansPerSecond);
+      // SmartDashboard.putNumber("Align_cmd_vx(mps)", outputSpeeds.vxMetersPerSecond);
+      // SmartDashboard.putNumber("Align_cmd_vy(mps)", outputSpeeds.vyMetersPerSecond);
+      // SmartDashboard.putNumber("Align_cmd_omega(rps)", outputSpeeds.omegaRadiansPerSecond);
     } else {
       drivebase.drive(new ChassisSpeeds(0.0, 0.0, 0.0));
     }

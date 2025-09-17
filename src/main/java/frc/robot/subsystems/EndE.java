@@ -118,6 +118,11 @@ public class EndE extends SubsystemBase {
         return this.startEnd(
                 () -> this.setIntakePower(IntakeSetpoints.kReverse), () -> this.setIntakePower(0.0));
     }
+
+    public Command reverseIntakeCommandFast() {
+        return this.startEnd(
+                () -> this.setIntakePower(IntakeSetpoints.kReverseFast), () -> this.setIntakePower(0.0));
+    }
     // public boolean isCoralEngaged() {
     // return CoralEngaged;
     // }
