@@ -20,6 +20,7 @@ import swervelib.SwerveInputStream;
 // import frc.robot.subsystems.AlgaeArmSubsystem;
 
 import java.io.File;
+import java.util.Map;
 
 import com.ctre.phoenix6.hardware.core.CoreCANcoder;
 import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveRequest.RobotCentric;
@@ -147,23 +148,62 @@ public class RobotContainer {
 
   Command driveFieldOrientedAngluarVelocity = drivebase.driveFieldOriented(driveAngulareVelocity);
 
+  // Command ScoreUniversal() {
+  //   return Commands.either(
+  //       Commands.either(
+  //           Commands.parallel(
+  //               m_funnelIntakeSubsystem.runIntakeCommand(), // Run Funnel Intake
+  //               m_EndE.runIntakeCommand() // Run Coral Intake at the same time
+  //           ),
+  //           Commands.either(
+  //               m_EndE.runIntakeCommand(), // If ElevatorAtL4 is true, run Reverse Intake
+  //               m_EndE.runIntakeCommand(), // Otherwise, run normal intake
+  //               () -> CoralSubsystem.ElevatorAtL4 // Condition for reverse intake
+  //           ),
+  //           () -> CoralSubsystem.runFunnelIntake // Condition for Funnel Intake
+  //       ),
+  //       m_EndE.runIntakeCommand(), // Do nothing
+  //       () -> CoralSubsystem.runFunnelIntake || CoralSubsystem.ElevatorAtL4);
+  // }
+
   Command ScoreUniversal() {
     return Commands.either(
-        Commands.either(
-            Commands.parallel(
-                m_funnelIntakeSubsystem.runIntakeCommand(), // Run Funnel Intake
-                m_EndE.runIntakeCommand() // Run Coral Intake at the same time
-            ),
-            Commands.either(
-                m_EndE.runIntakeCommand(), // If ElevatorAtL4 is true, run Reverse Intake
-                m_EndE.runIntakeCommand(), // Otherwise, run normal intake
-                () -> CoralSubsystem.ElevatorAtL4 // Condition for reverse intake
-            ),
-            () -> CoralSubsystem.runFunnelIntake // Condition for Funnel Intake
-        ),
-        m_EndE.runIntakeCommand(), // Do nothing
-        () -> CoralSubsystem.runFunnelIntake || CoralSubsystem.ElevatorAtL4);
+        m_EndE.reverseIntakeCommand(), // Run reverse intake at L4 or L3
+        m_EndE.runIntakeCommand(),        // Run normal intake everywhere else
+        () -> CoralSubsystem.ElevatorAtL4);
+}
+Command Intake() {
+  return Commands.either(
+      m_EndE.reverseIntakeCommand(), // Run reverse intake at L4 or L3
+      m_EndE.BrunIntakeCommandFeeder().andThen(m_EndE.runIntakeCommand().withTimeout(.2)),        // Run normal intake everywhere else
+      () -> CoralSubsystem.ElevatorAtL4);
+}
+
+Command Universal() {
+  if (CoralSubsystem.runFunnelIntake) {
+      return m_EndE.BrunIntakeCommandFeeder()
+                   .andThen(m_EndE.runIntakeCommand().withTimeout(0.2));
+  } 
+  
+  if (CoralSubsystem.ElevatorAtL4) {
+      return m_EndE.reverseIntakeCommand();
   }
+
+  return m_EndE.runIntakeCommand();
+}
+Command scoreUniversal() {
+    return Commands.select(Map.of(
+        "FUNNEL",   m_EndE.BrunIntakeCommandFeeder()
+                         .andThen(m_EndE.runIntakeCommand().withTimeout(0.2)),
+        "L4",       m_EndE.reverseIntakeCommand(),
+        "DEFAULT",  m_EndE.runIntakeCommand()
+    ), () -> {
+        if (CoralSubsystem.runFunnelIntake) return "FUNNEL";
+        if (CoralSubsystem.ElevatorAtL4)    return "L4";
+        return "DEFAULT";
+    });
+}
+
 
   /**
    * Use this method to define your trigger->command mappings. Triggers can be
