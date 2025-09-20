@@ -19,7 +19,7 @@ import frc.robot.subsystems.SwerveSubsystem;
 public class LAlignToReefTagRelative extends Command {
   private PIDController xController, yController, rotController;
   private ProfiledPIDController rotControllerProfiled;
-  //private boolean isRightScore;
+  // private boolean isRightScore;
   private Timer dontSeeTagTimer, stopTimer;
   private SwerveSubsystem drivebase;
   private double tagID = -1;
@@ -31,8 +31,9 @@ public class LAlignToReefTagRelative extends Command {
     // Horitontal movement
     rotController = new PIDController(Constants.ROT_REEF_ALIGNMENT_P, 0, 0);
     // Rotation
-    // rotControllerProfiled = new ProfiledPIDController(Constants.ROT_REEF_ALIGNMENT_P, 0, 0,
-    //     new TrapezoidProfile.Constraints(6.28, 3.14));
+    // rotControllerProfiled = new
+    // ProfiledPIDController(Constants.ROT_REEF_ALIGNMENT_P, 0, 0,
+    // new TrapezoidProfile.Constraints(6.28, 3.14));
     // Rotation using holonic drive controller
 
     // var controller = new HolonomicDriveController(
@@ -43,7 +44,7 @@ public class LAlignToReefTagRelative extends Command {
     // // Here, our rotation profile constraints were a max velocity
     // // of 1 rotation per second and a max acceleration of 180 degrees
     // // per second squared.
-    //this.isRightScore = isRightScore;
+    // this.isRightScore = isRightScore;
     this.drivebase = drivebase;
     addRequirements(drivebase);
   }
@@ -68,35 +69,69 @@ public class LAlignToReefTagRelative extends Command {
   }
 
   @Override
+  // public void execute() {
+  //   if (LimelightHelpers.getTV("limelight-right") && LimelightHelpers.getFiducialID("limelight-right") == tagID) {
+  //     this.dontSeeTagTimer.reset();
+
+  //     double[] postions = LimelightHelpers.getBotPose_TargetSpace("limelight-right");
+  //     SmartDashboard.putNumber("x", postions[2]);
+
+  //     double xSpeed = -xController.calculate(postions[2]);
+  //     SmartDashboard.putNumber("xspeed", xSpeed);
+  //     double ySpeed = yController.calculate(postions[0]);
+  //     double rotValue = rotController.calculate(postions[4]);
+
+  //      drivebase.drive(new Translation2d(xSpeed, ySpeed), rotValue, false);
+
+  //     if (!rotController.atSetpoint() ||
+  //         !yController.atSetpoint() ||
+  //         !xController.atSetpoint()) {
+  //       stopTimer.reset();
+  //     }
+  //   } else {
+  //      drivebase.drive(new Translation2d(), 0, false);
+  //   }
+
+  //   SmartDashboard.putNumber("poseValidTimer", stopTimer.get());
+  // }
   public void execute() {
-    if (LimelightHelpers.getTV("limelight-right") && LimelightHelpers.getFiducialID("limelight-right") == tagID) {
-      this.dontSeeTagTimer.reset();
+    if (LimelightHelpers.getTV("limelight-right") 
+        && LimelightHelpers.getFiducialID("limelight-right") == tagID) {
+        this.dontSeeTagTimer.reset();
 
-      double[] postions = LimelightHelpers.getBotPose_TargetSpace("limelight-right");
-      SmartDashboard.putNumber("x", postions[2]);
+        double[] positions = LimelightHelpers.getBotPose_TargetSpace("");
 
-      double xSpeed = -xController.calculate(postions[2]);
-      SmartDashboard.putNumber("xspeed", xSpeed);
-      double ySpeed = yController.calculate(postions[0]);
-      double rotValue = rotController.calculate(postions[4]);
+        double xSpeed = -xController.calculate(positions[2]);
+        double ySpeed = yController.calculate(positions[0]);
+        double rotValue = rotController.calculate(positions[4]);
 
-       drivebase.drive(new Translation2d(xSpeed, ySpeed), rotValue, false);
+        drivebase.drive(
+            new Translation2d(
+                yController.getError() < Constants.Y_TOLERANCE_REEF_ALIGNMENT ? xSpeed : 0,
+                ySpeed
+            ),
+            rotValue,
+            false
+        );
 
-      if (!rotController.atSetpoint() ||
-          !yController.atSetpoint() ||
-          !xController.atSetpoint()) {
-        stopTimer.reset();
-      }
+        if (!rotController.atSetpoint() ||
+            !yController.atSetpoint() ||
+            !xController.atSetpoint()) {
+            stopTimer.reset();
+        }
     } else {
-       drivebase.drive(new Translation2d(), 0, false);
+        drivebase.drive(
+            new Translation2d(),
+            0,
+            false
+        );
     }
+}
 
-    SmartDashboard.putNumber("poseValidTimer", stopTimer.get());
-  }
 
   @Override
   public void end(boolean interrupted) {
-     drivebase.drive(new Translation2d(), 0, false);
+    drivebase.drive(new Translation2d(), 0, false);
   }
 
   @Override
