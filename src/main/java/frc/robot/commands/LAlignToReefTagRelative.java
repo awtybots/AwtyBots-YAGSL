@@ -70,68 +70,69 @@ public class LAlignToReefTagRelative extends Command {
 
   @Override
   // public void execute() {
-  //   if (LimelightHelpers.getTV("limelight-right") && LimelightHelpers.getFiducialID("limelight-right") == tagID) {
-  //     this.dontSeeTagTimer.reset();
+  // if (LimelightHelpers.getTV("limelight-right") &&
+  // LimelightHelpers.getFiducialID("limelight-right") == tagID) {
+  // this.dontSeeTagTimer.reset();
 
-  //     double[] postions = LimelightHelpers.getBotPose_TargetSpace("limelight-right");
-  //     SmartDashboard.putNumber("x", postions[2]);
+  // double[] postions =
+  // LimelightHelpers.getBotPose_TargetSpace("limelight-right");
+  // SmartDashboard.putNumber("x", postions[2]);
 
-  //     double xSpeed = -xController.calculate(postions[2]);
-  //     SmartDashboard.putNumber("xspeed", xSpeed);
-  //     double ySpeed = yController.calculate(postions[0]);
-  //     double rotValue = rotController.calculate(postions[4]);
+  // double xSpeed = -xController.calculate(postions[2]);
+  // SmartDashboard.putNumber("xspeed", xSpeed);
+  // double ySpeed = yController.calculate(postions[0]);
+  // double rotValue = rotController.calculate(postions[4]);
 
-  //      drivebase.drive(new Translation2d(xSpeed, ySpeed), rotValue, false);
+  // drivebase.drive(new Translation2d(xSpeed, ySpeed), rotValue, false);
 
-  //     if (!rotController.atSetpoint() ||
-  //         !yController.atSetpoint() ||
-  //         !xController.atSetpoint()) {
-  //       stopTimer.reset();
-  //     }
-  //   } else {
-  //      drivebase.drive(new Translation2d(), 0, false);
-  //   }
+  // if (!rotController.atSetpoint() ||
+  // !yController.atSetpoint() ||
+  // !xController.atSetpoint()) {
+  // stopTimer.reset();
+  // }
+  // } else {
+  // drivebase.drive(new Translation2d(), 0, false);
+  // }
 
-  //   SmartDashboard.putNumber("poseValidTimer", stopTimer.get());
+  // SmartDashboard.putNumber("poseValidTimer", stopTimer.get());
   // }
   public void execute() {
-    if (LimelightHelpers.getTV("limelight-right") 
+    if (LimelightHelpers.getTV("limelight-right")
         && LimelightHelpers.getFiducialID("limelight-right") == tagID) {
-        this.dontSeeTagTimer.reset();
+      this.dontSeeTagTimer.reset();
 
-        double[] positions = LimelightHelpers.getBotPose_TargetSpace("");
+      double[] postions = LimelightHelpers.getBotPose_TargetSpace("limelight-right");
 
-        double xSpeed = -xController.calculate(positions[2]);
-        double ySpeed = yController.calculate(positions[0]);
-        double rotValue = rotController.calculate(positions[4]);
+      double xSpeed = -xController.calculate(postions[2]);
+      SmartDashboard.putNumber("xspeed", xSpeed);
+      double ySpeed = yController.calculate(postions[0]);
+      double rotValue = rotController.calculate(postions[4]);
 
-        drivebase.drive(
-            new Translation2d(
-                yController.getError() < Constants.Y_TOLERANCE_REEF_ALIGNMENT ? xSpeed : 0,
-                ySpeed
-            ),
-            rotValue,
-            false
-        );
+      drivebase.drive(
+          new Translation2d(
+              yController.getError() < Constants.Y_TOLERANCE_REEF_ALIGNMENT ? xSpeed : 0.03,
+              ySpeed),
+          rotValue,
+          false);
 
-        if (!rotController.atSetpoint() ||
-            !yController.atSetpoint() ||
-            !xController.atSetpoint()) {
-            stopTimer.reset();
-        }
+      if (!rotController.atSetpoint() ||
+          !yController.atSetpoint() ||
+          !xController.atSetpoint()) {
+        stopTimer.reset();
+      }
     } else {
-        drivebase.drive(
-            new Translation2d(),
-            0,
-            false
-        );
+      // drivebase.drive(
+      //     new Translation2d(),
+      //     0,
+      //     false);
+        drivebase.stop();
     }
-}
-
+  }
 
   @Override
   public void end(boolean interrupted) {
-    drivebase.drive(new Translation2d(), 0, false);
+    // drivebase.drive(new Translation2d(), 0, false);
+    drivebase.stop();
   }
 
   @Override
