@@ -97,7 +97,7 @@ public final class Constants {
     public static final int L2 = 47;
     public static final int AlgaeHigh = 42;
     public static final int L3 = 0 ;
-    public static final int L4 = 75;
+    public static final int L4 = 70;
     public static final int Barge = 27;
   }
 
@@ -188,9 +188,9 @@ public final class Constants {
     public static final double kFreeSpeedRpm = 6784;
   }
   // AutoAlign constants
-  public static final double X_REEF_ALIGNMENT_P = 1; //1
-  public static final double Y_REEF_ALIGNMENT_P = 1.74;//1.74
-  public static final double ROT_REEF_ALIGNMENT_P = 0.08;
+  public static final double X_REEF_ALIGNMENT_P = 1.5; //1
+  public static final double Y_REEF_ALIGNMENT_P = 2.3;//1.74
+  public static final double ROT_REEF_ALIGNMENT_P = 0.1;
 
   public static final double ROT_SETPOINT_REEF_ALIGNMENT = -0.1; // Rotation
   public static final double ROT_TOLERANCE_REEF_ALIGNMENT = 0.05;

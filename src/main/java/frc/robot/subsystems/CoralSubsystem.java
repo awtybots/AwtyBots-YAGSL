@@ -127,7 +127,7 @@ public class CoralSubsystem extends SubsystemBase {
         if(runFunnelIntake){
             double elevatorPos = elevatorEncoder.getPosition();
             double elevatorError = Math.abs(elevatorCurrentTarget - elevatorPos);
-            double stopThreshold = 20;
+            double stopThreshold = 40;
 
             if (elevatorError > stopThreshold){
 
