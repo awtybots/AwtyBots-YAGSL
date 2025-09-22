@@ -158,7 +158,9 @@ public final class Constants {
   public static final class IntakeSetpoints{
     public static final double kForward = -.6;
     public static final double kReverse = .6;
+    public static final double kReverseFast = 1.0;
     public static final double kHold = .25;
+
   }
 
   public static final class ModuleConstants {
