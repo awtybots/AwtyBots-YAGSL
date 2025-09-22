@@ -202,6 +202,20 @@ public final class Constants {
   public static final double Y_R_SETPOINT_REEF_ALIGNMENT = 0.3; // tag-space X for right auto
   public static final double Y_TOLERANCE_REEF_ALIGNMENT = 0.02;
 
+  // Algae alignment tuning targets (PhotonVision based).
+  public static final double AREA_ALIGNMENT_P_ALGAE = 0.35;
+  public static final double YAW_ALIGNMENT_P_ALGAE = 3.0;
+  public static final double ROT_ALIGNMENT_P_ALGAE = 0.9;
+
+  public static final double AREA_SETPOINT_ALGAE = 5.0; // Percent of image filled by algae
+  public static final double AREA_TOLERANCE_ALGAE = 1.0; // Acceptable percent error on area
+  public static final double YAW_TOLERANCE_ALGAE = 0.5; // Degrees off-center horizontally
+  public static final double ROT_SETPOINT_ALGAE = 0.0;
+  public static final double ROT_TOLERANCE_ALGAE = 1.0; // Degrees robot facing error
+
+  // Rough mapping between forward velocity (m/s) and percent-area growth for latency comp.
+  public static final double AREA_VELOCITY_COEFF_ALGAE = 6.0;
+
 
   public static final double DONT_SEE_TAG_WAIT_TIME = 0.4;
   public static final double POSE_VALIDATION_TIME = 0.4;

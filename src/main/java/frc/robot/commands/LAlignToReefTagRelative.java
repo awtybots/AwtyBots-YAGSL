@@ -113,12 +113,12 @@ public class LAlignToReefTagRelative extends Command {
 
       // Map tag-space Z -> controller X, tag-space X -> controller Y
       Pose2d currentTagRelativePose = new Pose2d(
-          predZ,
+          -predZ,
           predX,
           Rotation2d.fromDegrees(predYawDeg));
 
       Pose2d goalTagRelativePose = new Pose2d(
-          Constants.X_SETPOINT_REEF_ALIGNMENT,
+          -Constants.X_SETPOINT_REEF_ALIGNMENT,
           Constants.Y_L_SETPOINT_REEF_ALIGNMENT,
           Rotation2d.fromDegrees(Constants.ROT_SETPOINT_REEF_ALIGNMENT));
 
@@ -133,7 +133,7 @@ public class LAlignToReefTagRelative extends Command {
       drivebase.drive(outputSpeeds);
 
       // Setpoint adherence logic (same behavior as before)
-      double xErr = Constants.X_SETPOINT_REEF_ALIGNMENT - predZ;
+      double xErr = predZ - Constants.X_SETPOINT_REEF_ALIGNMENT;
       double yErr = Constants.Y_L_SETPOINT_REEF_ALIGNMENT - predX;
       double rotErrDeg = Constants.ROT_SETPOINT_REEF_ALIGNMENT - predYawDeg;
 

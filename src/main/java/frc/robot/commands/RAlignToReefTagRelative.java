@@ -109,12 +109,12 @@ public class RAlignToReefTagRelative extends Command {
 
       // Build current and goal poses in tag-relative frame (Z->X, X->Y)
       Pose2d currentTagRelativePose = new Pose2d(
-          predZ,
+          -predZ,
           predX,
           Rotation2d.fromDegrees(predYawDeg));
 
       Pose2d goalTagRelativePose = new Pose2d(
-          Constants.X_SETPOINT_REEF_ALIGNMENT,
+          -Constants.X_SETPOINT_REEF_ALIGNMENT,
           Constants.Y_R_SETPOINT_REEF_ALIGNMENT,
           Rotation2d.fromDegrees(Constants.ROT_SETPOINT_REEF_ALIGNMENT));
 
@@ -129,7 +129,7 @@ public class RAlignToReefTagRelative extends Command {
       drivebase.drive(outputSpeeds);
 
       // Setpoint checks for stop timer
-      double xErr = Constants.X_SETPOINT_REEF_ALIGNMENT - predZ;
+      double xErr = predZ - Constants.X_SETPOINT_REEF_ALIGNMENT;
       double yErr = Constants.Y_R_SETPOINT_REEF_ALIGNMENT - predX;
       double rotErrDeg = Constants.ROT_SETPOINT_REEF_ALIGNMENT - predYawDeg;
 
