@@ -95,6 +95,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("test", Commands.print("Hello World"));
     NamedCommands.registerCommand("outtake", m_EndE.reverseIntakeCommand().withTimeout(1));
     NamedCommands.registerCommand("outtakeLD", m_EndE.BrunIntakeCommandFeeder().andThen(m_EndE.runIntakeCommand().withTimeout(.2)));
+    NamedCommands.registerCommand("outtakefast", m_EndE.fastrunIntakeCommand().withTimeout(0.3));
     NamedCommands.registerCommand("outtake0.5", m_EndE.reverseIntakeCommand().withTimeout(0.5));
     NamedCommands.registerCommand("fintake", m_funnelIntakeSubsystem.runIntakeCommand().withTimeout(1));
     NamedCommands.registerCommand("FeederStation", m_coralSubsystem.setSetpointCommand(Setpoint.FeederStation));
@@ -114,6 +115,10 @@ public class RobotContainer {
     //     Commands.waitUntil(() -> m_EndE.isCoralEngaged()),
     //     m_coralSubsystem.setSetpointCommand(Setpoint.L4),
     //     new LAlignToReefTagRelative(drivebase), this.ScoreUniversal().withTimeout(1)));
+    NamedCommands.registerCommand("AlignR",
+    new RAlignToReefTagRelative(drivebase));
+NamedCommands.registerCommand("AlignL1",
+    new LAlignToReefTagRelative(drivebase));
     NamedCommands.registerCommand("AlignRFeeder",
         new RAlignToReefTagRelative(drivebase).withTimeout(5));
     NamedCommands.registerCommand("AlignL",
