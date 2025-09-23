@@ -207,6 +207,10 @@ public final class Constants {
   public static final double DONT_SEE_TAG_WAIT_TIME = 1;
   public static final double POSE_VALIDATION_TIME = 0.4;
 
+  // Dashboard throttling
+  public static final boolean LIMIT_DASHBOARD_PERIODIC_UPDATES = true;
+  public static final int DASHBOARD_UPDATE_PERIOD_CYCLES = 10;
+
   // public static final class LimelightConstants {
 
   //   public static void initializeLimelight() {

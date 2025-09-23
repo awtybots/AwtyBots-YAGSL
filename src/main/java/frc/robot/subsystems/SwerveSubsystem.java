@@ -44,6 +44,19 @@ public class SwerveSubsystem extends SubsystemBase {
   private final SwerveDrive swerveDrive;
   private final SwerveDrivePoseEstimator poseEstimator;
   private final double headingBias = 0; // set this if there is alot of drift on pathplanner
+  private int dashboardLoopCounter = Math.max(0, Constants.DASHBOARD_UPDATE_PERIOD_CYCLES - 1);
+
+  private boolean shouldUpdateDashboard() {
+    if (!Constants.LIMIT_DASHBOARD_PERIODIC_UPDATES || Constants.DASHBOARD_UPDATE_PERIOD_CYCLES <= 1) {
+      return true;
+    }
+    dashboardLoopCounter++;
+    if (dashboardLoopCounter >= Constants.DASHBOARD_UPDATE_PERIOD_CYCLES) {
+      dashboardLoopCounter = 0;
+      return true;
+    }
+    return false;
+  }
   public SwerveSubsystem(File directory) {
     try {
       swerveDrive = new SwerveParser(directory)
@@ -271,21 +284,21 @@ public class SwerveSubsystem extends SubsystemBase {
       swerveDrive.getModulePositions() 
       );
 
-    SmartDashboard.putNumber("Gyro Yaw", getGyroYaw());
-    SmartDashboard.putNumber("Gyro Angle", getGyroAngle());
+    if (shouldUpdateDashboard()) {
+      SmartDashboard.putNumber("Gyro Yaw", getGyroYaw());
+      SmartDashboard.putNumber("Gyro Angle", getGyroAngle());
 
-    Pose2d estimatedPose = poseEstimator.getEstimatedPosition();
-    SmartDashboard.putNumber("Odometry X", estimatedPose.getX());
-    SmartDashboard.putNumber("Odometry Y", estimatedPose.getY());
-    SmartDashboard.putNumber("Odometry Heading", estimatedPose.getRotation().getDegrees());
-    SmartDashboard.putString("Odometry Pose: ", estimatedPose.toString());
-    SmartDashboard.putString("PathPlanner Pose ", getPose().toString());
+      Pose2d estimatedPose = poseEstimator.getEstimatedPosition();
+      SmartDashboard.putNumber("Odometry X", estimatedPose.getX());
+      SmartDashboard.putNumber("Odometry Y", estimatedPose.getY());
+      SmartDashboard.putNumber("Odometry Heading", estimatedPose.getRotation().getDegrees());
+      SmartDashboard.putString("Odometry Pose: ", estimatedPose.toString());
+      SmartDashboard.putString("PathPlanner Pose ", getPose().toString());
 
-
-
-    var positions = swerveDrive.getModulePositions();
-    for (int i = 0; i < 4; i++) {
-      SmartDashboard.putNumber("module " + i, positions[i].angle.getDegrees());
+      var positions = swerveDrive.getModulePositions();
+      for (int i = 0; i < 4; i++) {
+        SmartDashboard.putNumber("module " + i, positions[i].angle.getDegrees());
+      }
     }
 
   }

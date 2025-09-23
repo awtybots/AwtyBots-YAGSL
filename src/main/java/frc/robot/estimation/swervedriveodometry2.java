@@ -11,6 +11,7 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.Constants;
 
 public class swervedriveodometry2 extends SwerveDrivePoseEstimator {
 
@@ -18,6 +19,19 @@ public class swervedriveodometry2 extends SwerveDrivePoseEstimator {
   private SwerveModulePosition[] previousPositions;
   private Rotation2d previousGyro;
   private double lastTime = Double.NaN;
+  private int dashboardLoopCounter = Math.max(0, Constants.DASHBOARD_UPDATE_PERIOD_CYCLES - 1);
+
+  private boolean shouldUpdateDashboard() {
+    if (!Constants.LIMIT_DASHBOARD_PERIODIC_UPDATES || Constants.DASHBOARD_UPDATE_PERIOD_CYCLES <= 1) {
+      return true;
+    }
+    dashboardLoopCounter++;
+    if (dashboardLoopCounter >= Constants.DASHBOARD_UPDATE_PERIOD_CYCLES) {
+      dashboardLoopCounter = 0;
+      return true;
+    }
+    return false;
+  }
 
   public swervedriveodometry2(
       SwerveDriveKinematics kinematics,
@@ -65,13 +79,18 @@ public class swervedriveodometry2 extends SwerveDrivePoseEstimator {
       dt = Math.max(1e-6, currentTimeSeconds - lastTime);
     }
     lastTime = currentTimeSeconds;
-    SmartDashboard.putNumber("Odo2/dt", dt);
+    boolean updateDashboard = shouldUpdateDashboard();
+    if (updateDashboard) {
+      SmartDashboard.putNumber("Odo2/dt", dt);
+    }
 
     // --- Previous and current gyro ---
     double theta0 = previousGyro.getRadians();
     double theta1 = gyroAngle.getRadians();
-    SmartDashboard.putNumber("Odo2/PrevGyro_rad", theta0);
-    SmartDashboard.putNumber("Odo2/CurrGyro_rad", theta1);
+    if (updateDashboard) {
+      SmartDashboard.putNumber("Odo2/PrevGyro_rad", theta0);
+      SmartDashboard.putNumber("Odo2/CurrGyro_rad", theta1);
+    }
 
     // --- Drive distance and steering of each module ---
     for (int i = 0; i < numModules; i++) {
@@ -81,17 +100,21 @@ public class swervedriveodometry2 extends SwerveDrivePoseEstimator {
       double prevAngle = previousPositions[i].angle.getRadians();
       double currAngle = wheelPositions[i].angle.getRadians();
 
-      SmartDashboard.putNumber("Odo2/Module" + i + "/PrevDistance_m", prevDistance);
-      SmartDashboard.putNumber("Odo2/Module" + i + "/CurrDistance_m", currDistance);
-      SmartDashboard.putNumber("Odo2/Module" + i + "/PrevAngle_rad", prevAngle);
-      SmartDashboard.putNumber("Odo2/Module" + i + "/CurrAngle_rad", currAngle);
+      if (updateDashboard) {
+        SmartDashboard.putNumber("Odo2/Module" + i + "/PrevDistance_m", prevDistance);
+        SmartDashboard.putNumber("Odo2/Module" + i + "/CurrDistance_m", currDistance);
+        SmartDashboard.putNumber("Odo2/Module" + i + "/PrevAngle_rad", prevAngle);
+        SmartDashboard.putNumber("Odo2/Module" + i + "/CurrAngle_rad", currAngle);
+      }
     }
 
     // Update history
     previousPositions = copyPositions(wheelPositions);
     previousGyro = gyroAngle;
 
-    SmartDashboard.putString("Odo2/Status", "OK (simple collection)");
+    if (updateDashboard) {
+      SmartDashboard.putString("Odo2/Status", "OK (simple collection)");
+    }
 
     // Does not modify pose, just returns the current estimate
     return super.getEstimatedPosition();

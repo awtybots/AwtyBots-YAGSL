@@ -23,13 +23,29 @@ public class LAlignToReefTagRelative extends Command {
   private Timer dontSeeTagTimer, stopTimer;
   private SwerveSubsystem drivebase;
   private double tagID = -1;
+  private int dashboardLoopCounter = Math.max(0, Constants.DASHBOARD_UPDATE_PERIOD_CYCLES - 1);
+
+  private boolean shouldUpdateDashboard() {
+    if (!Constants.LIMIT_DASHBOARD_PERIODIC_UPDATES || Constants.DASHBOARD_UPDATE_PERIOD_CYCLES <= 1) {
+      return true;
+    }
+    dashboardLoopCounter++;
+    if (dashboardLoopCounter >= Constants.DASHBOARD_UPDATE_PERIOD_CYCLES) {
+      dashboardLoopCounter = 0;
+      return true;
+    }
+    return false;
+  }
 
   public LAlignToReefTagRelative(SwerveSubsystem drivebase) {
-    // Forward/back: bump P up if the robot creeps in too slowly, drop it if it shoots past the tag.
+    // Forward/back: bump P up if the robot creeps in too slowly, drop it if it
+    // shoots past the tag.
     xController = new PIDController(Constants.X_REEF_ALIGNMENT_P, 0.0, 0);
-    // Strafe: raise this P when the chassis stays offset left/right of the reef, lower if it oscillates.
+    // Strafe: raise this P when the chassis stays offset left/right of the reef,
+    // lower if it oscillates.
     yController = new PIDController(Constants.Y_REEF_ALIGNMENT_P, 0.0, 0);
-    // Yaw: tune this when the robot finishes facing left/right instead of square to the reef.
+    // Yaw: tune this when the robot finishes facing left/right instead of square to
+    // the reef.
     rotController = new PIDController(Constants.ROT_REEF_ALIGNMENT_P, 0, 0);
     // Rotation
     // rotControllerProfiled = new
@@ -60,11 +76,13 @@ public class LAlignToReefTagRelative extends Command {
     rotController.setSetpoint(Constants.ROT_SETPOINT_REEF_ALIGNMENT);
     rotController.setTolerance(Constants.ROT_TOLERANCE_REEF_ALIGNMENT);
 
-    // If the robot stops short or bumps the reef, shift this X setpoint (positive pulls closer).
+    // If the robot stops short or bumps the reef, shift this X setpoint (positive
+    // pulls closer).
     xController.setSetpoint(Constants.X_SETPOINT_REEF_ALIGNMENT);
     xController.setTolerance(Constants.X_TOLERANCE_REEF_ALIGNMENT);
 
-    // Move this Y setpoint toward zero when the chassis finishes too far left of the pole.
+    // Move this Y setpoint toward zero when the chassis finishes too far left of
+    // the pole.
     yController.setSetpoint(Constants.Y_L_SETPOINT_REEF_ALIGNMENT);
     yController.setTolerance(Constants.Y_TOLERANCE_REEF_ALIGNMENT);
 
@@ -101,6 +119,7 @@ public class LAlignToReefTagRelative extends Command {
   // SmartDashboard.putNumber("poseValidTimer", stopTimer.get());
   // }
   public void execute() {
+    boolean updateDashboard = shouldUpdateDashboard();
     if (LimelightHelpers.getTV("limelight-right")
         && LimelightHelpers.getFiducialID("limelight-right") == tagID) {
       this.dontSeeTagTimer.reset();
@@ -108,13 +127,13 @@ public class LAlignToReefTagRelative extends Command {
       double[] postions = LimelightHelpers.getBotPose_TargetSpace("limelight-right");
 
       double xSpeed = -xController.calculate(postions[2]);
-      SmartDashboard.putNumber("xspeed", xSpeed);
       double ySpeed = yController.calculate(postions[0]);
       double rotValue = rotController.calculate(postions[4]);
 
       drivebase.drive(
           new Translation2d(
-              // If we jump forward before we are centered, increase the Y tolerance gate or lower this 0.03 safety creep.
+              // If we jump forward before we are centered, increase the Y tolerance gate or
+              // lower this 0.03 safety creep.
               yController.getError() < Constants.Y_TOLERANCE_REEF_ALIGNMENT ? xSpeed : 0.03,
               ySpeed),
           rotValue,
@@ -125,18 +144,29 @@ public class LAlignToReefTagRelative extends Command {
           !xController.atSetpoint()) {
         stopTimer.reset();
       }
+
+      if (updateDashboard) {
+        SmartDashboard.putNumber("xspeed", xSpeed);
+      }
     } else {
       // drivebase.drive(
-      //     new Translation2d(),
-      //     0,
-      //     false);
-        drivebase.stop();
+      // new Translation2d(),
+      // 0,
+      // false);
+      drivebase.stop();
+      if (updateDashboard) {
+        SmartDashboard.putNumber("xspeed", 0);
+      }
+    }
+
+    if (updateDashboard) {
+      SmartDashboard.putNumber("poseValidTimer", stopTimer.get());
     }
   }
 
   @Override
   public void end(boolean interrupted) {
-    // drivebase.drive(new Translation2d(), 0, false);
+      // drivebase.drive(new Translation2d(), 0, false);
     drivebase.stop();
   }
 
@@ -145,7 +175,6 @@ public class LAlignToReefTagRelative extends Command {
     // Requires the robot to stay in the correct position for 0.3 seconds, as long
     // as it gets a tag in the camera
     // Extend DONT_SEE_TAG_WAIT_TIME if small camera dropouts end the command too early.
-    return this.dontSeeTagTimer.hasElapsed(Constants.DONT_SEE_TAG_WAIT_TIME) ||
-        stopTimer.hasElapsed(Constants.POSE_VALIDATION_TIME);
+    return this.dontSeeTagTimer.hasElapsed(Constants.DONT_SEE_TAG_WAIT_TIME) || stopTimer.hasElapsed(Constants.POSE_VALIDATION_TIME);
   }
 }

@@ -23,6 +23,19 @@ public class RAlignToReefTagRelative extends Command {
   private Timer dontSeeTagTimer, stopTimer;
   private SwerveSubsystem drivebase;
   private double tagID = -1;
+  private int dashboardLoopCounter = Math.max(0, Constants.DASHBOARD_UPDATE_PERIOD_CYCLES - 1);
+
+  private boolean shouldUpdateDashboard() {
+    if (!Constants.LIMIT_DASHBOARD_PERIODIC_UPDATES || Constants.DASHBOARD_UPDATE_PERIOD_CYCLES <= 1) {
+      return true;
+    }
+    dashboardLoopCounter++;
+    if (dashboardLoopCounter >= Constants.DASHBOARD_UPDATE_PERIOD_CYCLES) {
+      dashboardLoopCounter = 0;
+      return true;
+    }
+    return false;
+  }
 
   public RAlignToReefTagRelative(SwerveSubsystem drivebase) {
     // Forward/back: raise this gain if the robot crawls toward the reef, lower if it rockets past.
@@ -73,14 +86,13 @@ public class RAlignToReefTagRelative extends Command {
 
   @Override
   public void execute() {
+    boolean updateDashboard = shouldUpdateDashboard();
     if (LimelightHelpers.getTV("limelight-left") && LimelightHelpers.getFiducialID("limelight-left") == tagID) {
       this.dontSeeTagTimer.reset();
 
       double[] postions = LimelightHelpers.getBotPose_TargetSpace("limelight-left");
-      SmartDashboard.putNumber("x", postions[2]);
 
       double xSpeed = -xController.calculate(postions[2]);
-      SmartDashboard.putNumber("xspeed", xSpeed);
       double ySpeed = yController.calculate(postions[0]);
       double rotValue = rotController.calculate(postions[4]);
 
@@ -92,11 +104,21 @@ public class RAlignToReefTagRelative extends Command {
           !xController.atSetpoint()) {
         stopTimer.reset();
       }
+
+      if (updateDashboard) {
+        SmartDashboard.putNumber("x", postions[2]);
+        SmartDashboard.putNumber("xspeed", xSpeed);
+      }
     } else {
        drivebase.drive(new Translation2d(), 0, false);
+       if (updateDashboard) {
+        SmartDashboard.putNumber("xspeed", 0);
+       }
     }
 
-    SmartDashboard.putNumber("poseValidTimer", stopTimer.get());
+    if (updateDashboard) {
+      SmartDashboard.putNumber("poseValidTimer", stopTimer.get());
+    }
   }
 
   @Override
