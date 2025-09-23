@@ -113,6 +113,18 @@ public class EndE extends SubsystemBase {
         return Commands.startEnd(
                 () -> setIntakePower(IntakeSetpoints.kForward), () -> setIntakePower(0.0));
     }
+    public Command fastrunIntakeCommand() {
+
+        /*if(measurement.status > 10){
+            return Commands.startEnd(
+                () -> setIntakePower(IntakeSetpoints.kForward), () -> setIntakePower(0.0));
+        }else{
+            return Commands.startEnd(
+                () -> setIntakePower(0.0), () -> setIntakePower(0.0));
+        }*/
+        return Commands.startEnd(
+                () -> setIntakePower(IntakeSetpoints.kFastForward), () -> setIntakePower(0.0));
+    }
 
     public Command reverseIntakeCommand() {
         return this.startEnd(
