@@ -209,6 +209,7 @@ public class SwerveSubsystem extends SubsystemBase {
   /**
    * Get current robot-relative chassis speeds from the swerve library.
    * Useful for latency compensation and predictive control.
+   * Verify that +X is forward and +Y is left on your drivebase; if not, fix the odometry before tuning auto-align.
    *
    * @return {@link ChassisSpeeds} in the robot frame.
    */

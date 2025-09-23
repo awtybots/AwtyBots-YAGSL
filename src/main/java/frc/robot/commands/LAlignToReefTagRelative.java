@@ -20,8 +20,8 @@ import frc.robot.subsystems.SwerveSubsystem;
 
 public class LAlignToReefTagRelative extends Command {
   // Controllers for HolonomicDriveController
-  private final PIDController xController; // Tag-space Z axis mapped to X in controller frame
-  private final PIDController yController; // Tag-space X axis mapped to Y in controller frame
+  private final PIDController xController; // Tag-space Z axis mapped to X in controller frame (forward/back)
+  private final PIDController yController; // Tag-space X axis mapped to Y in controller frame (left/right)
   private final ProfiledPIDController thetaController;
   private final HolonomicDriveController holonomic;
 
@@ -31,9 +31,10 @@ public class LAlignToReefTagRelative extends Command {
 
   public LAlignToReefTagRelative(SwerveSubsystem drivebase) {
     // PID gains tune how aggressively we correct tag-space Z (forward/back) error.
-    // increase X_REEF_ALIGNMENT_P for faster approach or tweak D term to reduce overshoot.
+    // Increase X_REEF_ALIGNMENT_P for a faster approach; drop it if the robot slams the reef.
     this.xController = new PIDController(Constants.X_REEF_ALIGNMENT_P, 0.0, 0.0);
     // Controls tag-space X (left/right) correction while holding yaw constant.
+    // If the chassis sticks wide of the pole, raise Y_REEF_ALIGNMENT_P or move the Y setpoint.
     this.yController = new PIDController(Constants.Y_REEF_ALIGNMENT_P, 0.0, 0.0);
 
     // Profiled PID governs yaw error toward the reef; adjust ROT_REEF_ALIGNMENT_P for rotation response.
@@ -55,9 +56,10 @@ public class LAlignToReefTagRelative extends Command {
     this.dontSeeTagTimer = new Timer();
     this.dontSeeTagTimer.start();
 
-    this.tagID = -1; // Lazily latch target tag when we first see it
+    this.tagID = -1; // Lazily latch target tag when we first see it so we do not jump between faces
 
     // Tolerances for setpoint checks (HolonomicDriveController handles control)
+    // Tighten these if we need to be more precise before scoring; loosen to settle faster.
     xController.setTolerance(Constants.X_TOLERANCE_REEF_ALIGNMENT);
     yController.setTolerance(Constants.Y_TOLERANCE_REEF_ALIGNMENT);
     thetaController.setTolerance(Math.toRadians(Constants.ROT_TOLERANCE_REEF_ALIGNMENT));
@@ -86,10 +88,11 @@ public class LAlignToReefTagRelative extends Command {
       this.dontSeeTagTimer.reset();
 
       // Target-space pose of robot (translation: [0]=X, [2]=Z, rotation yaw: [4])
+      // Positive Z means we are in front of the tag; if these signs look flipped, revisit Limelight camera pose.
       double[] positions = LimelightHelpers.getBotPose_TargetSpace(llNameR);
 
       // Latency compensation: predict where the robot is NOW in target-space based on
-      // robot-relative velocity and Limelight latency.
+      // robot-relative velocity and Limelight latency. If values blow up, check robot velocity units/calibration.
       double llLatencySec =
           (LimelightHelpers.getLatency_Pipeline(llNameR) + LimelightHelpers.getLatency_Capture(llNameR)) / 1000.0;
 
@@ -103,6 +106,7 @@ public class LAlignToReefTagRelative extends Command {
       double rYawRad = Math.toRadians(positions[4]);
 
       // Transform robot-frame velocity into target-space components (Z forward/back, X left/right)
+      // If the prediction moves the wrong way (e.g. robot drives forward but predZ increases), swap the sin/cos signs here.
       double vTargetZ = vx * Math.cos(rYawRad) - vy * Math.sin(rYawRad);
       double vTargetX = vx * Math.sin(rYawRad) + vy * Math.cos(rYawRad);
 
@@ -112,6 +116,7 @@ public class LAlignToReefTagRelative extends Command {
       double predYawDeg = positions[4] + Math.toDegrees(omega * llLatencySec);
 
       // Map tag-space Z -> controller X, tag-space X -> controller Y
+      // NOTE: The leading negative keeps positive Z driving the robot forward. If the robot backs away instead, remove this negation.
       Pose2d currentTagRelativePose = new Pose2d(
           -predZ,
           predX,
@@ -130,11 +135,12 @@ public class LAlignToReefTagRelative extends Command {
           Rotation2d.fromDegrees(Constants.ROT_SETPOINT_REEF_ALIGNMENT));
 
       // Drive using robot-relative speeds (equivalent to fieldRelative=false)
+      // If translation axes feel swapped, verify the X/Y mapping above and the Limelight camera rotation.
       drivebase.drive(outputSpeeds);
 
       // Setpoint adherence logic (same behavior as before)
       double xErr = predZ - Constants.X_SETPOINT_REEF_ALIGNMENT;
-      double yErr = Constants.Y_L_SETPOINT_REEF_ALIGNMENT - predX;
+      double yErr = Constants.Y_L_SETPOINT_REEF_ALIGNMENT - predX; // Flip the subtraction if "left" acts like "right".
       double rotErrDeg = Constants.ROT_SETPOINT_REEF_ALIGNMENT - predYawDeg;
 
       boolean atX = Math.abs(xErr) <= Constants.X_TOLERANCE_REEF_ALIGNMENT;
@@ -182,6 +188,7 @@ public class LAlignToReefTagRelative extends Command {
   public boolean isFinished() {
     // Requires the robot to stay in the correct position for 0.3 seconds, as long
     // as it gets a tag in the camera
+    // Raise DONT_SEE_TAG_WAIT_TIME if momentary vision drops cancel early; lower POSE_VALIDATION_TIME to exit faster.
     return this.dontSeeTagTimer.hasElapsed(Constants.DONT_SEE_TAG_WAIT_TIME)
         || stopTimer.hasElapsed(Constants.POSE_VALIDATION_TIME);
   }
