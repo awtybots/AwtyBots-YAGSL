@@ -25,10 +25,11 @@ public class RAlignToReefTagRelative extends Command {
   private double tagID = -1;
 
   public RAlignToReefTagRelative(SwerveSubsystem drivebase) {
+    // Forward/back: raise this gain if the robot crawls toward the reef, lower if it rockets past.
     xController = new PIDController(Constants.X_REEF_ALIGNMENT_P, 0.0, 0);
-    // Vertical movement
+    // Strafe: tweak when the bot parks too far from the pole on the right side.
     yController = new PIDController(Constants.Y_REEF_ALIGNMENT_P, 0.0, 0);
-    // Horitontal movement
+    // Rotation: adjust when the bumper ends up angled inward/outward at the finish.
     rotController = new PIDController(Constants.ROT_REEF_ALIGNMENT_P, 0, 0);
     // Rotation
     // rotControllerProfiled = new ProfiledPIDController(Constants.ROT_REEF_ALIGNMENT_P, 0, 0,
@@ -58,12 +59,15 @@ public class RAlignToReefTagRelative extends Command {
     rotController.setSetpoint(Constants.ROT_SETPOINT_REEF_ALIGNMENT);
     rotController.setTolerance(Constants.ROT_TOLERANCE_REEF_ALIGNMENT);
 
+    // Adjust this X setpoint if we crash into or linger too far from the reef (positive drives closer).
     xController.setSetpoint(Constants.X_SETPOINT_REEF_ALIGNMENT);
     xController.setTolerance(Constants.X_TOLERANCE_REEF_ALIGNMENT);
 
+    // Nudge this Y setpoint when the right side scores off the mark (more positive drifts toward the driver side).
     yController.setSetpoint(Constants.Y_R_SETPOINT_REEF_ALIGNMENT);
     yController.setTolerance(Constants.Y_TOLERANCE_REEF_ALIGNMENT);
 
+    // Remember which tag we locked on so we stay tied to the correct reef face.
     tagID = LimelightHelpers.getFiducialID("limelight-left");
   }
 
@@ -80,6 +84,7 @@ public class RAlignToReefTagRelative extends Command {
       double ySpeed = yController.calculate(postions[0]);
       double rotValue = rotController.calculate(postions[4]);
 
+       // If the right-side approach veers left/right swap the sign of ySpeed or tune Y setpoint/tolerance.
        drivebase.drive(new Translation2d(xSpeed, ySpeed), rotValue, false);
 
       if (!rotController.atSetpoint() ||
@@ -103,6 +108,7 @@ public class RAlignToReefTagRelative extends Command {
   public boolean isFinished() {
     // Requires the robot to stay in the correct position for 0.3 seconds, as long
     // as it gets a tag in the camera
+    // Increase the wait time if intermittent vision causes premature cancel, shorten to bail faster.
     return this.dontSeeTagTimer.hasElapsed(Constants.DONT_SEE_TAG_WAIT_TIME) ||
         stopTimer.hasElapsed(Constants.POSE_VALIDATION_TIME);
   }

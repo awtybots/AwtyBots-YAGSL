@@ -25,10 +25,11 @@ public class LAlignToReefTagRelative extends Command {
   private double tagID = -1;
 
   public LAlignToReefTagRelative(SwerveSubsystem drivebase) {
+    // Forward/back: bump P up if the robot creeps in too slowly, drop it if it shoots past the tag.
     xController = new PIDController(Constants.X_REEF_ALIGNMENT_P, 0.0, 0);
-    // Vertical movement
+    // Strafe: raise this P when the chassis stays offset left/right of the reef, lower if it oscillates.
     yController = new PIDController(Constants.Y_REEF_ALIGNMENT_P, 0.0, 0);
-    // Horitontal movement
+    // Yaw: tune this when the robot finishes facing left/right instead of square to the reef.
     rotController = new PIDController(Constants.ROT_REEF_ALIGNMENT_P, 0, 0);
     // Rotation
     // rotControllerProfiled = new
@@ -59,12 +60,15 @@ public class LAlignToReefTagRelative extends Command {
     rotController.setSetpoint(Constants.ROT_SETPOINT_REEF_ALIGNMENT);
     rotController.setTolerance(Constants.ROT_TOLERANCE_REEF_ALIGNMENT);
 
+    // If the robot stops short or bumps the reef, shift this X setpoint (positive pulls closer).
     xController.setSetpoint(Constants.X_SETPOINT_REEF_ALIGNMENT);
     xController.setTolerance(Constants.X_TOLERANCE_REEF_ALIGNMENT);
 
+    // Move this Y setpoint toward zero when the chassis finishes too far left of the pole.
     yController.setSetpoint(Constants.Y_L_SETPOINT_REEF_ALIGNMENT);
     yController.setTolerance(Constants.Y_TOLERANCE_REEF_ALIGNMENT);
 
+    // Latch the first tag we see so the robot does not jump between IDs mid-align.
     tagID = LimelightHelpers.getFiducialID("limelight-right");
   }
 
@@ -110,6 +114,7 @@ public class LAlignToReefTagRelative extends Command {
 
       drivebase.drive(
           new Translation2d(
+              // If we jump forward before we are centered, increase the Y tolerance gate or lower this 0.03 safety creep.
               yController.getError() < Constants.Y_TOLERANCE_REEF_ALIGNMENT ? xSpeed : 0.03,
               ySpeed),
           rotValue,
@@ -139,6 +144,7 @@ public class LAlignToReefTagRelative extends Command {
   public boolean isFinished() {
     // Requires the robot to stay in the correct position for 0.3 seconds, as long
     // as it gets a tag in the camera
+    // Extend DONT_SEE_TAG_WAIT_TIME if small camera dropouts end the command too early.
     return this.dontSeeTagTimer.hasElapsed(Constants.DONT_SEE_TAG_WAIT_TIME) ||
         stopTimer.hasElapsed(Constants.POSE_VALIDATION_TIME);
   }

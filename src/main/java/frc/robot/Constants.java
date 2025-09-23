@@ -189,10 +189,12 @@ public final class Constants {
     public static final double kFreeSpeedRpm = 6784;
   }
   // AutoAlign constants
+  // Raise these gains if the chassis reacts slowly, lower if it oscillates or overshoots.
   public static final double X_REEF_ALIGNMENT_P = 1.5; //1
   public static final double Y_REEF_ALIGNMENT_P = 2.3;//1.74
   public static final double ROT_REEF_ALIGNMENT_P = 0.1;
 
+  // Shift these setpoints when the robot stops short, crashes the reef, or parks off-center.
   public static final double ROT_SETPOINT_REEF_ALIGNMENT = -0.1; // Rotation
   public static final double ROT_TOLERANCE_REEF_ALIGNMENT = 0.05;
   public static final double X_SETPOINT_REEF_ALIGNMENT = 0.06;//-0.43 // Vertical pose
@@ -202,6 +204,7 @@ public final class Constants {
   public static final double Y_TOLERANCE_REEF_ALIGNMENT = 0.1;
 
 
+  // Extend this wait if brief vision dropouts abort alignment, shorten to bail sooner.
   public static final double DONT_SEE_TAG_WAIT_TIME = 1;
   public static final double POSE_VALIDATION_TIME = 0.4;
 
