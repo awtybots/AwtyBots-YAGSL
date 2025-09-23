@@ -183,29 +183,29 @@ public class CoralSubsystem extends SubsystemBase {
         return this.runOnce(
                 () -> {
 
-                    boolean isL4ToL3 = (lastSetpoint == Setpoint.L4 && setpoint == Setpoint.L3);
-                    boolean isL3ToL4 = (lastSetpoint == Setpoint.L3 && setpoint == Setpoint.L4);
-                    boolean isL2ToL4 = (lastSetpoint == Setpoint.L2 && setpoint == Setpoint.L4);
-                    boolean isL1ToL4 = (lastSetpoint == Setpoint.L1 && setpoint == Setpoint.L4);
-                    boolean isFeederToL4 = (lastSetpoint == Setpoint.FeederStation && setpoint == Setpoint.L4);
-                    boolean isFeederToL3 = (lastSetpoint == Setpoint.FeederStation && setpoint == Setpoint.L3);
-                    boolean isL4ToAlgaeHigh = (lastSetpoint == Setpoint.L4 && setpoint == Setpoint.AlgaeHigh);
-                    boolean isL4ToAlgaeLow = (lastSetpoint == Setpoint.L4 && setpoint == Setpoint.AlgaeLow);
-                    boolean isL3ToL2 = (lastSetpoint == Setpoint.L3 && setpoint == Setpoint.L2);
-                    boolean isL4ToL2 = (lastSetpoint == Setpoint.L4 && setpoint == Setpoint.L2);
-                    boolean isBargeToL3 = (lastSetpoint == Setpoint.Barge && setpoint == Setpoint.L3);
-                    boolean isBargeToL2 = (lastSetpoint == Setpoint.Barge && setpoint == Setpoint.L2);
-                    boolean isBargeToL1 = (lastSetpoint == Setpoint.Barge && setpoint == Setpoint.L1);
-                    boolean isBargeToFeeder = (lastSetpoint == Setpoint.Barge && setpoint == Setpoint.FeederStation);
-                    if (isL4ToL3 || isL3ToL4 || isL4ToAlgaeHigh || isL4ToAlgaeLow || isL3ToL2 || isL4ToL2 || isFeederToL4 || isL2ToL4 ||isFeederToL3 ||isL1ToL4 || isBargeToL3 || isBargeToL2 || isBargeToL1 || isBargeToFeeder) {
-                        // Apply slow config
-                        r_armMotor.configure(Configs.CoralSubsystem.r_armMotorSlowConfig,
-                                ResetMode.kResetSafeParameters,
-                                PersistMode.kNoPersistParameters);
-                        l_armMotor.configure(Configs.CoralSubsystem.l_armMotorSlowConfig,
-                                ResetMode.kResetSafeParameters,
-                                PersistMode.kNoPersistParameters);
-                    } else {
+                    // boolean isL4ToL3 = (lastSetpoint == Setpoint.L4 && setpoint == Setpoint.L3);
+                    // boolean isL3ToL4 = (lastSetpoint == Setpoint.L3 && setpoint == Setpoint.L4);
+                    // boolean isL2ToL4 = (lastSetpoint == Setpoint.L2 && setpoint == Setpoint.L4);
+                    // boolean isL1ToL4 = (lastSetpoint == Setpoint.L1 && setpoint == Setpoint.L4);
+                    // boolean isFeederToL4 = (lastSetpoint == Setpoint.FeederStation && setpoint == Setpoint.L4);
+                    // boolean isFeederToL3 = (lastSetpoint == Setpoint.FeederStation && setpoint == Setpoint.L3);
+                    // boolean isL4ToAlgaeHigh = (lastSetpoint == Setpoint.L4 && setpoint == Setpoint.AlgaeHigh);
+                    // boolean isL4ToAlgaeLow = (lastSetpoint == Setpoint.L4 && setpoint == Setpoint.AlgaeLow);
+                    // boolean isL3ToL2 = (lastSetpoint == Setpoint.L3 && setpoint == Setpoint.L2);
+                    // boolean isL4ToL2 = (lastSetpoint == Setpoint.L4 && setpoint == Setpoint.L2);
+                    // boolean isBargeToL3 = (lastSetpoint == Setpoint.Barge && setpoint == Setpoint.L3);
+                    // boolean isBargeToL2 = (lastSetpoint == Setpoint.Barge && setpoint == Setpoint.L2);
+                    // boolean isBargeToL1 = (lastSetpoint == Setpoint.Barge && setpoint == Setpoint.L1);
+                    // boolean isBargeToFeeder = (lastSetpoint == Setpoint.Barge && setpoint == Setpoint.FeederStation);
+                    // if (isL4ToL3 || isL3ToL4 || isL4ToAlgaeHigh || isL4ToAlgaeLow || isL3ToL2 || isL4ToL2 || isFeederToL4 || isL2ToL4 ||isFeederToL3 ||isL1ToL4 || isBargeToL3 || isBargeToL2 || isBargeToL1 || isBargeToFeeder) {
+                    //     // Apply slow config
+                    //     r_armMotor.configure(Configs.CoralSubsystem.r_armMotorSlowConfig,
+                    //             ResetMode.kResetSafeParameters,
+                    //             PersistMode.kNoPersistParameters);
+                    //     l_armMotor.configure(Configs.CoralSubsystem.l_armMotorSlowConfig,
+                    //             ResetMode.kResetSafeParameters,
+                    //             PersistMode.kNoPersistParameters);
+                    // } else {
                         // Default config
                         r_armMotor.configure(
                                 Configs.CoralSubsystem.r_armMotorConfig,
@@ -216,7 +216,7 @@ public class CoralSubsystem extends SubsystemBase {
                                 Configs.CoralSubsystem.l_armMotorConfig,
                                 ResetMode.kResetSafeParameters,
                                 PersistMode.kNoPersistParameters);
-                    }
+                    // }
 
 
                     switch (setpoint) {
