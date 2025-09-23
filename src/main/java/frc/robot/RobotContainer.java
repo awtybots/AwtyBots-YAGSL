@@ -63,6 +63,32 @@ public class RobotContainer {
   private final CommandXboxController m_operatorController = new CommandXboxController(
       OIConstants.kOperatorControllerPort);
 
+  // Driver controller triggers
+  private final Trigger slowModeTrigger = m_driverController.rightTrigger(OIConstants.kTriggerThreshold);
+  private final Trigger driverHeadingResetTrigger = m_driverController.start();
+  private final Trigger driverAlignRightTrigger = m_driverController.rightBumper();
+  private final Trigger driverAlignLeftTrigger = m_driverController.leftBumper();
+  private final Trigger driverClimberInTrigger = m_driverController.b();
+  private final Trigger driverClimberOutTrigger = m_driverController.a();
+
+  // Operator controller triggers
+  private final Trigger operatorIntakeTrigger = m_operatorController.leftBumper();
+  private final Trigger operatorReverseIntakeTrigger = m_operatorController.rightBumper();
+  private final Trigger operatorFeederStationTrigger = m_operatorController.back();
+  private final Trigger operatorL1Trigger = m_operatorController.a();
+  private final Trigger operatorL2Trigger = m_operatorController.b();
+  private final Trigger operatorL3Trigger = m_operatorController.x();
+  private final Trigger operatorL4Trigger = m_operatorController.y();
+  private final Trigger operatorAlgaeHighTrigger = m_operatorController.povUp();
+  private final Trigger operatorAlgaeLowTrigger = m_operatorController.povDown();
+  private final Trigger operatorBargeTrigger = m_operatorController.povLeft();
+
+  // Sensor/state-based triggers
+  private final Trigger coralDetectedTrigger = new Trigger(m_EndE::isCoralEngaged);
+  private final Trigger coralLostTrigger = coralDetectedTrigger.negate();
+  private final Trigger elevatorAtL4Trigger = new Trigger(() -> CoralSubsystem.ElevatorAtL4);
+  private final Trigger funnelIntakeTrigger = new Trigger(() -> CoralSubsystem.runFunnelIntake);
+
 
   public static boolean hasLostContact = false;
 
@@ -226,82 +252,87 @@ Command scoreUniversal() {
    */
   private void configureBindings() {
     // enable slow mode
-    m_driverController
-        .rightTrigger(OIConstants.kTriggerThreshold)
+    slowModeTrigger
         .onTrue(
             Commands.runOnce(() -> {
-              driveAngulareVelocity.scaleTranslation(0.2); // Scale translation speed
+              driveAngulareVelocity.scaleTranslation(0.2);
               driveAngulareVelocity.withControllerRotationAxis(() -> {
                 double rotationValue = m_driverController.getRightX();
-                if (Math.abs(rotationValue) >= 0.5) {
-                  return 0.5 * Math.signum(rotationValue); // Cap at 50% power
-                } else {
-                  return rotationValue; // Send actual value if under 50%
-                }
+                return Math.abs(rotationValue) >= 0.5 ? 0.5 * Math.signum(rotationValue) : rotationValue;
               });
-
             }))
         .onFalse(
             Commands.runOnce(() -> {
-              driveAngulareVelocity.scaleTranslation(1.0); // Restore normal translation speed
-              driveAngulareVelocity.withControllerRotationAxis(m_driverController::getRightX); // Restore normal
-                                                                                               // rotation speed
-
+              driveAngulareVelocity.scaleTranslation(1.0);
+              driveAngulareVelocity.withControllerRotationAxis(m_driverController::getRightX);
             }));
 
     // Left Bumper -> Run tube intake
-    m_operatorController.leftBumper().whileTrue(m_EndE.BrunIntakeCommandFeeder().andThen(m_EndE.runIntakeCommand().withTimeout(.2)));
+    operatorIntakeTrigger
+        .and(funnelIntakeTrigger)
+        .whileTrue(m_EndE.BrunIntakeCommandFeeder().andThen(m_EndE.runIntakeCommand().withTimeout(.2)));
      //   .whileTrue(m_EndE.BrunIntakeCommandFeeder(hasLostContact).andThen(m_EndE.reverseIntakeCommand().withTimeout(.2)));// .onlyIf(m_operatorController.leftBumper()));
 
     // m_operatorController.leftBumper().whileTrue(new CoralIntake(m_EndE));
-
     // m_operatorController.start().whileTrue(m_coralSubsystem.manualElevatorDown());
+
+    operatorIntakeTrigger
+        .and(funnelIntakeTrigger.negate())
+        .and(elevatorAtL4Trigger)
+        .whileTrue(m_EndE.reverseIntakeCommand());
+
+    operatorIntakeTrigger
+        .and(funnelIntakeTrigger.negate())
+        .and(elevatorAtL4Trigger.negate())
+        .whileTrue(m_EndE.runIntakeCommand());
+
     // Right Bumper -> Run tube intake in reverse
     // m_driverController.y().whileTrue(m_algae.runAlgaeInCommand());
-    m_operatorController.rightBumper().whileTrue(m_EndE.reverseIntakeCommand());
-   // m_driverController.rightTrigger().whileTrue(this.ScoreUniversal());
+    operatorReverseIntakeTrigger.whileTrue(m_EndE.reverseIntakeCommand());
 
     // Reef alignment
     // m_driverController.rightBumper().whileTrue(new
     // RAlignToReefTagRelative(drivebase));
     // m_driverController.leftBumper().whileTrue(new
     // LAlignToReefTagRelative(drivebase));
-    m_driverController.rightBumper().whileTrue(new RAlignToReefTagRelative(drivebase));//new SequentialCommandGroup(
-        // Commands.waitUntil(() -> m_EndE.isCoralEngaged()),
-        // m_coralSubsystem.setSetpointCommand(m_coralSubsystem.lastSetpoint),
-        // new RAlignToReefTagRelative(drivebase), this.ScoreUniversal().withTimeout(1)));
-    m_driverController.leftBumper().whileTrue(new LAlignToReefTagRelative(drivebase));
-    // m_operatorController.rightStick().onTrue(m_coralSubsystem.resetElevatorEncoder());
+    driverAlignRightTrigger.whileTrue(new RAlignToReefTagRelative(drivebase));
+    driverAlignLeftTrigger.whileTrue(new LAlignToReefTagRelative(drivebase));
 
-    // B Button -> Elevator/Arm to human player position, set ball intake to stow
-    // when idle
-    m_operatorController.back().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.FeederStation));
-
+    // B Button -> Elevator/Arm to human player position, set ball intake to stow when idle
+    operatorFeederStationTrigger.onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.FeederStation));
     // A Button -> Elevator/Arm to level 1 position
-    m_operatorController.a().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.L1));
+    operatorL1Trigger.onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.L1));
 
     // B Button -> Elevator/Arm to level 2 position
-    m_operatorController.b().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.L2));
+    operatorL2Trigger.onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.L2));
 
     // X Button -> Elevator/Arm to level 3 position
-    m_operatorController.x().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.L3));
+    operatorL3Trigger.onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.L3));
 
     // Y Button -> Elevator/Arm to level 4 position
-    m_operatorController.y().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.L4));
+    operatorL4Trigger.onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.L4));
 
     // D-Pad Up -> Elevator to 2st Algae pickup position
-    m_operatorController.povUp().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeHigh));
+    operatorAlgaeHighTrigger.onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeHigh));
 
     // D-Pad Down -> Elevator to 1st Algae pickup position
-    m_operatorController.povDown().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeLow));
+    operatorAlgaeLowTrigger.onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeLow));
     // D-Pad Left -> Elevator to Barge position
-    m_operatorController.povLeft().onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.Barge));
+    operatorBargeTrigger.onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.Barge));
 
-    m_driverController.start().onTrue(new InstantCommand(() -> drivebase.setInitialHeading(180), drivebase));
+    driverHeadingResetTrigger.onTrue(new InstantCommand(() -> drivebase.setInitialHeading(180), drivebase));
+    // m_driverController.rightTrigger().whileTrue(this.ScoreUniversal());
+    // m_operatorController.rightStick().onTrue(m_coralSubsystem.resetElevatorEncoder());
+
     // A Button -> Climber Goes In
-    m_driverController.b().whileTrue(m_climber.runClimberCommand());
+    driverClimberInTrigger.whileTrue(m_climber.runClimberCommand());
     // B Button -> Climber Goes Out
-    m_driverController.a().whileTrue(m_climber.runReverseClimberCommand());
+    driverClimberOutTrigger.whileTrue(m_climber.runReverseClimberCommand());
+
+    // Track coral contact to avoid rescheduling intake commands when contact is lost/regained.
+    coralDetectedTrigger.onTrue(Commands.runOnce(() -> hasLostContact = false));
+    coralLostTrigger.debounce(0.1).onTrue(Commands.runOnce(() -> hasLostContact = true));
+
     // Resets all encoders
     // m_operatorController.start().onTrue(m_coralSubsystem.resetAllEncoders());
     // m_operatorController.leftTrigger(0.3).whileTrue(m_AlgaeArmSubsystem.coralToAlgae());
