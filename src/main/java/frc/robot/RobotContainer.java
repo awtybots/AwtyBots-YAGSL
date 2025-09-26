@@ -290,6 +290,11 @@ Command scoreUniversal() {
     // m_driverController.y().whileTrue(m_algae.runAlgaeInCommand());
     operatorReverseIntakeTrigger.whileTrue(m_EndE.reverseIntakeCommand());
 
+    operatorReverseIntakeTrigger
+        .and(funnelIntakeTrigger.negate())
+        .and(elevatorAtL4Trigger.negate())
+        .whileTrue(m_EndE.runIntakeCommand());
+
     // Reef alignment
     // m_driverController.rightBumper().whileTrue(new
     // RAlignToReefTagRelative(drivebase));
