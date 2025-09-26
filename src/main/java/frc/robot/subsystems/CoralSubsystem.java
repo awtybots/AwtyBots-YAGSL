@@ -124,19 +124,19 @@ public class CoralSubsystem extends SubsystemBase {
         l_elevatorController.setReference(elevatorCurrentTarget, ControlType.kMAXMotionPositionControl);
         
         
-        if(runFunnelIntake){
-            double elevatorPos = elevatorEncoder.getPosition();
-            double elevatorError = Math.abs(elevatorCurrentTarget - elevatorPos);
-            double stopThreshold = 40;
+        // if(runFunnelIntake){
+        //     double elevatorPos = elevatorEncoder.getPosition();
+        //     double elevatorError = Math.abs(elevatorCurrentTarget - elevatorPos);
+        //     double stopThreshold = 40;
 
-            if (elevatorError > stopThreshold){
+        //     if (elevatorError > stopThreshold){
 
-                return;
-            }
+        //         return;
+        //     }
 
 
 
-        }
+        // }
         
     
         l_armController.setReference(armCurrentTarget, ControlType.kMAXMotionPositionControl);
@@ -207,15 +207,15 @@ public class CoralSubsystem extends SubsystemBase {
                     //             PersistMode.kNoPersistParameters);
                     // } else {
                         // Default config
-                        r_armMotor.configure(
-                                Configs.CoralSubsystem.r_armMotorConfig,
-                                ResetMode.kResetSafeParameters,
-                                PersistMode.kNoPersistParameters);
+                        // r_armMotor.configure(
+                        //         Configs.CoralSubsystem.r_armMotorConfig,
+                        //         ResetMode.kResetSafeParameters,
+                        //         PersistMode.kNoPersistParameters);
 
-                        l_armMotor.configure(
-                                Configs.CoralSubsystem.l_armMotorConfig,
-                                ResetMode.kResetSafeParameters,
-                                PersistMode.kNoPersistParameters);
+                        // l_armMotor.configure(
+                        //         Configs.CoralSubsystem.l_armMotorConfig,
+                        //         ResetMode.kResetSafeParameters,
+                        //         PersistMode.kNoPersistParameters);
                     // }
 
 

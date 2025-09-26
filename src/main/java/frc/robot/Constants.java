@@ -97,12 +97,12 @@ public final class Constants {
     public static final int L2 = 47;
     public static final int AlgaeHigh = 42;
     public static final int L3 = 0 ;
-    public static final int L4 = 70;
-    public static final int Barge = 27;
+    public static final int L4 = 72;
+    public static final int Barge = 72;
   }
 
   public static final class ArmSetpoints{
-    public static final double FeederStation = -1.9;//-1.9 //
+    public static final double FeederStation = -1.3;//-1.9 //
     public static final double L1 = -3; //-3
     public static final double AlgaeLow = -9;
     public static final double L2 = -3;
@@ -195,8 +195,8 @@ public final class Constants {
   public static final double ROT_REEF_ALIGNMENT_P = 0.1;
 
   // Shift these setpoints when the robot stops short, crashes the reef, or parks off-center.
-  public static final double ROT_SETPOINT_REEF_ALIGNMENT = -0.1; // Rotation
-  public static final double ROT_TOLERANCE_REEF_ALIGNMENT = 0.05;
+  public static final double ROT_SETPOINT_REEF_ALIGNMENT = 0; // Rotation
+  public static final double ROT_TOLERANCE_REEF_ALIGNMENT = 1;
   public static final double X_SETPOINT_REEF_ALIGNMENT = 0.06;//-0.43 // Vertical pose
   public static final double X_TOLERANCE_REEF_ALIGNMENT = 0.08;
   public static final double Y_L_SETPOINT_REEF_ALIGNMENT = 0.05; // -0.359 Horizontal pose

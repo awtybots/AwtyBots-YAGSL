@@ -77,20 +77,20 @@ public final class Configs {
                         r_armMotorConfig.follow(12, true);
 
                         r_armMotorConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-                                        .p(0.2)
+                                        .p(0.5)
                                         .d(0.4)
-                                        .outputRange(-0.5, 0.5).maxMotion
+                                        .outputRange(-1, 1).maxMotion
                                         .maxVelocity(1400)
                                         .maxAcceleration(1300)
-                                        .allowedClosedLoopError(.4);
+                                        .allowedClosedLoopError(.2);
 
                         l_armMotorConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-                                        .p(0.2)
+                                        .p(0.5)
                                         .d(.4)
-                                        .outputRange(-0.5, 0.5).maxMotion
+                                        .outputRange(-1, 1).maxMotion
                                         .maxVelocity(1400)
                                         .maxAcceleration(1300)
-                                        .allowedClosedLoopError(.4);
+                                        .allowedClosedLoopError(.2);
 
                         // r_armMotorSlowConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(50).voltageCompensation(12);
                         // l_armMotorSlowConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(50).voltageCompensation(12);
@@ -120,18 +120,18 @@ public final class Configs {
                         l_elevatorMotorConfig.closedLoop
                                         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
                                         .p(0.4)
-                                        .d(.15)
+                                        .d(.1)
                                         .outputRange(-1, 1).maxMotion
-                                        .maxVelocity(6000)
+                                        .maxVelocity(7000)
                                         .maxAcceleration(6000)
                                         .allowedClosedLoopError(.5);
 
                         r_elevatorMotorConfig.closedLoop
                                         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
                                         .p(0.4)
-                                        .d(.15)
+                                        .d(.1)
                                         .outputRange(-1, 1).maxMotion
-                                        .maxVelocity(6000)
+                                        .maxVelocity(7000)
                                         .maxAcceleration(6000)
                                         .allowedClosedLoopError(.5);
 
@@ -139,7 +139,8 @@ public final class Configs {
 
                         wristMotorConfig.closedLoop
                                         .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
-                                        .p(0.02)
+                                        .p(0.03)
+                                        .d(0.01)
                                         .outputRange(-1, 1).maxMotion
                                         .maxVelocity(6000)
                                         .maxAcceleration(8000)

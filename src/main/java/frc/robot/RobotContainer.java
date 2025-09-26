@@ -57,7 +57,8 @@ public class RobotContainer {
   private final Climber m_climber = new Climber();
   private final SendableChooser<Command> autoChooser;
   // private final Algae m_algae = new Algae();
-  // private final AlgaeArmSubsystem m_AlgaeArmSubsystem = new AlgaeArmSubsystem(m_coralSubsystem);
+  // private final AlgaeArmSubsystem m_AlgaeArmSubsystem = new
+  // AlgaeArmSubsystem(m_coralSubsystem);
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController = new CommandXboxController(OIConstants.kDriverControllerPort);
   private final CommandXboxController m_operatorController = new CommandXboxController(
@@ -89,7 +90,6 @@ public class RobotContainer {
   private final Trigger elevatorAtL4Trigger = new Trigger(() -> CoralSubsystem.ElevatorAtL4);
   private final Trigger funnelIntakeTrigger = new Trigger(() -> CoralSubsystem.runFunnelIntake);
 
-
   public static boolean hasLostContact = false;
 
   /**
@@ -120,7 +120,8 @@ public class RobotContainer {
     NamedCommands.registerCommand("Stop", Commands.runOnce(() -> drivebase.stop()));
     NamedCommands.registerCommand("test", Commands.print("Hello World"));
     NamedCommands.registerCommand("outtake", m_EndE.reverseIntakeCommand().withTimeout(1));
-    NamedCommands.registerCommand("outtakeLD", m_EndE.BrunIntakeCommandFeeder().andThen(m_EndE.runIntakeCommand().withTimeout(.2)));
+    NamedCommands.registerCommand("outtakeLD",
+        m_EndE.BrunIntakeCommandFeeder().andThen(m_EndE.runIntakeCommand().withTimeout(.2)));
     NamedCommands.registerCommand("outtakefast", m_EndE.fastrunIntakeCommand().withTimeout(0.3));
     NamedCommands.registerCommand("outtake0.5", m_EndE.reverseIntakeCommand().withTimeout(0.5));
     NamedCommands.registerCommand("fintake", m_funnelIntakeSubsystem.runIntakeCommand().withTimeout(1));
@@ -134,25 +135,26 @@ public class RobotContainer {
     NamedCommands.registerCommand("Gyroreset", new InstantCommand(() -> drivebase.setInitialHeading(180), drivebase));
     NamedCommands.registerCommand("Gyroreset1", new InstantCommand(() -> drivebase.setInitialHeading(0), drivebase));
     // NamedCommands.registerCommand("AlignR", new SequentialCommandGroup(
-    //     Commands.waitUntil(() -> m_EndE.isCoralEngaged()),
-    //     m_coralSubsystem.setSetpointCommand(Setpoint.L4),
-    //     new RAlignToReefTagRelative(drivebase), this.ScoreUniversal().withTimeout(1)));
+    // Commands.waitUntil(() -> m_EndE.isCoralEngaged()),
+    // m_coralSubsystem.setSetpointCommand(Setpoint.L4),
+    // new RAlignToReefTagRelative(drivebase),
+    // this.ScoreUniversal().withTimeout(1)));
     // NamedCommands.registerCommand("AlignL", new SequentialCommandGroup(
-    //     Commands.waitUntil(() -> m_EndE.isCoralEngaged()),
-    //     m_coralSubsystem.setSetpointCommand(Setpoint.L4),
-    //     new LAlignToReefTagRelative(drivebase), this.ScoreUniversal().withTimeout(1)));
+    // Commands.waitUntil(() -> m_EndE.isCoralEngaged()),
+    // m_coralSubsystem.setSetpointCommand(Setpoint.L4),
+    // new LAlignToReefTagRelative(drivebase),
+    // this.ScoreUniversal().withTimeout(1)));
     NamedCommands.registerCommand("AlignR",
-    new RAlignToReefTagRelative(drivebase));
-NamedCommands.registerCommand("AlignL1",
-    new LAlignToReefTagRelative(drivebase));
+        new RAlignToReefTagRelative(drivebase));
+    NamedCommands.registerCommand("AlignL1",
+        new LAlignToReefTagRelative(drivebase));
     NamedCommands.registerCommand("AlignRFeeder",
         new RAlignToReefTagRelative(drivebase).withTimeout(5));
     NamedCommands.registerCommand("AlignL",
         new LAlignToReefTagRelative(drivebase).withTimeout(3));
-        NamedCommands.registerCommand("AlignLFeeder",
+    NamedCommands.registerCommand("AlignLFeeder",
         new LAlignToReefTagRelative(drivebase).withTimeout(5));
     autoChooser = AutoBuilder.buildAutoChooser();
-
 
     SmartDashboard.putData("Auto Chooser", autoChooser);
 
@@ -167,7 +169,8 @@ NamedCommands.registerCommand("AlignL1",
       () -> m_driverController.getLeftX() * 1)
       .withControllerRotationAxis(m_driverController::getRightX)
       .deadband(OIConstants.DEADBAND)
-      .scaleTranslation(0.8)
+      .scaleTranslation(1)
+      .scaleRotation(1)
       .allianceRelativeControl(true);
 
   SwerveInputStream driveDirectAngle = driveAngulareVelocity
@@ -180,61 +183,61 @@ NamedCommands.registerCommand("AlignL1",
   Command driveFieldOrientedAngluarVelocity = drivebase.driveFieldOriented(driveAngulareVelocity);
 
   // Command ScoreUniversal() {
-  //   return Commands.either(
-  //       Commands.either(
-  //           Commands.parallel(
-  //               m_funnelIntakeSubsystem.runIntakeCommand(), // Run Funnel Intake
-  //               m_EndE.runIntakeCommand() // Run Coral Intake at the same time
-  //           ),
-  //           Commands.either(
-  //               m_EndE.runIntakeCommand(), // If ElevatorAtL4 is true, run Reverse Intake
-  //               m_EndE.runIntakeCommand(), // Otherwise, run normal intake
-  //               () -> CoralSubsystem.ElevatorAtL4 // Condition for reverse intake
-  //           ),
-  //           () -> CoralSubsystem.runFunnelIntake // Condition for Funnel Intake
-  //       ),
-  //       m_EndE.runIntakeCommand(), // Do nothing
-  //       () -> CoralSubsystem.runFunnelIntake || CoralSubsystem.ElevatorAtL4);
+  // return Commands.either(
+  // Commands.either(
+  // Commands.parallel(
+  // m_funnelIntakeSubsystem.runIntakeCommand(), // Run Funnel Intake
+  // m_EndE.runIntakeCommand() // Run Coral Intake at the same time
+  // ),
+  // Commands.either(
+  // m_EndE.runIntakeCommand(), // If ElevatorAtL4 is true, run Reverse Intake
+  // m_EndE.runIntakeCommand(), // Otherwise, run normal intake
+  // () -> CoralSubsystem.ElevatorAtL4 // Condition for reverse intake
+  // ),
+  // () -> CoralSubsystem.runFunnelIntake // Condition for Funnel Intake
+  // ),
+  // m_EndE.runIntakeCommand(), // Do nothing
+  // () -> CoralSubsystem.runFunnelIntake || CoralSubsystem.ElevatorAtL4);
   // }
 
-  Command ScoreUniversal() {
-    return Commands.either(
-        m_EndE.reverseIntakeCommand(), // Run reverse intake at L4 or L3
-        m_EndE.runIntakeCommand(),        // Run normal intake everywhere else
-        () -> CoralSubsystem.ElevatorAtL4);
-}
-Command Intake() {
-  return Commands.either(
-      m_EndE.reverseIntakeCommand(), // Run reverse intake at L4 or L3
-      m_EndE.BrunIntakeCommandFeeder().andThen(m_EndE.runIntakeCommand().withTimeout(.2)),        // Run normal intake everywhere else
-      () -> CoralSubsystem.ElevatorAtL4);
-}
+  // Command ScoreUniversal() {
+  // return Commands.either(
+  // m_EndE.reverseIntakeCommand(), // Run reverse intake at L4 or L3
+  // m_EndE.runIntakeCommand(), // Run normal intake everywhere else
+  // () -> CoralSubsystem.ElevatorAtL4);
+  // }
+  // Command Intake() {
+  // return Commands.either(
+  // m_EndE.reverseIntakeCommand(), // Run reverse intake at L4 or L3
+  // m_EndE.BrunIntakeCommandFeeder().andThen(m_EndE.runIntakeCommand().withTimeout(.2)),
+  // // Run normal intake everywhere else
+  // () -> CoralSubsystem.ElevatorAtL4);
+  // }
 
-Command Universal() {
-  if (CoralSubsystem.runFunnelIntake) {
-      return m_EndE.BrunIntakeCommandFeeder()
-                   .andThen(m_EndE.runIntakeCommand().withTimeout(0.2));
-  } 
-  
-  if (CoralSubsystem.ElevatorAtL4) {
-      return m_EndE.reverseIntakeCommand();
-  }
+  // Command Universal() {
+  // if (CoralSubsystem.runFunnelIntake) {
+  // return m_EndE.BrunIntakeCommandFeeder()
+  // .andThen(m_EndE.runIntakeCommand().withTimeout(0.2));
+  // }
 
-  return m_EndE.runIntakeCommand();
-}
-Command scoreUniversal() {
-    return Commands.select(Map.of(
-        "FUNNEL",   m_EndE.BrunIntakeCommandFeeder()
-                         .andThen(m_EndE.runIntakeCommand().withTimeout(0.2)),
-        "L4",       m_EndE.reverseIntakeCommand(),
-        "DEFAULT",  m_EndE.runIntakeCommand()
-    ), () -> {
-        if (CoralSubsystem.runFunnelIntake) return "FUNNEL";
-        if (CoralSubsystem.ElevatorAtL4)    return "L4";
-        return "DEFAULT";
-    });
-}
+  // if (CoralSubsystem.ElevatorAtL4) {
+  // return m_EndE.reverseIntakeCommand();
+  // }
 
+  // return m_EndE.runIntakeCommand();
+  // }
+  // Command scoreUniversal() {
+  // return Commands.select(Map.of(
+  // "FUNNEL", m_EndE.BrunIntakeCommandFeeder()
+  // .andThen(m_EndE.runIntakeCommand().withTimeout(0.2)),
+  // "L4", m_EndE.reverseIntakeCommand(),
+  // "DEFAULT", m_EndE.runIntakeCommand()
+  // ), () -> {
+  // if (CoralSubsystem.runFunnelIntake) return "FUNNEL";
+  // if (CoralSubsystem.ElevatorAtL4) return "L4";
+  // return "DEFAULT";
+  // });
+  // }
 
   /**
    * Use this method to define your trigger->command mappings. Triggers can be
@@ -271,7 +274,8 @@ Command scoreUniversal() {
     operatorIntakeTrigger
         .and(funnelIntakeTrigger)
         .whileTrue(m_EndE.BrunIntakeCommandFeeder().andThen(m_EndE.runIntakeCommand().withTimeout(.2)));
-     //   .whileTrue(m_EndE.BrunIntakeCommandFeeder(hasLostContact).andThen(m_EndE.reverseIntakeCommand().withTimeout(.2)));// .onlyIf(m_operatorController.leftBumper()));
+    // .whileTrue(m_EndE.BrunIntakeCommandFeeder(hasLostContact).andThen(m_EndE.reverseIntakeCommand().withTimeout(.2)));//
+    // .onlyIf(m_operatorController.leftBumper()));
 
     // m_operatorController.leftBumper().whileTrue(new CoralIntake(m_EndE));
     // m_operatorController.start().whileTrue(m_coralSubsystem.manualElevatorDown());
@@ -295,6 +299,16 @@ Command scoreUniversal() {
         .and(elevatorAtL4Trigger.negate())
         .whileTrue(m_EndE.runIntakeCommand());
 
+    operatorReverseIntakeTrigger
+        .and(funnelIntakeTrigger.negate())
+        .and(elevatorAtL4Trigger)
+        .whileTrue(m_EndE.runIntakeCommand());
+
+    operatorReverseIntakeTrigger
+        .and(funnelIntakeTrigger.negate())
+        .and(elevatorAtL4Trigger.negate())
+        .whileTrue(m_EndE.reverseIntakeCommand());
+
     // Reef alignment
     // m_driverController.rightBumper().whileTrue(new
     // RAlignToReefTagRelative(drivebase));
@@ -303,7 +317,8 @@ Command scoreUniversal() {
     driverAlignRightTrigger.whileTrue(new RAlignToReefTagRelative(drivebase));
     driverAlignLeftTrigger.whileTrue(new LAlignToReefTagRelative(drivebase));
 
-    // B Button -> Elevator/Arm to human player position, set ball intake to stow when idle
+    // B Button -> Elevator/Arm to human player position, set ball intake to stow
+    // when idle
     operatorFeederStationTrigger.onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.FeederStation));
     // A Button -> Elevator/Arm to level 1 position
     operatorL1Trigger.onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.L1));
@@ -334,7 +349,8 @@ Command scoreUniversal() {
     // B Button -> Climber Goes Out
     driverClimberOutTrigger.whileTrue(m_climber.runReverseClimberCommand());
 
-    // Track coral contact to avoid rescheduling intake commands when contact is lost/regained.
+    // Track coral contact to avoid rescheduling intake commands when contact is
+    // lost/regained.
     coralDetectedTrigger.onTrue(Commands.runOnce(() -> hasLostContact = false));
     coralLostTrigger.debounce(0.1).onTrue(Commands.runOnce(() -> hasLostContact = true));
 
