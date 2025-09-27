@@ -1,0 +1,117 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 7.175,
+        "y": 0.7153814935064929
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 5.183070210158327,
+        "y": 0.5824840098135973
+      },
+      "isLocked": false,
+      "linkedName": "CageStart6"
+    },
+    {
+      "anchor": {
+        "x": 3.5977499999999996,
+        "y": 0.7153814935064929
+      },
+      "prevControl": {
+        "x": 3.846449639368225,
+        "y": 0.6899160389039376
+      },
+      "nextControl": {
+        "x": 2.4158640192013845,
+        "y": 0.8364000195722335
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 1.5210000000000001,
+        "y": 2.143249999999999
+      },
+      "prevControl": {
+        "x": 1.3552499999999998,
+        "y": 1.207249999999999
+      },
+      "nextControl": {
+        "x": 1.703289515657636,
+        "y": 3.172649617831353
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 3.1492500000000003,
+        "y": 3.8592499999999994
+      },
+      "prevControl": {
+        "x": 2.586253098966589,
+        "y": 3.5756055984623174
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "B Score"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.5046632124352334,
+      "rotationDegrees": 180.0
+    }
+  ],
+  "constraintZones": [
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 1.6260000000000208,
+      "maxWaypointRelativePos": 3.0,
+      "constraints": {
+        "maxVelocity": 4.0,
+        "maxAcceleration": 2.5,
+        "maxAngularVelocity": 180.0,
+        "maxAngularAcceleration": 180.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    }
+  ],
+  "pointTowardsZones": [],
+  "eventMarkers": [
+    {
+      "name": "ReachedTarget",
+      "waypointRelativePos": 1.9578651685393271,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "ReachedTarget"
+        }
+      }
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 5.0,
+    "maxAcceleration": 4.5,
+    "maxAngularVelocity": 180.0,
+    "maxAngularAcceleration": 180.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 0.0
+  },
+  "reversed": false,
+  "folder": "3 Piece (Crazy) Paths",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 180.0
+  },
+  "useDefaultConstraints": false
+}

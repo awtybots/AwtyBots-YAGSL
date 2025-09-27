@@ -1,0 +1,88 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 5.82150974025974,
+        "y": 4.191193181818182
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 6.292297069866974,
+        "y": 4.18383776726774
+      },
+      "isLocked": false,
+      "linkedName": "H Score"
+    },
+    {
+      "anchor": {
+        "x": 6.265710616438356,
+        "y": 4.191193181818182
+      },
+      "prevControl": {
+        "x": 5.746586478071617,
+        "y": 4.191028149995379
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "H Backup"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [
+    {
+      "name": "ResetReachedTarget",
+      "waypointRelativePos": 0.0,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "ResetReachedTarget"
+        }
+      }
+    },
+    {
+      "name": "runRoller",
+      "waypointRelativePos": 0,
+      "endWaypointRelativePos": 0.04439999999999895,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "runRoller"
+        }
+      }
+    },
+    {
+      "name": "stow",
+      "waypointRelativePos": 0.034799999999999054,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "stow"
+        }
+      }
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 4.0,
+    "maxAcceleration": 2.5,
+    "maxAngularVelocity": 180.0,
+    "maxAngularAcceleration": 180.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 180.0
+  },
+  "reversed": false,
+  "folder": "Reef Backup Paths",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 180.0
+  },
+  "useDefaultConstraints": true
+}
