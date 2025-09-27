@@ -21,6 +21,7 @@ import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.ElevatorSetpoints;
 import frc.robot.Constants.IntakeSetpoints;
 import frc.robot.Constants.WristSetpoints;
+import frc.robot.util.ScoreSafetyManager;
 import au.grapplerobotics.LaserCan;
 
 public class CoralSubsystem extends SubsystemBase {
@@ -182,6 +183,11 @@ public class CoralSubsystem extends SubsystemBase {
     public Command setSetpointCommand(Setpoint setpoint) {
         return this.runOnce(
                 () -> {
+
+                    if (ScoreSafetyManager.isMovementBlocked()) {
+                        ScoreSafetyManager.notifyBlocked();
+                        return;
+                    }
 
                     // boolean isL4ToL3 = (lastSetpoint == Setpoint.L4 && setpoint == Setpoint.L3);
                     // boolean isL3ToL4 = (lastSetpoint == Setpoint.L3 && setpoint == Setpoint.L4);

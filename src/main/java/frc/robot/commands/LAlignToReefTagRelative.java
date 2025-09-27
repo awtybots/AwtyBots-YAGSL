@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.LimelightHelpers;
 import frc.robot.subsystems.SwerveSubsystem;
+import frc.robot.util.ScoreSafetyManager;
 
 public class LAlignToReefTagRelative extends Command {
   private PIDController xController, yController, rotController;
@@ -168,6 +169,9 @@ public class LAlignToReefTagRelative extends Command {
   public void end(boolean interrupted) {
       // drivebase.drive(new Translation2d(), 0, false);
     drivebase.stop();
+    if (!interrupted) {
+      ScoreSafetyManager.activateLockout(drivebase.getPose());
+    }
   }
 
   @Override
