@@ -33,10 +33,9 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathPlannerPath;
-import com.studica.frc.AHRS.NavXComType;
-
 import swervelib.SwerveDrive;
 import swervelib.parser.SwerveParser;
+import frc.robot.util.ScoreSafetyManager;
 
 public class SwerveSubsystem extends SubsystemBase {
 
@@ -283,6 +282,8 @@ public class SwerveSubsystem extends SubsystemBase {
       Rotation2d.fromDegrees(getGyroYaw()),
       swerveDrive.getModulePositions() 
       );
+
+    ScoreSafetyManager.updateWithCurrentPose(getPose());
 
     if (shouldUpdateDashboard()) {
       SmartDashboard.putNumber("Gyro Yaw", getGyroYaw());

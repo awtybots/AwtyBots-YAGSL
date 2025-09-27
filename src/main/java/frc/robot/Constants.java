@@ -162,6 +162,11 @@ public final class Constants {
     public static final double kFastForward =-1;
   }
 
+  public static final class SafetyConstants {
+    public static final double BACKUP_RELEASE_DISTANCE_METERS = Units.inchesToMeters(16);
+    public static final double LOCK_REMINDER_INTERVAL_SECONDS = 0.75;
+  }
+
   public static final class ModuleConstants {
     // The MAXSwerve module can be configured with one of three pinion gears: 12T,
     // 13T, or 14T. This changes the drive speed of the module (a pinion gear with
