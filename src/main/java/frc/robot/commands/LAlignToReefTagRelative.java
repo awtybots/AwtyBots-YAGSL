@@ -9,6 +9,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -24,7 +25,9 @@ public class LAlignToReefTagRelative extends Command {
   private Timer dontSeeTagTimer, stopTimer;
   private SwerveSubsystem drivebase;
   private double tagID = -1;
+  private double lastPoseValidatedTimestamp = -1;
   private int dashboardLoopCounter = Math.max(0, Constants.DASHBOARD_UPDATE_PERIOD_CYCLES - 1);
+  private boolean completionReported = false;
 
   private boolean shouldUpdateDashboard() {
     if (!Constants.LIMIT_DASHBOARD_PERIODIC_UPDATES || Constants.DASHBOARD_UPDATE_PERIOD_CYCLES <= 1) {
@@ -73,6 +76,8 @@ public class LAlignToReefTagRelative extends Command {
     this.stopTimer.start();
     this.dontSeeTagTimer = new Timer();
     this.dontSeeTagTimer.start();
+    lastPoseValidatedTimestamp = -1;
+    completionReported = false;
 
     rotController.setSetpoint(Constants.ROT_SETPOINT_REEF_ALIGNMENT);
     rotController.setTolerance(Constants.ROT_TOLERANCE_REEF_ALIGNMENT);
@@ -140,10 +145,16 @@ public class LAlignToReefTagRelative extends Command {
           rotValue,
           false);
 
-      if (!rotController.atSetpoint() ||
-          !yController.atSetpoint() ||
-          !xController.atSetpoint()) {
+      boolean atPose = rotController.atSetpoint() && yController.atSetpoint() && xController.atSetpoint();
+      if (!atPose) {
         stopTimer.reset();
+        lastPoseValidatedTimestamp = -1;
+      } else if (stopTimer.hasElapsed(Constants.POSE_VALIDATION_TIME)) {
+        lastPoseValidatedTimestamp = Timer.getFPGATimestamp();
+        if (!completionReported) {
+          DriverStation.reportWarning("Auto align left finished", false);
+          completionReported = true;
+        }
       }
 
       if (updateDashboard) {
@@ -179,6 +190,10 @@ public class LAlignToReefTagRelative extends Command {
     // Requires the robot to stay in the correct position for 0.3 seconds, as long
     // as it gets a tag in the camera
     // Extend DONT_SEE_TAG_WAIT_TIME if small camera dropouts end the command too early.
-    return this.dontSeeTagTimer.hasElapsed(Constants.DONT_SEE_TAG_WAIT_TIME) || stopTimer.hasElapsed(Constants.POSE_VALIDATION_TIME);
+    double now = Timer.getFPGATimestamp();
+    boolean poseRecentlyValidated = lastPoseValidatedTimestamp > 0
+        && (now - lastPoseValidatedTimestamp) <= Constants.POSE_LOSS_GRACE_PERIOD;
+    return poseRecentlyValidated
+        || this.dontSeeTagTimer.hasElapsed(Constants.DONT_SEE_TAG_WAIT_TIME);
   }
 }

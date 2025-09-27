@@ -211,7 +211,8 @@ public final class Constants {
 
   // Extend this wait if brief vision dropouts abort alignment, shorten to bail sooner.
   public static final double DONT_SEE_TAG_WAIT_TIME = 1;
-  public static final double POSE_VALIDATION_TIME = 0.4;
+  public static final double POSE_VALIDATION_TIME = 0.12;
+  public static final double POSE_LOSS_GRACE_PERIOD = 0.4;
 
   // Dashboard throttling
   public static final boolean LIMIT_DASHBOARD_PERIODIC_UPDATES = true;
