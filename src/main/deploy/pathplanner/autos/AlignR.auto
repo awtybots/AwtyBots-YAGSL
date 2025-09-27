@@ -7,13 +7,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "StraightToAlign"
+            "pathName": "Path1S1"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "AlignRight"
+            "name": "AlignR"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "outtakefast"
           }
         }
       ]
