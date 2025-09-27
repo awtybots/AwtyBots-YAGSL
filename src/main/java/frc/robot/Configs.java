@@ -77,20 +77,20 @@ public final class Configs {
                         r_armMotorConfig.follow(12, true);
 
                         r_armMotorConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-                                        .p(0.5)
+                                        .p(0.6)
                                         .d(0.4)
                                         .outputRange(-1, 1).maxMotion
                                         .maxVelocity(1400)
                                         .maxAcceleration(1300)
-                                        .allowedClosedLoopError(.2);
+                                        .allowedClosedLoopError(.1);
 
                         l_armMotorConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-                                        .p(0.5)
+                                        .p(06)
                                         .d(.4)
                                         .outputRange(-1, 1).maxMotion
                                         .maxVelocity(1400)
                                         .maxAcceleration(1300)
-                                        .allowedClosedLoopError(.2);
+                                        .allowedClosedLoopError(.1);
 
                         // r_armMotorSlowConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(50).voltageCompensation(12);
                         // l_armMotorSlowConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(50).voltageCompensation(12);

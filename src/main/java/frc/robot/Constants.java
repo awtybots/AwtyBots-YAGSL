@@ -191,7 +191,7 @@ public final class Constants {
   // AutoAlign constants
   // Raise these gains if the chassis reacts slowly, lower if it oscillates or overshoots.
   public static final double X_REEF_ALIGNMENT_P = 1.5; //1
-  public static final double Y_REEF_ALIGNMENT_P = 2.3;//1.74
+  public static final double Y_REEF_ALIGNMENT_P = 2.1;//1.74
   public static final double ROT_REEF_ALIGNMENT_P = 0.1;
 
   // Shift these setpoints when the robot stops short, crashes the reef, or parks off-center.
@@ -199,7 +199,7 @@ public final class Constants {
   public static final double ROT_TOLERANCE_REEF_ALIGNMENT = 1;
   public static final double X_SETPOINT_REEF_ALIGNMENT = 0.06;//-0.43 // Vertical pose
   public static final double X_TOLERANCE_REEF_ALIGNMENT = 0.08;
-  public static final double Y_L_SETPOINT_REEF_ALIGNMENT = 0.02; // -0.359 Horizontal pose
+  public static final double Y_L_SETPOINT_REEF_ALIGNMENT = 0.05; // -0.359 Horizontal pose
   public static final double Y_R_SETPOINT_REEF_ALIGNMENT = 0.275; // Horizontal pose
   public static final double Y_TOLERANCE_REEF_ALIGNMENT = 0.1;
 
