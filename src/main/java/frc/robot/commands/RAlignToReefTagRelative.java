@@ -108,29 +108,31 @@ public class RAlignToReefTagRelative extends Command {
       double ySpeed = yController.calculate(postions[0]);
       double rotValue = rotController.calculate(postions[4]);
 
-      // If the right-side approach veers left/right swap the sign of ySpeed or tune Y
-      // setpoint/tolerance.
-      drivebase.drive(
-          new Translation2d(
-              // If we jump forward before we are centered, increase the Y tolerance gate or
-              // lower this 0.03 safety creep.
-              yController.getError() < 0.3 ? xSpeed : 0.00,
-              ySpeed),
-          rotValue,
-          false);
-
       boolean atPose = rotController.atSetpoint() && yController.atSetpoint() && xController.atSetpoint();
-      if (!atPose) {
+      if (atPose) {
+        drivebase.stop();
+        if (stopTimer.hasElapsed(Constants.POSE_VALIDATION_TIME)) {
+          lastPoseValidatedTimestamp = Timer.getFPGATimestamp();
+          if (!completionReported) {
+            DriverStation.reportWarning("Auto align right finished", false);
+            System.out.println("Auto align right finished");
+            SmartDashboard.putBoolean("AutoAlignRightComplete", true);
+            completionReported = true;
+          }
+        }
+      } else {
         stopTimer.reset();
         lastPoseValidatedTimestamp = -1;
-      } else if (stopTimer.hasElapsed(Constants.POSE_VALIDATION_TIME)) {
-        lastPoseValidatedTimestamp = Timer.getFPGATimestamp();
-        if (!completionReported) {
-          DriverStation.reportWarning("Auto align right finished", false);
-          System.out.println("Auto align right finished");
-          SmartDashboard.putBoolean("AutoAlignRightComplete", true);
-          completionReported = true;
-        }
+        // If the right-side approach veers left/right swap the sign of ySpeed or tune Y
+        // setpoint/tolerance.
+        drivebase.drive(
+            new Translation2d(
+                // If we jump forward before we are centered, increase the Y tolerance gate or
+                // lower this 0.03 safety creep.
+                yController.getError() < 0.3 ? xSpeed : 0.00,
+                ySpeed),
+            rotValue,
+            false);
       }
 
       if (updateDashboard) {
@@ -157,6 +159,9 @@ public class RAlignToReefTagRelative extends Command {
     drivebase.stop();
     if (!interrupted) {
       ScoreSafetyManager.activateLockout(drivebase.getPose());
+    }
+    if (!completionReported) {
+      SmartDashboard.putBoolean("AutoAlignRightComplete", false);
     }
   }
 
