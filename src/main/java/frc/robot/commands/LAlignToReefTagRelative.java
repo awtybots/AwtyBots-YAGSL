@@ -79,6 +79,8 @@ public class LAlignToReefTagRelative extends Command {
     lastPoseValidatedTimestamp = -1;
     completionReported = false;
 
+    SmartDashboard.putBoolean("AutoAlignLeftComplete", false);
+
     rotController.setSetpoint(Constants.ROT_SETPOINT_REEF_ALIGNMENT);
     rotController.setTolerance(Constants.ROT_TOLERANCE_REEF_ALIGNMENT);
 
@@ -153,6 +155,8 @@ public class LAlignToReefTagRelative extends Command {
         lastPoseValidatedTimestamp = Timer.getFPGATimestamp();
         if (!completionReported) {
           DriverStation.reportWarning("Auto align left finished", false);
+          System.out.println("Auto align left finished");
+          SmartDashboard.putBoolean("AutoAlignLeftComplete", true);
           completionReported = true;
         }
       }
