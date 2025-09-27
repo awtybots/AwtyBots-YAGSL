@@ -97,28 +97,38 @@ public class RAlignToReefTagRelative extends Command {
       double rotValue = rotController.calculate(postions[4]);
 
        // If the right-side approach veers left/right swap the sign of ySpeed or tune Y setpoint/tolerance.
-       drivebase.drive(new Translation2d(xSpeed, ySpeed), rotValue, false);
+       drivebase.drive(
+        new Translation2d(
+            // If we jump forward before we are centered, increase the Y tolerance gate or
+            // lower this 0.03 safety creep.
+            yController.getError() < 0.3 ? xSpeed : 0.00,
+            ySpeed),
+        rotValue,
+        false);
 
-      if (!rotController.atSetpoint() ||
-          !yController.atSetpoint() ||
-          !xController.atSetpoint()) {
-        stopTimer.reset();
-      }
-
-      if (updateDashboard) {
-        SmartDashboard.putNumber("x", postions[2]);
-        SmartDashboard.putNumber("xspeed", xSpeed);
-      }
-    } else {
-       drivebase.drive(new Translation2d(), 0, false);
-       if (updateDashboard) {
-        SmartDashboard.putNumber("xspeed", 0);
-       }
+    if (!rotController.atSetpoint() ||
+        !yController.atSetpoint() ||
+        !xController.atSetpoint()) {
+      stopTimer.reset();
     }
 
     if (updateDashboard) {
-      SmartDashboard.putNumber("poseValidTimer", stopTimer.get());
+      SmartDashboard.putNumber("xspeed", xSpeed);
     }
+  } else {
+    // drivebase.drive(
+    // new Translation2d(),
+    // 0,
+    // false);
+    drivebase.stop();
+    if (updateDashboard) {
+      SmartDashboard.putNumber("xspeed", 0);
+    }
+  }
+
+  if (updateDashboard) {
+    SmartDashboard.putNumber("poseValidTimer", stopTimer.get());
+  }
   }
 
   @Override
