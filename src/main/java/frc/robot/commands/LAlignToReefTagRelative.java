@@ -7,6 +7,7 @@ package frc.robot.commands;
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -28,6 +29,9 @@ public class LAlignToReefTagRelative extends Command {
   private double lastPoseValidatedTimestamp = -1;
   private int dashboardLoopCounter = Math.max(0, Constants.DASHBOARD_UPDATE_PERIOD_CYCLES - 1);
   private boolean completionReported = false;
+  private Pose2d lastPoseWhileVision = null;
+  private double lastVisionPoseTimestamp = -1;
+  private boolean atPoseWithVisionLatched = false;
 
   private boolean shouldUpdateDashboard() {
     if (!Constants.LIMIT_DASHBOARD_PERIODIC_UPDATES || Constants.DASHBOARD_UPDATE_PERIOD_CYCLES <= 1) {
@@ -78,6 +82,9 @@ public class LAlignToReefTagRelative extends Command {
     this.dontSeeTagTimer.start();
     lastPoseValidatedTimestamp = -1;
     completionReported = false;
+    lastPoseWhileVision = null;
+    lastVisionPoseTimestamp = -1;
+    atPoseWithVisionLatched = false;
 
     SmartDashboard.putBoolean("AutoAlignLeftComplete", false);
 
@@ -139,20 +146,21 @@ public class LAlignToReefTagRelative extends Command {
       double rotValue = rotController.calculate(postions[4]);
 
       boolean atPose = rotController.atSetpoint() && yController.atSetpoint() && xController.atSetpoint();
+      double now = Timer.getFPGATimestamp();
       if (atPose) {
+        atPoseWithVisionLatched = true;
+        lastPoseWhileVision = drivebase.getPose();
+        lastVisionPoseTimestamp = now;
         drivebase.stop();
         if (stopTimer.hasElapsed(Constants.POSE_VALIDATION_TIME)) {
-          lastPoseValidatedTimestamp = Timer.getFPGATimestamp();
-          if (!completionReported) {
-            DriverStation.reportWarning("Auto align left finished", false);
-            System.out.println("Auto align left finished");
-            SmartDashboard.putBoolean("AutoAlignLeftComplete", true);
-            completionReported = true;
-          }
+          recordPoseValidation();
         }
       } else {
         stopTimer.reset();
         lastPoseValidatedTimestamp = -1;
+        atPoseWithVisionLatched = false;
+        lastPoseWhileVision = null;
+        lastVisionPoseTimestamp = -1;
         drivebase.drive(
             new Translation2d(
                 // If we jump forward before we are centered, increase the Y tolerance gate or
@@ -172,6 +180,18 @@ public class LAlignToReefTagRelative extends Command {
       // 0,
       // false);
       drivebase.stop();
+      if (atPoseWithVisionLatched && lastPoseWhileVision != null && lastVisionPoseTimestamp > 0) {
+        double timeSinceVision = Timer.getFPGATimestamp() - lastVisionPoseTimestamp;
+        boolean withinGrace = timeSinceVision <= Constants.POSE_LOSS_GRACE_PERIOD;
+        boolean poseStillValid = isCurrentPoseCloseToVisionPose();
+        if (withinGrace && stopTimer.hasElapsed(Constants.POSE_VALIDATION_TIME) && poseStillValid) {
+          recordPoseValidation();
+        } else if (!withinGrace || !poseStillValid) {
+          atPoseWithVisionLatched = false;
+          lastPoseWhileVision = null;
+          lastVisionPoseTimestamp = -1;
+        }
+      }
       if (updateDashboard) {
         SmartDashboard.putNumber("xspeed", 0);
       }
@@ -204,5 +224,28 @@ public class LAlignToReefTagRelative extends Command {
         && (now - lastPoseValidatedTimestamp) <= Constants.POSE_LOSS_GRACE_PERIOD;
     return poseRecentlyValidated
         || this.dontSeeTagTimer.hasElapsed(Constants.DONT_SEE_TAG_WAIT_TIME);
+  }
+
+  private void recordPoseValidation() {
+    lastPoseValidatedTimestamp = Timer.getFPGATimestamp();
+    if (!completionReported) {
+      DriverStation.reportWarning("Auto align left finished", false);
+      System.out.println("Auto align left finished");
+      SmartDashboard.putBoolean("AutoAlignLeftComplete", true);
+      completionReported = true;
+    }
+  }
+
+  private boolean isCurrentPoseCloseToVisionPose() {
+    if (lastPoseWhileVision == null) {
+      return false;
+    }
+    Pose2d currentPose = drivebase.getPose();
+    double translationError =
+        currentPose.getTranslation().getDistance(lastPoseWhileVision.getTranslation());
+    double headingError = Math.abs(
+        currentPose.getRotation().minus(lastPoseWhileVision.getRotation()).getDegrees());
+    return translationError <= Constants.POSE_ODOMETRY_TOLERANCE_METERS
+        && headingError <= Constants.POSE_ODOMETRY_TOLERANCE_DEGREES;
   }
 }

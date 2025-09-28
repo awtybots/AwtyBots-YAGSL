@@ -213,6 +213,8 @@ public final class Constants {
   public static final double DONT_SEE_TAG_WAIT_TIME = 1;
   public static final double POSE_VALIDATION_TIME = 0.12;
   public static final double POSE_LOSS_GRACE_PERIOD = 0.4;
+  public static final double POSE_ODOMETRY_TOLERANCE_METERS = 0.1;
+  public static final double POSE_ODOMETRY_TOLERANCE_DEGREES = 3.0;
 
   // Dashboard throttling
   public static final boolean LIMIT_DASHBOARD_PERIODIC_UPDATES = true;
