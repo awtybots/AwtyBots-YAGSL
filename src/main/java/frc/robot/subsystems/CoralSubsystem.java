@@ -116,6 +116,7 @@ public class CoralSubsystem extends SubsystemBase {
         
         elevatorEncoder.setPosition(0);
         armEncoder.setPosition(0);
+   
        
         
     }

@@ -149,11 +149,11 @@ public class LAlignToReefTagRelative extends Command {
         SmartDashboard.putNumber("xspeed", xSpeed);
       }
     } else {
-      // drivebase.drive(
-      // new Translation2d(),
-      // 0,
-      // false);
-      drivebase.stop();
+      drivebase.drive(
+          new Translation2d(),
+          0,
+          false);
+      // drivebase.stop();
       if (updateDashboard) {
         SmartDashboard.putNumber("xspeed", 0);
       }

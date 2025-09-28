@@ -25,7 +25,7 @@ public class EndE extends SubsystemBase {
     LaserCan.Measurement measurement = lc.getMeasurement();
     // intake setup
     private SparkFlex intakeMotor = new SparkFlex(ArmConstants.IntakeCanID, MotorType.kBrushless);
-    private boolean CoralEngaged = false;
+    // private boolean CoralEngaged = false;
 
     public EndE() {
         intakeMotor.configure(

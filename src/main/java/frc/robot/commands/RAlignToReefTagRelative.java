@@ -19,8 +19,9 @@ import frc.robot.subsystems.SwerveSubsystem;
 import static frc.robot.subsystems.CoralSubsystem.ElevatorAtL4;
 // import yams.mechanisms.positional.Elevator;
 import frc.robot.subsystems.CoralSubsystem;
-import frc.robot.subsystems.EndE;
+
 import edu.wpi.first.wpilibj2.command.Command;
+
 public class RAlignToReefTagRelative extends Command {
   private PIDController xController, yController, rotController;
   private ProfiledPIDController rotControllerProfiled;
@@ -29,7 +30,7 @@ public class RAlignToReefTagRelative extends Command {
   private SwerveSubsystem drivebase;
   private double tagID = -1;
   private int dashboardLoopCounter = Math.max(0, Constants.DASHBOARD_UPDATE_PERIOD_CYCLES - 1);
- 
+
   private boolean shouldUpdateDashboard() {
     if (!Constants.LIMIT_DASHBOARD_PERIODIC_UPDATES || Constants.DASHBOARD_UPDATE_PERIOD_CYCLES <= 1) {
       return true;
@@ -126,18 +127,14 @@ public class RAlignToReefTagRelative extends Command {
         SmartDashboard.putNumber("xspeed", xSpeed);
       }
     } else {
-      // drivebase.drive(
-      // new Translation2d(),
-      // 0,
-      // false);
-      if (ElevatorAtL4) {
-        drivebase.drive(new Translation2d(-1, 0.0), 0.0, false);
-      }
-        else{
-
-          drivebase.stop();
-        }
+      drivebase.drive(
+      new Translation2d(),
+      0,
+      false);
+   
+        // drivebase.drive(, dashboardLoopCounter, updateDashboard);();
       
+
       if (updateDashboard) {
         SmartDashboard.putNumber("xspeed", 0);
       }
