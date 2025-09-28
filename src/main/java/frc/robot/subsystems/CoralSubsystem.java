@@ -37,8 +37,8 @@ public class CoralSubsystem extends SubsystemBase {
     }
 
     //LaserCan setup
-    private LaserCan lc = new LaserCan(29);
-    LaserCan.Measurement measurement = lc.getMeasurement();
+    // private LaserCan lc = new LaserCan(29);
+    // LaserCan.Measurement measurement = lc.getMeasurement();
 
     // Variable use for tracking if the elevator was raised to L4
     public static boolean ElevatorAtL4;

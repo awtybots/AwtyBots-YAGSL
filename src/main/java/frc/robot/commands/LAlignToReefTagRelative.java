@@ -166,7 +166,7 @@ public class LAlignToReefTagRelative extends Command {
 
   @Override
   public void end(boolean interrupted) {
-      // drivebase.drive(new Translation2d(), 0, false);
+    // drivebase.drive(new Translation2d(), 0, false);
     drivebase.stop();
   }
 
@@ -174,7 +174,9 @@ public class LAlignToReefTagRelative extends Command {
   public boolean isFinished() {
     // Requires the robot to stay in the correct position for 0.3 seconds, as long
     // as it gets a tag in the camera
-    // Extend DONT_SEE_TAG_WAIT_TIME if small camera dropouts end the command too early.
-    return this.dontSeeTagTimer.hasElapsed(Constants.DONT_SEE_TAG_WAIT_TIME) || stopTimer.hasElapsed(Constants.POSE_VALIDATION_TIME);
+    // Extend DONT_SEE_TAG_WAIT_TIME if small camera dropouts end the command too
+    // early.
+    return this.dontSeeTagTimer.hasElapsed(Constants.DONT_SEE_TAG_WAIT_TIME)
+        || stopTimer.hasElapsed(Constants.POSE_VALIDATION_TIME);
   }
 }
