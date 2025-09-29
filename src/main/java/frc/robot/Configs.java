@@ -122,18 +122,18 @@ public final class Configs {
                                         .p(0.4)
                                         .d(.1)
                                         .outputRange(-1, 1).maxMotion
-                                        .maxVelocity(7500)
-                                        .maxAcceleration(7000)
-                                        .allowedClosedLoopError(.3);
+                                        .maxVelocity(7000)
+                                        .maxAcceleration(6000)
+                                        .allowedClosedLoopError(.5);
 
                         r_elevatorMotorConfig.closedLoop
                                         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
                                         .p(0.4)
                                         .d(.1)
                                         .outputRange(-1, 1).maxMotion
-                                        .maxVelocity(7500)
-                                        .maxAcceleration(7000)
-                                        .allowedClosedLoopError(.3);
+                                        .maxVelocity(7000)
+                                        .maxAcceleration(6000)
+                                        .allowedClosedLoopError(.5);
 
                         wristMotorConfig.idleMode(IdleMode.kCoast).smartCurrentLimit(50).voltageCompensation(12);
 
@@ -144,7 +144,7 @@ public final class Configs {
                                         .outputRange(-1, 1).maxMotion
                                         .maxVelocity(6000)
                                         .maxAcceleration(8000)
-                                        .allowedClosedLoopError(.005);
+                                        .allowedClosedLoopError(.01);
 
                         intakeMotorConfig.inverted(true).idleMode(IdleMode.kBrake).smartCurrentLimit(50);
 
