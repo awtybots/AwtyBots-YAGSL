@@ -69,6 +69,7 @@ public class RobotContainer {
   private final Trigger driverHeadingResetTrigger = m_driverController.start();
   private final Trigger driverAlignRightTrigger = m_driverController.rightBumper();
   private final Trigger driverAlignLeftTrigger = m_driverController.leftBumper();
+  private final Trigger driverOverrideTrigger = driverAlignLeftTrigger.or(driverAlignRightTrigger);
   private final Trigger driverClimberInTrigger = m_driverController.b();
   private final Trigger driverClimberOutTrigger = m_driverController.a();
 
@@ -316,6 +317,9 @@ public class RobotContainer {
     // LAlignToReefTagRelative(drivebase));
     driverAlignRightTrigger.whileTrue(new RAlignToReefTagRelative(drivebase));
     driverAlignLeftTrigger.whileTrue(new LAlignToReefTagRelative(drivebase));
+
+    driverOverrideTrigger.onTrue(Commands.runOnce(() -> m_coralSubsystem.setDriverOverrideActive(true)));
+    driverOverrideTrigger.onFalse(Commands.runOnce(() -> m_coralSubsystem.setDriverOverrideActive(false)));
 
     // B Button -> Elevator/Arm to human player position, set ball intake to stow
     // when idle

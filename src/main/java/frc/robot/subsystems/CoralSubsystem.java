@@ -49,6 +49,7 @@ public class CoralSubsystem extends SubsystemBase {
     public static boolean runFunnelIntake;
     private Setpoint lastSetpoint = Setpoint.FeederStation;
     private boolean checkTargetSetpointForAutoAlign = false;
+    private boolean DriverIsPressingRightBumperOrLeftBumper = false; // True while driver holds either bumper override
 
     // arm setup
     private SparkFlex r_armMotor = new SparkFlex(ArmConstants.ArmRightCanID, MotorType.kBrushless);
@@ -293,6 +294,11 @@ public class CoralSubsystem extends SubsystemBase {
                     }
                     lastSetpoint = setpoint; 
                 });
+    }
+
+    /** Updates whether the driver is actively holding the alignment override bumpers. */
+    public void setDriverOverrideActive(boolean isPressed) {
+        DriverIsPressingRightBumperOrLeftBumper = isPressed;
     }
 
     // public Command runIntakeCommand() {
