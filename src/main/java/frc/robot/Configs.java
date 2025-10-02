@@ -139,12 +139,12 @@ public final class Configs {
 
                         wristMotorConfig.closedLoop
                                         .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
-                                        .p(0.03)
+                                        .p(0.02)
                                         .d(0.01)
                                         .outputRange(-1, 1).maxMotion
                                         .maxVelocity(6000)
                                         .maxAcceleration(8000)
-                                        .allowedClosedLoopError(.01);
+                                        .allowedClosedLoopError(.005);
 
                         intakeMotorConfig.inverted(true).idleMode(IdleMode.kBrake).smartCurrentLimit(50);
 
