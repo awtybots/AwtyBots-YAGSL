@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import com.fasterxml.jackson.annotation.Nulls;
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.RelativeEncoder;
 
@@ -47,7 +48,7 @@ public class CoralSubsystem extends SubsystemBase {
 
     public static boolean runFunnelIntake;
     private Setpoint lastSetpoint = Setpoint.FeederStation;
-
+    private boolean checkTargetSetpointForAutoAlign = false;
 
     // arm setup
     private SparkFlex r_armMotor = new SparkFlex(ArmConstants.ArmRightCanID, MotorType.kBrushless);
@@ -122,6 +123,11 @@ public class CoralSubsystem extends SubsystemBase {
     }
 
     private void moveToSetpoint() {
+        if (checkTargetSetpointForAutoAlign && !DriverIsPressingRightBumperOrLeftBumper) {
+
+            return;
+        }
+       
         l_elevatorController.setReference(elevatorCurrentTarget, ControlType.kMAXMotionPositionControl);
         
         
@@ -180,7 +186,7 @@ public class CoralSubsystem extends SubsystemBase {
     //     intakeMotor.set(power);
     // }
 
-    public Command setSetpointCommand(Setpoint setpoint) {
+    public Command setSetpointCommand(Setpoint setpoint, Boolean override) {
         return this.runOnce(
                 () -> {
 
@@ -223,7 +229,7 @@ public class CoralSubsystem extends SubsystemBase {
                         //         ResetMode.kResetSafeParameters,
                         //         PersistMode.kNoPersistParameters);
                     // }
-
+                    checkTargetSetpointForAutoAlign = override;
 
                     switch (setpoint) {
                         case FeederStation:

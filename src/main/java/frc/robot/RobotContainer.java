@@ -125,13 +125,13 @@ public class RobotContainer {
     NamedCommands.registerCommand("outtakefast", m_EndE.fastrunIntakeCommand().withTimeout(0.3));
     NamedCommands.registerCommand("outtake0.5", m_EndE.reverseIntakeCommand().withTimeout(0.5));
     NamedCommands.registerCommand("fintake", m_funnelIntakeSubsystem.runIntakeCommand().withTimeout(1));
-    NamedCommands.registerCommand("FeederStation", m_coralSubsystem.setSetpointCommand(Setpoint.FeederStation));
-    NamedCommands.registerCommand("ElevatorLiftL1", m_coralSubsystem.setSetpointCommand(Setpoint.L1));
-    NamedCommands.registerCommand("ElevatorLiftL2", m_coralSubsystem.setSetpointCommand(Setpoint.L2));
-    NamedCommands.registerCommand("ElevatorLiftL3", m_coralSubsystem.setSetpointCommand(Setpoint.L3));
-    NamedCommands.registerCommand("ElevatorLiftL4", m_coralSubsystem.setSetpointCommand(Setpoint.L4));
-    NamedCommands.registerCommand("AlgaeLow", m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeLow));
-    NamedCommands.registerCommand("AlgaeHigh", m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeHigh));
+    NamedCommands.registerCommand("FeederStation", m_coralSubsystem.setSetpointCommand(Setpoint.FeederStation, false));
+    NamedCommands.registerCommand("ElevatorLiftL1", m_coralSubsystem.setSetpointCommand(Setpoint.L1, false));
+    NamedCommands.registerCommand("ElevatorLiftL2", m_coralSubsystem.setSetpointCommand(Setpoint.L2, false));
+    NamedCommands.registerCommand("ElevatorLiftL3", m_coralSubsystem.setSetpointCommand(Setpoint.L3, false));
+    NamedCommands.registerCommand("ElevatorLiftL4", m_coralSubsystem.setSetpointCommand(Setpoint.L4, false));
+    NamedCommands.registerCommand("AlgaeLow", m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeLow, false));
+    NamedCommands.registerCommand("AlgaeHigh", m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeHigh, false));
     NamedCommands.registerCommand("Gyroreset", new InstantCommand(() -> drivebase.setInitialHeading(180), drivebase));
     NamedCommands.registerCommand("Gyroreset1", new InstantCommand(() -> drivebase.setInitialHeading(0), drivebase));
     // NamedCommands.registerCommand("AlignR", new SequentialCommandGroup(
@@ -319,26 +319,26 @@ public class RobotContainer {
 
     // B Button -> Elevator/Arm to human player position, set ball intake to stow
     // when idle
-    operatorFeederStationTrigger.onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.FeederStation));
+    operatorFeederStationTrigger.onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.FeederStation, false));
     // A Button -> Elevator/Arm to level 1 position
-    operatorL1Trigger.onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.L1));
+    operatorL1Trigger.onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.L1, true));
 
     // B Button -> Elevator/Arm to level 2 position
-    operatorL2Trigger.onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.L2));
+    operatorL2Trigger.onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.L2, true));
 
     // X Button -> Elevator/Arm to level 3 position
-    operatorL3Trigger.onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.L3));
+    operatorL3Trigger.onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.L3, true));
 
     // Y Button -> Elevator/Arm to level 4 position
-    operatorL4Trigger.onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.L4));
+    operatorL4Trigger.onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.L4, true));
 
     // D-Pad Up -> Elevator to 2st Algae pickup position
-    operatorAlgaeHighTrigger.onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeHigh));
+    operatorAlgaeHighTrigger.onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeHigh, false));
 
     // D-Pad Down -> Elevator to 1st Algae pickup position
-    operatorAlgaeLowTrigger.onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeLow));
+    operatorAlgaeLowTrigger.onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.AlgaeLow, false));
     // D-Pad Left -> Elevator to Barge position
-    operatorBargeTrigger.onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.Barge));
+    operatorBargeTrigger.onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.Barge, false));
 
     driverHeadingResetTrigger.onTrue(new InstantCommand(() -> drivebase.setInitialHeading(180), drivebase));
     // m_driverController.rightTrigger().whileTrue(this.ScoreUniversal());
