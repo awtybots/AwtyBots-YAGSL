@@ -152,6 +152,7 @@ public class LAlignToReefTagRelative extends Command {
             System.out.println("Auto align left finished");
             SmartDashboard.putBoolean("AutoAlignLeftComplete", true);
             completionReported = true;
+            LatPose = true; 
           }
         }
       } else {
