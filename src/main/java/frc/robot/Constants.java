@@ -202,9 +202,9 @@ public final class Constants {
   }
   // AutoAlign constants
   // Raise these gains if the chassis reacts slowly, lower if it oscillates or overshoots.
-  public static final double X_REEF_ALIGNMENT_P = 1.5; // Proportional gain for X-axis reef alignment
-  public static final double Y_REEF_ALIGNMENT_P = 2.1; // Proportional gain for Y-axis reef alignment (previously 1.74)
-  public static final double ROT_REEF_ALIGNMENT_P = 0.06; // Proportional gain for rotational reef alignment
+  public static final double X_REEF_ALIGNMENT_P = 2; // Proportional gain for X-axis reef alignment
+  public static final double Y_REEF_ALIGNMENT_P = 2.5; // Proportional gain for Y-axis reef alignment (previously 1.74)
+  public static final double ROT_REEF_ALIGNMENT_P = 0.07; // Proportional gain for rotational reef alignment
 
   // Shift these setpoints when the robot stops short, crashes the reef, or parks off-center.
   public static final double ROT_SETPOINT_REEF_ALIGNMENT = 0; // Desired robot heading when aligned to the reef
@@ -217,9 +217,9 @@ public final class Constants {
 
 
   // Extend this wait if brief vision dropouts abort alignment, shorten to bail sooner.
-  public static final double DONT_SEE_TAG_WAIT_TIME = 1; // Time to continue aligning after vision tag loss
-  public static final double POSE_VALIDATION_TIME = 0.12; // Duration a pose measurement must remain valid
-  public static final double POSE_LOSS_GRACE_PERIOD = 0.4; // Allowed vision dropout time before aborting alignment
+  public static final double DONT_SEE_TAG_WAIT_TIME = 0.4; // Time to continue aligning after vision tag loss
+  public static final double POSE_VALIDATION_TIME = 0.01; // Duration a pose measurement must remain valid
+  public static final double POSE_LOSS_GRACE_PERIOD = 0.2; // Allowed vision dropout time before aborting alignment
 
   // Dashboard throttling
   public static final boolean LIMIT_DASHBOARD_PERIODIC_UPDATES = true; // Enable throttling of dashboard updates

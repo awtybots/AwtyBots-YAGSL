@@ -26,6 +26,7 @@ import java.util.Map;
 
 import com.ctre.phoenix6.hardware.core.CoreCANcoder;
 import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveRequest.RobotCentric;
+import com.fasterxml.jackson.databind.util.Named;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
@@ -143,6 +144,10 @@ public class RobotContainer {
                 new InstantCommand(() -> drivebase.setInitialHeading(180), drivebase));
         NamedCommands.registerCommand("Gyroreset1",
                 new InstantCommand(() -> drivebase.setInitialHeading(0), drivebase));
+        NamedCommands.registerCommand("ComboScoring", Commands.sequence(
+            new RAlignToReefTagRelative(drivebase).onlyIf(m_coralSubsystem::isAtTarget),
+            this.scoreUniversal().withTimeout(0.3)
+                    .onlyIf(m_coralSubsystem::isAtTarget)));
         // NamedCommands.registerCommand("AlignR", new SequentialCommandGroup(
         // Commands.waitUntil(() -> m_EndE.isCoralEngaged()),
         // m_coralSubsystem.setSetpointCommand(Setpoint.L4),
@@ -326,15 +331,17 @@ public class RobotContainer {
         // m_driverController.leftBumper().whileTrue(new
         // LAlignToReefTagRelative(drivebase));
         // driverAlignRightTrigger.whileTrue(new RAlignToReefTagRelative(drivebase));
-        driverAlignLeftTrigger.whileTrue(new LAlignToReefTagRelative(drivebase));
-
+        driverAlignLeftTrigger.whileTrue(Commands.sequence(
+            new LAlignToReefTagRelative(drivebase).onlyIf(m_coralSubsystem::isAtTarget),
+            this.scoreUniversal().withTimeout(0.3)
+                    .onlyIf(m_coralSubsystem::isAtTarget)));
         driverOverrideTrigger.onTrue(Commands.runOnce(() -> m_coralSubsystem.setDriverOverrideActive(true)));
         driverOverrideTrigger.onFalse(Commands.runOnce(() -> m_coralSubsystem.setDriverOverrideActive(false)));
 
         driverAlignRightTrigger.whileTrue(Commands.sequence(
-                new RAlignToReefTagRelative(drivebase),
-                this.scoreUniversal().withTimeout(0.5)
-                        .onlyIf(() -> m_rAlignToReefTagRelative.RisAtPose() && m_coralSubsystem.isAtTarget())));
+                new RAlignToReefTagRelative(drivebase).onlyIf(m_coralSubsystem::isAtTarget),
+                this.scoreUniversal().withTimeout(0.3)
+                        .onlyIf(m_coralSubsystem::isAtTarget)));
     
         // B Button -> Elevator/Arm to human player position, set ball intake to stow
         // when idle
