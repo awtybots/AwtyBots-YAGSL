@@ -28,7 +28,11 @@ public class LAlignToReefTagRelative extends Command {
   private double lastPoseValidatedTimestamp = -1;
   private int dashboardLoopCounter = Math.max(0, Constants.DASHBOARD_UPDATE_PERIOD_CYCLES - 1);
   private boolean completionReported = false;
+  private boolean LatPose = false;  // <-- make it a field
 
+  public boolean isAtPose() {      // <-- getter for RobotContainer
+      return LatPose;
+  }
   private boolean shouldUpdateDashboard() {
     if (!Constants.LIMIT_DASHBOARD_PERIODIC_UPDATES || Constants.DASHBOARD_UPDATE_PERIOD_CYCLES <= 1) {
       return true;
@@ -175,6 +179,7 @@ public class LAlignToReefTagRelative extends Command {
       if (updateDashboard) {
         SmartDashboard.putNumber("xspeed", 0);
       }
+      
     }
 
     if (updateDashboard) {

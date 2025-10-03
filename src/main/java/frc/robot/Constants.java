@@ -160,6 +160,7 @@ public final class Constants {
     public static final double kReverse = .6; // Intake power to eject game pieces
     public static final double kHold = .25; // Intake power to retain a game piece
     public static final double kFastForward = -1; // Maximum intake power for rapid collection
+    public static final double kFastBackward = 1; // Maximum intake power for rapid ejection
   }
 
   public static final class SafetyConstants {

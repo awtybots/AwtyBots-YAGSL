@@ -44,8 +44,10 @@ public class CoralSubsystem extends SubsystemBase {
 
     // Variable use for tracking if the elevator was raised to L4
     public static boolean ElevatorAtL4;
-
-
+    private boolean SubsystemAtPos= false;
+    public boolean CheckPos() {      // <-- getter for RobotContainer
+        return SubsystemAtPos;
+    }
     public static boolean runFunnelIntake;
     private Setpoint lastSetpoint = Setpoint.FeederStation;
     private boolean checkTargetSetpointForAutoAlign = false;
@@ -149,7 +151,16 @@ public class CoralSubsystem extends SubsystemBase {
     
         l_armController.setReference(armCurrentTarget, ControlType.kMAXMotionPositionControl);
         wristController.setReference(wristCurrentTarget, ControlType.kMAXMotionPositionControl);
-        
+    
+        double elevatorPos = elevatorEncoder.getPosition();
+        double armPos = armEncoder.getPosition();
+        double WristPos = wristAbsoluteEncoder.getPosition();
+        if (elevatorCurrentTarget==elevatorPos && armCurrentTarget==armPos&&wristCurrentTarget==WristPos){
+            SubsystemAtPos=true;
+
+        }
+           
+
     }
 
     // public Command manualElevatorDown() {

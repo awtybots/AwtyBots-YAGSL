@@ -28,7 +28,11 @@ public class RAlignToReefTagRelative extends Command {
   private double lastPoseValidatedTimestamp = -1;
   private int dashboardLoopCounter = Math.max(0, Constants.DASHBOARD_UPDATE_PERIOD_CYCLES - 1);
   private boolean completionReported = false;
+  private boolean RatPose = false;  // <-- make it a field
 
+  public boolean RisAtPose() {      // <-- getter for RobotContainer
+      return RatPose;
+  }
   private boolean shouldUpdateDashboard() {
     if (!Constants.LIMIT_DASHBOARD_PERIODIC_UPDATES || Constants.DASHBOARD_UPDATE_PERIOD_CYCLES <= 1) {
       return true;
@@ -118,6 +122,7 @@ public class RAlignToReefTagRelative extends Command {
             System.out.println("Auto align right finished");
             SmartDashboard.putBoolean("AutoAlignRightComplete", true);
             completionReported = true;
+            RatPose = true; 
           }
         }
       } else {
