@@ -30,7 +30,7 @@ public class LAlignToReefTagRelative extends Command {
   private boolean completionReported = false;
   private boolean LatPose = false;  // <-- make it a field
 
-  public boolean isAtPose() {      // <-- getter for RobotContainer
+  public boolean LisAtPose() {      // <-- getter for RobotContainer
       return LatPose;
   }
   private boolean shouldUpdateDashboard() {
