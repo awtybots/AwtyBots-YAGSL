@@ -22,6 +22,7 @@ import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.ElevatorSetpoints;
 import frc.robot.Constants.IntakeSetpoints;
 import frc.robot.Constants.WristSetpoints;
+import frc.robot.Constants.CoralToleranceConstants;
 import frc.robot.util.ScoreSafetyManager;
 import au.grapplerobotics.LaserCan;
 
@@ -45,9 +46,6 @@ public class CoralSubsystem extends SubsystemBase {
     // Variable use for tracking if the elevator was raised to L4
     public static boolean ElevatorAtL4;
     private boolean SubsystemAtPos= false;
-    public boolean CheckPos() {      // <-- getter for RobotContainer
-        return SubsystemAtPos;
-    }
     public static boolean runFunnelIntake;
     private Setpoint lastSetpoint = Setpoint.FeederStation;
     private boolean checkTargetSetpointForAutoAlign = false;
@@ -154,13 +152,18 @@ public class CoralSubsystem extends SubsystemBase {
     
         double elevatorPos = elevatorEncoder.getPosition();
         double armPos = armEncoder.getPosition();
-        double WristPos = wristAbsoluteEncoder.getPosition();
-        if (elevatorCurrentTarget==elevatorPos && armCurrentTarget==armPos&&wristCurrentTarget==WristPos){
-            SubsystemAtPos=true;
+        double wristPos = wristAbsoluteEncoder.getPosition();
 
-        }
-           
+        boolean elevatorOnTarget = Math.abs(elevatorCurrentTarget - elevatorPos) < CoralToleranceConstants.ELEVATOR_TOLERANCE;
+        boolean armOnTarget = Math.abs(armCurrentTarget - armPos) < CoralToleranceConstants.ARM_TOLERANCE;
+        boolean wristOnTarget = Math.abs(wristCurrentTarget - wristPos) < CoralToleranceConstants.WRIST_TOLERANCE;
 
+        SubsystemAtPos = elevatorOnTarget && armOnTarget && wristOnTarget;
+    }
+
+    /** Returns true when elevator, arm, and wrist are each within their tolerance window. */
+    public boolean isAtTarget() {
+        return SubsystemAtPos;
     }
 
     // public Command manualElevatorDown() {
