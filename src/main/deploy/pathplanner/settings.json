@@ -8,10 +8,11 @@
     "test"
   ],
   "autoFolders": [
-    "VisionAuto",
-    "Red and Blue Comp"
+    "Works",
+    "Red and Blue Comp",
+    "VisionAuto"
   ],
-  "defaultMaxVel": 5.0,
+  "defaultMaxVel": 4.0,
   "defaultMaxAccel": 4.0,
   "defaultMaxAngVel": 180.0,
   "defaultMaxAngAccel": 360.0,

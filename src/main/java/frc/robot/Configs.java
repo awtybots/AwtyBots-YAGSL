@@ -80,16 +80,16 @@ public final class Configs {
                                         .p(0.6)
                                         .d(0.4)
                                         .outputRange(-1, 1).maxMotion
-                                        .maxVelocity(1400)
-                                        .maxAcceleration(1300)
+                                        .maxVelocity(2000)
+                                        .maxAcceleration(2000)
                                         .allowedClosedLoopError(.1);
 
                         l_armMotorConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder)
                                         .p(06)
                                         .d(.4)
                                         .outputRange(-1, 1).maxMotion
-                                        .maxVelocity(1400)
-                                        .maxAcceleration(1300)
+                                        .maxVelocity(2000)
+                                        .maxAcceleration(2000)
                                         .allowedClosedLoopError(.1);
 
                         // r_armMotorSlowConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(50).voltageCompensation(12);
@@ -122,8 +122,8 @@ public final class Configs {
                                         .p(0.4)
                                         .d(.1)
                                         .outputRange(-1, 1).maxMotion
-                                        .maxVelocity(7000)
-                                        .maxAcceleration(6000)
+                                        .maxVelocity(8000)
+                                        .maxAcceleration(8000)
                                         .allowedClosedLoopError(.5);
 
                         r_elevatorMotorConfig.closedLoop
@@ -131,8 +131,8 @@ public final class Configs {
                                         .p(0.4)
                                         .d(.1)
                                         .outputRange(-1, 1).maxMotion
-                                        .maxVelocity(7000)
-                                        .maxAcceleration(6000)
+                                        .maxVelocity(8000)
+                                        .maxAcceleration(8000)
                                         .allowedClosedLoopError(.5);
 
                         wristMotorConfig.idleMode(IdleMode.kCoast).smartCurrentLimit(50).voltageCompensation(12);

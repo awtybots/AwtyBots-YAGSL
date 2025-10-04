@@ -23,16 +23,10 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "AlignL1"
+                  "name": "ComboScoringL"
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "outtakefast"
           }
         },
         {
@@ -60,16 +54,10 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "AlignR"
+                  "name": "ComboScoringR"
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "outtakefast"
           }
         },
         {
@@ -97,7 +85,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "AlignL1"
+                  "name": "ComboScoringL"
                 }
               }
             ]

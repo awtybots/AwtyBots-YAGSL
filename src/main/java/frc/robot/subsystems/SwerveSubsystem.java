@@ -223,7 +223,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
    public Command backUpRobotCommand() {
     return new RunCommand(
-            () -> drive(new ChassisSpeeds(-0.3,0,0)), this);
+            () -> drive(new ChassisSpeeds(0.8,0,0)), this);
 }
 
   public void setInitialHeading(double angleDegrees) {
