@@ -5,6 +5,12 @@
     "data": {
       "commands": [
         {
+          "type": "path",
+          "data": {
+            "pathName": "New New New Path"
+          }
+        },
+        {
           "type": "named",
           "data": {
             "name": "ElevatorLiftL4"
@@ -14,6 +20,18 @@
           "type": "named",
           "data": {
             "name": "ComboScoring"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "back from l4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "FeederStation"
           }
         }
       ]

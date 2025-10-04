@@ -145,7 +145,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("Gyroreset1",
                 new InstantCommand(() -> drivebase.setInitialHeading(0), drivebase));
         NamedCommands.registerCommand("ComboScoring", Commands.sequence(
-            new RAlignToReefTagRelative(drivebase).onlyIf(m_coralSubsystem::isAtTarget),
+            new RAlignToReefTagRelative(drivebase),
             this.scoreUniversal().withTimeout(0.3)
                     .onlyIf(m_coralSubsystem::isAtTarget)));
         // NamedCommands.registerCommand("AlignR", new SequentialCommandGroup(

@@ -202,8 +202,8 @@ public final class Constants {
   }
   // AutoAlign constants
   // Raise these gains if the chassis reacts slowly, lower if it oscillates or overshoots.
-  public static final double X_REEF_ALIGNMENT_P = 2; // Proportional gain for X-axis reef alignment
-  public static final double Y_REEF_ALIGNMENT_P = 2.5; // Proportional gain for Y-axis reef alignment (previously 1.74)
+  public static final double X_REEF_ALIGNMENT_P = 1.9; // Proportional gain for X-axis reef alignment
+  public static final double Y_REEF_ALIGNMENT_P = 2.3; // Proportional gain for Y-axis reef alignment (previously 1.74)
   public static final double ROT_REEF_ALIGNMENT_P = 0.07; // Proportional gain for rotational reef alignment
 
   // Shift these setpoints when the robot stops short, crashes the reef, or parks off-center.
@@ -222,7 +222,7 @@ public final class Constants {
   public static final double POSE_LOSS_GRACE_PERIOD = 0.2; // Allowed vision dropout time before aborting alignment
 
   // Dashboard throttling
-  public static final boolean LIMIT_DASHBOARD_PERIODIC_UPDATES = true; // Enable throttling of dashboard updates
+  public static final boolean LIMIT_DASHBOARD_PERIODIC_UPDATES = false; // Enable throttling of dashboard updates
   public static final int DASHBOARD_UPDATE_PERIOD_CYCLES = 10; // Number of periodic loops between dashboard refreshes
 
   // public static final class LimelightConstants {
