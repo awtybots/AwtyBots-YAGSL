@@ -335,7 +335,9 @@ public class RobotContainer {
             Commands.waitUntil(m_coralSubsystem::isAtTarget),
             new LAlignToReefTagRelative(drivebase),
             this.scoreUniversal().withTimeout(0.3)
-                    .onlyIf(m_coralSubsystem::isAtTarget)));
+                    .onlyIf(m_coralSubsystem::isAtTarget),
+                    drivebase.backUpRobotCommand().withTimeout(1).andThen(drivebase.stopCommand()))
+                    );
         driverOverrideTrigger.onTrue(Commands.runOnce(() -> m_coralSubsystem.setDriverOverrideActive(true)));
         driverOverrideTrigger.onFalse(Commands.runOnce(() -> m_coralSubsystem.setDriverOverrideActive(false)));
 

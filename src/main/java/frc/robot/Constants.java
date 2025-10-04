@@ -164,7 +164,7 @@ public final class Constants {
   }
 
   public static final class CoralToleranceConstants {
-    public static final double ELEVATOR_TOLERANCE = 1.0; // Allowable elevator position error before declaring on target
+    public static final double ELEVATOR_TOLERANCE = 0.5; // Allowable elevator position error before declaring on target
     public static final double ARM_TOLERANCE = 0.5; // Allowable arm position error before declaring on target
     public static final double WRIST_TOLERANCE = 0.05; // Allowable wrist position error before declaring on target
   }

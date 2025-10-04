@@ -18,8 +18,11 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.Constants.ClimbSetPoints;
+
 import com.studica.frc.AHRS;
 import com.studica.frc.AHRS.NavXComType;
 import java.io.File;
@@ -218,6 +221,11 @@ public class SwerveSubsystem extends SubsystemBase {
     swerveDrive.drive(velocity);
   }
 
+   public Command backUpRobotCommand() {
+    return new RunCommand(
+            () -> drive(new ChassisSpeeds(-0.3,0,0)), this);
+}
+
   public void setInitialHeading(double angleDegrees) {
     gyro.setAngleAdjustment(angleDegrees);
     swerveDrive.resetOdometry(new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(angleDegrees)));
@@ -229,6 +237,12 @@ public class SwerveSubsystem extends SubsystemBase {
     swerveDrive.setModuleStates(
       swerveDrive.kinematics.toSwerveModuleStates(new ChassisSpeeds(0,0,0)), true
       );
+  }
+
+  public Command stopCommand() {
+    return this.runOnce(() -> {
+      stop();
+  });
   }
 
   /**
