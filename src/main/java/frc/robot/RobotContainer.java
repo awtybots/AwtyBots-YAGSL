@@ -332,14 +332,16 @@ public class RobotContainer {
         // LAlignToReefTagRelative(drivebase));
         // driverAlignRightTrigger.whileTrue(new RAlignToReefTagRelative(drivebase));
         driverAlignLeftTrigger.whileTrue(Commands.sequence(
-            new LAlignToReefTagRelative(drivebase).onlyIf(m_coralSubsystem::isAtTarget),
+            Commands.waitUntil(m_coralSubsystem::isAtTarget),
+            new LAlignToReefTagRelative(drivebase),
             this.scoreUniversal().withTimeout(0.3)
                     .onlyIf(m_coralSubsystem::isAtTarget)));
         driverOverrideTrigger.onTrue(Commands.runOnce(() -> m_coralSubsystem.setDriverOverrideActive(true)));
         driverOverrideTrigger.onFalse(Commands.runOnce(() -> m_coralSubsystem.setDriverOverrideActive(false)));
 
         driverAlignRightTrigger.whileTrue(Commands.sequence(
-                new RAlignToReefTagRelative(drivebase).onlyIf(m_coralSubsystem::isAtTarget),
+                Commands.waitUntil(m_coralSubsystem::isAtTarget),
+                new RAlignToReefTagRelative(drivebase),
                 this.scoreUniversal().withTimeout(0.3)
                         .onlyIf(m_coralSubsystem::isAtTarget)));
     
