@@ -134,7 +134,7 @@ public class RAlignToReefTagRelative extends Command {
             new Translation2d(
                 // If we jump forward before we are centered, increase the Y tolerance gate or
                 // lower this 0.03 safety creep.
-                yController.getError() < 0.3 ? xSpeed : 0.00,
+                yController.getError() < 0.6 ? xSpeed : 0.00,
                 ySpeed),
             rotValue,
             false);
