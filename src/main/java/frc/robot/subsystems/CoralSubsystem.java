@@ -210,6 +210,8 @@ public class CoralSubsystem extends SubsystemBase {
                         return;
                     }
 
+                    SubsystemAtPos = false;
+
                     // boolean isL4ToL3 = (lastSetpoint == Setpoint.L4 && setpoint == Setpoint.L3);
                     // boolean isL3ToL4 = (lastSetpoint == Setpoint.L3 && setpoint == Setpoint.L4);
                     // boolean isL2ToL4 = (lastSetpoint == Setpoint.L2 && setpoint == Setpoint.L4);
