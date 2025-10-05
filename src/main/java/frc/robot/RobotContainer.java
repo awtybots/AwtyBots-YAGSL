@@ -347,10 +347,10 @@ public class RobotContainer {
                 // driverAlignRightTrigger.whileTrue(new RAlignToReefTagRelative(drivebase));
                 driverAlignLeftTrigger.whileTrue(Commands.sequence(
                                 Commands.waitUntil(m_coralSubsystem::isAtTarget),
-                                new LAlignToReefTagRelative(drivebase),
+                                new LAlignToReefTagRelative(drivebase).andThen(
                                 this.scoreUniversal().withTimeout(0.3)
-                                                .onlyIf(m_coralSubsystem::isAtTarget),
-                                Commands.waitSeconds(0.5),
+                                                ),
+                                Commands.waitSeconds(0.2),
                                 drivebase.backUpRobotCommand().withTimeout(0.9).andThen(drivebase.stopCommand(),
                                                 m_coralSubsystem.setSetpointCommand(Setpoint.FeederStation, false))));
                 driverOverrideTrigger.onTrue(Commands.runOnce(() -> m_coralSubsystem.setDriverOverrideActive(true)));
@@ -358,10 +358,10 @@ public class RobotContainer {
 
                 driverAlignRightTrigger.whileTrue(Commands.sequence(
                                 Commands.waitUntil(m_coralSubsystem::isAtTarget),
-                                new RAlignToReefTagRelative(drivebase),
+                                new RAlignToReefTagRelative(drivebase).andThen(
                                 this.scoreUniversal().withTimeout(0.3)
-                                                .onlyIf(m_coralSubsystem::isAtTarget),
-                                Commands.waitSeconds(0.5),
+                                               ),
+                                Commands.waitSeconds(0.2),
                                 drivebase.backUpRobotCommand().withTimeout(0.9).andThen(drivebase.stopCommand(),
                                                 m_coralSubsystem.setSetpointCommand(Setpoint.FeederStation, false))));
 
