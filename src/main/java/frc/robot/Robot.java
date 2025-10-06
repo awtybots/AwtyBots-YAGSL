@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import au.grapplerobotics.CanBridge;
 import au.grapplerobotics.LaserCan;
 import au.grapplerobotics.ConfigurationFailedException;
-
+import frc.robot.LimelightHelpers;
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
  * the TimedRobot documentation. If you change the name of this class or the package after creating
@@ -54,10 +54,14 @@ public class Robot extends TimedRobot {
 
   /** This function is called once each time the robot enters Disabled mode. */
   @Override
-  public void disabledInit() {}
-
+  public void disabledInit() {
+    LimelightHelpers.SetThrottle("limelight-left", 150);
+  }
+  
   @Override
-  public void disabledPeriodic() {}
+  public void disabledPeriodic() {
+    
+  }
 
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
@@ -69,6 +73,7 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
+    LimelightHelpers.SetThrottle("limelight-left", 0);
   }
 
   /** This function is called periodically during autonomous. */
@@ -84,6 +89,7 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
+    LimelightHelpers.SetThrottle("limelight-left", 0);
   }
 
   /** This function is called periodically during operator control. */
@@ -94,6 +100,7 @@ public class Robot extends TimedRobot {
   public void testInit() {
     // Cancels all running commands at the start of test mode.
     CommandScheduler.getInstance().cancelAll();
+    LimelightHelpers.SetThrottle("limelight-left", 0);
   }
 
   /** This function is called periodically during test mode. */
@@ -102,7 +109,9 @@ public class Robot extends TimedRobot {
 
   /** This function is called once when the robot is first started up. */
   @Override
-  public void simulationInit() {}
+  public void simulationInit() {
+    
+  }
 
   /** This function is called periodically whilst in simulation. */
   @Override
