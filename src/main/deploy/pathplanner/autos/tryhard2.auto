@@ -92,12 +92,6 @@
           }
         },
         {
-          "type": "named",
-          "data": {
-            "name": "outtakefast"
-          }
-        },
-        {
           "type": "path",
           "data": {
             "pathName": "Path6"

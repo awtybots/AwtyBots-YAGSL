@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import frc.robot.commands.AutonLAlignToReefTagRelative;
+import frc.robot.commands.AutonRAlignToReefTagRelative;
 import frc.robot.commands.LAlignToReefTagRelative;
 import frc.robot.commands.RAlignToReefTagRelative;
 import frc.robot.Constants.IntakeSetpoints;
@@ -152,13 +154,13 @@ public class RobotContainer {
                 NamedCommands.registerCommand("Gyroreset1",
                                 new InstantCommand(() -> drivebase.setInitialHeading(0), drivebase));
                 NamedCommands.registerCommand("ComboScoringR", Commands.sequence(
-                                new RAlignToReefTagRelative(drivebase),Commands.waitSeconds(0.5),
+                                new AutonRAlignToReefTagRelative(drivebase),Commands.waitSeconds(0.2),
                                 this.scoreUniversal().withTimeout(0.3)
-                                                .onlyIf(m_coralSubsystem::isAtTarget)));
+                                                ));
                 NamedCommands.registerCommand("ComboScoringL", Commands.sequence(
-                                new LAlignToReefTagRelative(drivebase),Commands.waitSeconds(0.5),
+                                new AutonLAlignToReefTagRelative(drivebase),Commands.waitSeconds(0.2),
                                 this.scoreUniversal().withTimeout(0.3)
-                                                .onlyIf(m_coralSubsystem::isAtTarget)));
+                                               ));
                 // NamedCommands.registerCommand("AlignR", new SequentialCommandGroup(
                 // Commands.waitUntil(() -> m_EndE.isCoralEngaged()),
                 // m_coralSubsystem.setSetpointCommand(Setpoint.L4),
@@ -346,7 +348,7 @@ public class RobotContainer {
                 // LAlignToReefTagRelative(drivebase));
                 // driverAlignRightTrigger.whileTrue(new RAlignToReefTagRelative(drivebase));
                 driverAlignLeftTrigger.whileTrue(Commands.sequence(
-                                Commands.waitUntil(m_coralSubsystem::isAtTarget),
+                               
                                 new LAlignToReefTagRelative(drivebase).andThen(
                                 this.scoreUniversal().withTimeout(0.3)
                                                 ),
@@ -357,7 +359,7 @@ public class RobotContainer {
                 driverOverrideTrigger.onFalse(Commands.runOnce(() -> m_coralSubsystem.setDriverOverrideActive(false)));
 
                 driverAlignRightTrigger.whileTrue(Commands.sequence(
-                                Commands.waitUntil(m_coralSubsystem::isAtTarget),
+                                
                                 new RAlignToReefTagRelative(drivebase).andThen(
                                 this.scoreUniversal().withTimeout(0.3)
                                                ),

@@ -218,7 +218,7 @@ public final class Constants {
 
   // Extend this wait if brief vision dropouts abort alignment, shorten to bail sooner.
   public static final double DONT_SEE_TAG_WAIT_TIME = 0.4; // Time to continue aligning after vision tag loss
-  public static final double POSE_VALIDATION_TIME = 0.01; // Duration a pose measurement must remain valid
+  public static final double POSE_VALIDATION_TIME = 0.07; // Duration a pose measurement must remain valid
   public static final double POSE_LOSS_GRACE_PERIOD = 0.2; // Allowed vision dropout time before aborting alignment
 
   // Dashboard throttling

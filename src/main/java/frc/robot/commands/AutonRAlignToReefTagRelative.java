@@ -19,7 +19,7 @@ import frc.robot.subsystems.CoralSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.util.ScoreSafetyManager;
 
-public class RAlignToReefTagRelative extends Command {
+public class AutonRAlignToReefTagRelative extends Command {
   private PIDController xController, yController, rotController;
   private ProfiledPIDController rotControllerProfiled;
   // private boolean isRightScore;
@@ -46,7 +46,7 @@ public class RAlignToReefTagRelative extends Command {
     return false;
   }
 
-  public RAlignToReefTagRelative(SwerveSubsystem drivebase) {
+  public AutonRAlignToReefTagRelative(SwerveSubsystem drivebase) {
     // Forward/back: raise this gain if the robot crawls toward the reef, lower if
     // it rockets past.
     xController = new PIDController(Constants.X_REEF_ALIGNMENT_P, 0.0, 0);
@@ -135,7 +135,7 @@ public class RAlignToReefTagRelative extends Command {
             new Translation2d(
                 // If we jump forward before we are centered, increase the Y tolerance gate or
                 // lower this 0.03 safety creep.
-                yController.getError() < 0.6 && CoralSubsystem.isAtTarget() ? xSpeed : 0.00,
+                yController.getError() < 0.6  ? xSpeed : 0.00,
                 ySpeed),
             rotValue,
             false);
