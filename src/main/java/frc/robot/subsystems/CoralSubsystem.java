@@ -45,7 +45,7 @@ public class CoralSubsystem extends SubsystemBase {
 
     // Variable use for tracking if the elevator was raised to L4
     public static boolean ElevatorAtL4;
-    private boolean SubsystemAtPos= false;
+    private static boolean SubsystemAtPos= false;
     public static boolean runFunnelIntake;
     private Setpoint lastSetpoint = Setpoint.FeederStation;
     private boolean checkTargetSetpointForAutoAlign = false;
@@ -162,7 +162,7 @@ public class CoralSubsystem extends SubsystemBase {
     }
 
     /** Returns true when elevator, arm, and wrist are each within their tolerance window. */
-    public boolean isAtTarget() {
+    public static boolean isAtTarget() {
         return SubsystemAtPos;
     }
 
