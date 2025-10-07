@@ -22,7 +22,6 @@ import frc.robot.Robot;
 
 public class EndE extends SubsystemBase {
     private LaserCan lc = new LaserCan(29);
-    LaserCan.Measurement measurement = lc.getMeasurement();
     // intake setup
     private SparkFlex intakeMotor = new SparkFlex(ArmConstants.IntakeCanID, MotorType.kBrushless);
     private boolean CoralEngaged = false;
@@ -35,7 +34,10 @@ public class EndE extends SubsystemBase {
     }
 
     public boolean isCoralEngaged() {
-        return lc.getMeasurement().distance_mm <= 30;
+        Measurement measurement = lc.getMeasurement();
+        return measurement != null
+                && measurement.status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT
+                && measurement.distance_mm <= 30;
     }
 
     public void periodic() {
