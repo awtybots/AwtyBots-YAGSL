@@ -17,8 +17,7 @@ import frc.robot.subsystems.CoralSubsystem.Setpoint;
 import frc.robot.subsystems.FunnelIntake;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.SwerveSubsystem;
-import frc.robot.commands.RAlignToReefTagRelative;
-import frc.robot.commands.LAlignToReefTagRelative;
+
 import swervelib.SwerveInputStream;
 // import frc.robot.subsystems.Algae;
 // import frc.robot.subsystems.AlgaeArmSubsystem;
@@ -35,6 +34,7 @@ import com.pathplanner.lib.commands.PathPlannerAuto;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -154,13 +154,11 @@ public class RobotContainer {
                 NamedCommands.registerCommand("Gyroreset1",
                                 new InstantCommand(() -> drivebase.setInitialHeading(0), drivebase));
                 NamedCommands.registerCommand("ComboScoringR", Commands.sequence(
-                                new AutonRAlignToReefTagRelative(drivebase),Commands.waitSeconds(0.2),
-                                this.scoreUniversal().withTimeout(0.3)
-                                                ));
+                                new AutonRAlignToReefTagRelative(drivebase), Commands.waitSeconds(0.2),
+                                this.scoreUniversal().withTimeout(0.3)));
                 NamedCommands.registerCommand("ComboScoringL", Commands.sequence(
-                                new AutonLAlignToReefTagRelative(drivebase),Commands.waitSeconds(0.2),
-                                this.scoreUniversal().withTimeout(0.3)
-                                               ));
+                                new AutonLAlignToReefTagRelative(drivebase), Commands.waitSeconds(0.2),
+                                this.scoreUniversal().withTimeout(0.3)));
                 // NamedCommands.registerCommand("AlignR", new SequentialCommandGroup(
                 // Commands.waitUntil(() -> m_EndE.isCoralEngaged()),
                 // m_coralSubsystem.setSetpointCommand(Setpoint.L4),
@@ -348,10 +346,9 @@ public class RobotContainer {
                 // LAlignToReefTagRelative(drivebase));
                 // driverAlignRightTrigger.whileTrue(new RAlignToReefTagRelative(drivebase));
                 driverAlignLeftTrigger.whileTrue(Commands.sequence(
-                               
+
                                 new LAlignToReefTagRelative(drivebase).andThen(
-                                this.scoreUniversal().withTimeout(0.3)
-                                                ),
+                                                this.scoreUniversal().withTimeout(0.3)),
                                 Commands.waitSeconds(0.2),
                                 drivebase.backUpRobotCommand().withTimeout(0.9).andThen(drivebase.stopCommand(),
                                                 m_coralSubsystem.setSetpointCommand(Setpoint.FeederStation, false))));
@@ -359,10 +356,9 @@ public class RobotContainer {
                 driverOverrideTrigger.onFalse(Commands.runOnce(() -> m_coralSubsystem.setDriverOverrideActive(false)));
 
                 driverAlignRightTrigger.whileTrue(Commands.sequence(
-                                
+
                                 new RAlignToReefTagRelative(drivebase).andThen(
-                                this.scoreUniversal().withTimeout(0.3)
-                                               ),
+                                                this.scoreUniversal().withTimeout(0.3)),
                                 Commands.waitSeconds(0.2),
                                 drivebase.backUpRobotCommand().withTimeout(0.9).andThen(drivebase.stopCommand(),
                                                 m_coralSubsystem.setSetpointCommand(Setpoint.FeederStation, false))));
@@ -403,6 +399,14 @@ public class RobotContainer {
                 // lost/regained.
                 coralDetectedTrigger.onTrue(Commands.runOnce(() -> hasLostContact = false));
                 coralLostTrigger.debounce(0.1).onTrue(Commands.runOnce(() -> hasLostContact = true));
+                coralDetectedTrigger.onTrue(Commands.runOnce(() -> {
+                        m_driverController.setRumble(RumbleType.kBothRumble, 1.0);
+                        m_operatorController.setRumble(RumbleType.kBothRumble, 1.0);
+                }).andThen(Commands.waitSeconds(0.5))
+                                .andThen(Commands.runOnce(() -> {
+                                        m_driverController.setRumble(RumbleType.kBothRumble, 0.0);
+                                        m_operatorController.setRumble(RumbleType.kBothRumble, 0.0);
+                                })));
 
                 // Resets all encoders
                 // m_operatorController.start().onTrue(m_coralSubsystem.resetAllEncoders());
