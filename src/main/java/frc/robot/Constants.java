@@ -97,8 +97,8 @@ public final class Constants {
     public static final int L2 = 47; // Elevator position for level 2 coral scoring
     public static final int AlgaeHigh = 42; // Elevator position for high algae removal
     public static final int L3 = 0 ; // Elevator position placeholder for level 3 coral scoring
-    public static final int L4 = 72; // Elevator position for level 4 coral scoring
-    public static final int Barge = 72; // Elevator position for barge scoring
+    public static final int L4 = 73; // Elevator position for level 4 coral scoring
+    public static final int Barge = 73; // Elevator position for barge scoring
   }
 
   public static final class ArmSetpoints{
@@ -127,8 +127,8 @@ public final class Constants {
     public static final double L2 = .5; // Wrist angle for level 2 coral scoring
     public static final double AlgaeHigh = .27; // Wrist angle for removing high algae
     public static final double L3 = .66; // Wrist angle for level 3 coral scoring
-    public static final double L4 = .61; // Wrist angle for level 4 coral scoring
-    public static final double Barge = .9; // Wrist angle for barge scoring
+    public static final double L4 = .67; // Wrist angle for level 4 coral scoring
+    public static final double Barge = .8; // Wrist angle for barge scoring
   }
 
   public static final class FunnelWristSetpoints{

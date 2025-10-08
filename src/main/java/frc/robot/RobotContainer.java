@@ -154,11 +154,11 @@ public class RobotContainer {
                 NamedCommands.registerCommand("Gyroreset1",
                                 new InstantCommand(() -> drivebase.setInitialHeading(0), drivebase));
                 NamedCommands.registerCommand("ComboScoringR", Commands.sequence(
-                                new AutonRAlignToReefTagRelative(drivebase), Commands.waitSeconds(0.2),
-                                this.scoreUniversal().withTimeout(0.3)));
+                                new AutonRAlignToReefTagRelative(drivebase).andThen(this.scoreUniversal().withTimeout(0.3))
+                                ));
                 NamedCommands.registerCommand("ComboScoringL", Commands.sequence(
-                                new AutonLAlignToReefTagRelative(drivebase), Commands.waitSeconds(0.2),
-                                this.scoreUniversal().withTimeout(0.3)));
+                                new AutonLAlignToReefTagRelative(drivebase).andThen(this.scoreUniversal().withTimeout(0.3))
+                                ));
                 // NamedCommands.registerCommand("AlignR", new SequentialCommandGroup(
                 // Commands.waitUntil(() -> m_EndE.isCoralEngaged()),
                 // m_coralSubsystem.setSetpointCommand(Setpoint.L4),
@@ -345,7 +345,7 @@ public class RobotContainer {
                 // m_driverController.leftBumper().whileTrue(new
                 // LAlignToReefTagRelative(drivebase));
                 // driverAlignRightTrigger.whileTrue(new RAlignToReefTagRelative(drivebase));
-                driverAlignLeftTrigger.whileTrue(Commands.sequence(
+                driverAlignLeftTrigger.whileTrue(Commands.sequence(Commands.waitUntil(() -> LimelightHelpers.getTV("limelight-right")),
 
                                 new LAlignToReefTagRelative(drivebase).andThen(
                                                 this.scoreUniversal().withTimeout(0.3)),
@@ -355,7 +355,7 @@ public class RobotContainer {
                 driverOverrideTrigger.onTrue(Commands.runOnce(() -> m_coralSubsystem.setDriverOverrideActive(true)));
                 driverOverrideTrigger.onFalse(Commands.runOnce(() -> m_coralSubsystem.setDriverOverrideActive(false)));
 
-                driverAlignRightTrigger.whileTrue(Commands.sequence(
+                driverAlignRightTrigger.whileTrue(Commands.sequence(Commands.waitUntil(() -> LimelightHelpers.getTV("limelight-left")),
 
                                 new RAlignToReefTagRelative(drivebase).andThen(
                                                 this.scoreUniversal().withTimeout(0.3)),

@@ -30,15 +30,22 @@
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "Path2"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "outtakeLD"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Path2"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "outtakeLD"
+                }
+              }
+            ]
           }
         },
         {
@@ -61,15 +68,22 @@
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "Path4"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "outtakeLD"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Path4"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "outtakeLD"
+                }
+              }
+            ]
           }
         },
         {
@@ -92,15 +106,22 @@
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "Path6"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "outtakeLD"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Path6"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "outtakeLD"
+                }
+              }
+            ]
           }
         }
       ]

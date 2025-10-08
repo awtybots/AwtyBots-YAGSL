@@ -140,7 +140,7 @@ public class LAlignToReefTagRelative extends Command {
     if (LimelightHelpers.getTV("limelight-right")
         && LimelightHelpers.getFiducialID("limelight-right") == tagID) {
       this.dontSeeTagTimer.reset();
-
+      SmartDashboard.putBoolean("LeftAlignReady", true);
       double[] postions = LimelightHelpers.getBotPose_TargetSpace("limelight-right");
 
       double xSpeed = -xController.calculate(postions[2]);
@@ -167,7 +167,7 @@ public class LAlignToReefTagRelative extends Command {
             new Translation2d(
                 // If we jump forward before we are centered, increase the Y tolerance gate or
                 // lower this 0.03 safety creep.
-                yController.getError() < 0.6 && CoralSubsystem.isAtTarget() ? xSpeed : 0.00,
+                yController.getError() < 1 && CoralSubsystem.isAtTarget() ? xSpeed : 0.00,
                 ySpeed),
             rotValue,
             false);
@@ -183,6 +183,7 @@ public class LAlignToReefTagRelative extends Command {
       // 0,
       // false);
       drivebase.stop();
+      SmartDashboard.putBoolean("AutoAlignLeftComplete", false);
       if (updateDashboard) {
         SmartDashboard.putNumber("xspeed", 0);
       }

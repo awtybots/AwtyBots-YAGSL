@@ -78,17 +78,17 @@ public final class Configs {
 
                         r_armMotorConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder)
                                         .p(0.6)
-                                        .d(0.4)
+                                        .d(0.5)
                                         .outputRange(-1, 1).maxMotion
-                                        .maxVelocity(2000)
+                                        .maxVelocity(2200)
                                         .maxAcceleration(2000)
                                         .allowedClosedLoopError(.1);
 
                         l_armMotorConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder)
                                         .p(0.6)
-                                        .d(0.4)
+                                        .d(0.5)
                                         .outputRange(-1, 1).maxMotion
-                                        .maxVelocity(2000)
+                                        .maxVelocity(2200)
                                         .maxAcceleration(2000)
                                         .allowedClosedLoopError(.1);
 
@@ -119,8 +119,8 @@ public final class Configs {
 
                         l_elevatorMotorConfig.closedLoop
                                         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-                                        .p(0.4)
-                                        .d(.1)
+                                        .p(0.3)
+                                        .d(.6)
                                         .outputRange(-1, 1).maxMotion
                                         .maxVelocity(8000)
                                         .maxAcceleration(8000)
@@ -128,8 +128,8 @@ public final class Configs {
 
                         r_elevatorMotorConfig.closedLoop
                                         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-                                        .p(0.4)
-                                        .d(.1)
+                                        .p(0.3)
+                                        .d(.6)
                                         .outputRange(-1, 1).maxMotion
                                         .maxVelocity(8000)
                                         .maxAcceleration(8000)
