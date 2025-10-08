@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import frc.robot.LimelightHelpers;
 import frc.robot.commands.LAlignToReefTagRelative;
 import frc.robot.commands.RAlignToReefTagRelative;
 import frc.robot.Constants.IntakeSetpoints;
@@ -15,8 +16,6 @@ import frc.robot.subsystems.CoralSubsystem.Setpoint;
 import frc.robot.subsystems.FunnelIntake;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.SwerveSubsystem;
-import frc.robot.commands.RAlignToReefTagRelative;
-import frc.robot.commands.LAlignToReefTagRelative;
 import swervelib.SwerveInputStream;
 // import frc.robot.subsystems.Algae;
 // import frc.robot.subsystems.AlgaeArmSubsystem;
@@ -152,11 +151,11 @@ public class RobotContainer {
                 NamedCommands.registerCommand("Gyroreset1",
                                 new InstantCommand(() -> drivebase.setInitialHeading(0), drivebase));
                 NamedCommands.registerCommand("ComboScoringR", Commands.sequence(
-                                new RAlignToReefTagRelative(drivebase),Commands.waitSeconds(0.5),
+                                new RAlignToReefTagRelative(drivebase), Commands.waitSeconds(0.5),
                                 this.scoreUniversal().withTimeout(0.3)
                                                 .onlyIf(m_coralSubsystem::isAtTarget)));
                 NamedCommands.registerCommand("ComboScoringL", Commands.sequence(
-                                new LAlignToReefTagRelative(drivebase),Commands.waitSeconds(0.5),
+                                new LAlignToReefTagRelative(drivebase), Commands.waitSeconds(0.5),
                                 this.scoreUniversal().withTimeout(0.3)
                                                 .onlyIf(m_coralSubsystem::isAtTarget)));
                 // NamedCommands.registerCommand("AlignR", new SequentialCommandGroup(
@@ -346,10 +345,11 @@ public class RobotContainer {
                 // LAlignToReefTagRelative(drivebase));
                 // driverAlignRightTrigger.whileTrue(new RAlignToReefTagRelative(drivebase));
                 driverAlignLeftTrigger.whileTrue(Commands.sequence(
+                                Commands.waitUntil(() -> LimelightHelpers.getTV("limelight-right")
+                                                && LimelightHelpers.getFiducialID("limelight-right") > 0),
                                 Commands.waitUntil(m_coralSubsystem::isAtTarget),
-                                new LAlignToReefTagRelative(drivebase).andThen(
-                                this.scoreUniversal().withTimeout(0.3)
-                                                ),
+                                new LAlignToReefTagRelative(drivebase)
+                                                .andThen(this.scoreUniversal().withTimeout(0.3)),
                                 Commands.waitSeconds(0.2),
                                 drivebase.backUpRobotCommand().withTimeout(0.9).andThen(drivebase.stopCommand(),
                                                 m_coralSubsystem.setSetpointCommand(Setpoint.FeederStation, false))));
@@ -357,10 +357,11 @@ public class RobotContainer {
                 driverOverrideTrigger.onFalse(Commands.runOnce(() -> m_coralSubsystem.setDriverOverrideActive(false)));
 
                 driverAlignRightTrigger.whileTrue(Commands.sequence(
+                                Commands.waitUntil(() -> LimelightHelpers.getTV("limelight-left")
+                                                && LimelightHelpers.getFiducialID("limelight-left") > 0),
                                 Commands.waitUntil(m_coralSubsystem::isAtTarget),
-                                new RAlignToReefTagRelative(drivebase).andThen(
-                                this.scoreUniversal().withTimeout(0.3)
-                                               ),
+                                new RAlignToReefTagRelative(drivebase)
+                                                .andThen(this.scoreUniversal().withTimeout(0.3)),
                                 Commands.waitSeconds(0.2),
                                 drivebase.backUpRobotCommand().withTimeout(0.9).andThen(drivebase.stopCommand(),
                                                 m_coralSubsystem.setSetpointCommand(Setpoint.FeederStation, false))));
