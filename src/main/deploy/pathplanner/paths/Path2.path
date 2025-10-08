@@ -60,7 +60,7 @@
   "folder": "VisionPath",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -59.03624346792645
+    "rotation": -59.99999999999999
   },
   "useDefaultConstraints": true
 }

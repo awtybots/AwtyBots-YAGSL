@@ -22,6 +22,7 @@ import frc.robot.Robot;
 
 public class EndE extends SubsystemBase {
     private LaserCan lc = new LaserCan(29);
+    // LaserCan.Measurement measurement = lc.getMeasurement();
     // intake setup
     private SparkFlex intakeMotor = new SparkFlex(ArmConstants.IntakeCanID, MotorType.kBrushless);
     private boolean CoralEngaged = false;

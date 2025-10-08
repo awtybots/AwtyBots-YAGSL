@@ -85,8 +85,8 @@ public final class Configs {
                                         .allowedClosedLoopError(.1);
 
                         l_armMotorConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-                                        .p(06)
-                                        .d(.4)
+                                        .p(0.6)
+                                        .d(0.4)
                                         .outputRange(-1, 1).maxMotion
                                         .maxVelocity(2000)
                                         .maxAcceleration(2000)
