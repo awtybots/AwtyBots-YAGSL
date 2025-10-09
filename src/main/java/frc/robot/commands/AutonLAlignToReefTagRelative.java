@@ -143,7 +143,16 @@ public class AutonLAlignToReefTagRelative extends Command {
 
       double[] postions = LimelightHelpers.getBotPose_TargetSpace("limelight-right");
 
-      double xSpeed = -xController.calculate(postions[2]);
+      double xDistanceFromReef = postions[2];
+      double xSpeed;
+      if (Constants.USE_AUTO_ALIGNMENT_FAST_APPROACH
+          && Math.abs(xDistanceFromReef) > Constants.AUTO_ALIGNMENT_FAST_APPROACH_DISTANCE_METERS) {
+        // Run at our configured max approach velocity when far from the reef
+        xSpeed = Math.copySign(Constants.AUTO_ALIGNMENT_FAST_APPROACH_SPEED, -xDistanceFromReef);
+      } else {
+        xSpeed = -xController.calculate(xDistanceFromReef);
+      }
+
       double ySpeed = yController.calculate(postions[0]);
       double rotValue = rotController.calculate(postions[4]);
 
