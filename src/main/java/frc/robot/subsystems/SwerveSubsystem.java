@@ -59,6 +59,7 @@ public class SwerveSubsystem extends SubsystemBase {
     }
     return false;
   }
+
   public SwerveSubsystem(File directory) {
     try {
       swerveDrive = new SwerveParser(directory)
@@ -76,11 +77,10 @@ public class SwerveSubsystem extends SubsystemBase {
 
     setupPathPlanner();
     poseEstimator = new SwerveDrivePoseEstimator(
-      getKinematics(), 
-      Rotation2d.fromDegrees(getGyroYaw()), 
-      swerveDrive.getModulePositions(), 
-      new Pose2d(0.0,0.0, new Rotation2d())
-      );
+        getKinematics(),
+        Rotation2d.fromDegrees(getGyroYaw()),
+        swerveDrive.getModulePositions(),
+        new Pose2d(0.0, 0.0, new Rotation2d()));
   }
 
   public SwerveDrive getSwerveDrive() {
@@ -116,16 +116,14 @@ public class SwerveSubsystem extends SubsystemBase {
     Rotation2d correctionHeading = Rotation2d.fromDegrees(getGyroYaw() - fieldOrientedOffset + headingBias);
 
     Pose2d biasedPose = new Pose2d(
-      initialHolonomicPose.getTranslation(),
-      correctionHeading
-    );
+        initialHolonomicPose.getTranslation(),
+        correctionHeading);
 
     swerveDrive.resetOdometry(biasedPose);
     poseEstimator.resetPosition(
-      correctionHeading,
-      swerveDrive.getModulePositions(),
-      biasedPose
-    );
+        correctionHeading,
+        swerveDrive.getModulePositions(),
+        biasedPose);
     System.out.println("Odometry Reset to: " + biasedPose);
   }
 
@@ -153,10 +151,9 @@ public class SwerveSubsystem extends SubsystemBase {
             double flippedOmega = -speedsRobotRelative.omegaRadiansPerSecond;
 
             ChassisSpeeds correctedSpeeds = new ChassisSpeeds(
-              speedsRobotRelative.vxMetersPerSecond,
-              speedsRobotRelative.vyMetersPerSecond,
-              flippedOmega
-            );
+                speedsRobotRelative.vxMetersPerSecond,
+                speedsRobotRelative.vyMetersPerSecond,
+                flippedOmega);
 
             if (enableFeedforward) {
               swerveDrive.drive(
@@ -221,10 +218,10 @@ public class SwerveSubsystem extends SubsystemBase {
     swerveDrive.drive(velocity);
   }
 
-   public Command backUpRobotCommand() {
+  public Command backUpRobotCommand() {
     return new RunCommand(
-            () -> drive(new ChassisSpeeds(0.8,0,0)), this);
-}
+        () -> drive(new ChassisSpeeds(0.9, 0, 0)), this);
+  }
 
   public void setInitialHeading(double angleDegrees) {
     gyro.setAngleAdjustment(angleDegrees);
@@ -232,17 +229,16 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   public void stop() {
-    drive(new ChassisSpeeds(0,0,0));
+    drive(new ChassisSpeeds(0, 0, 0));
 
     swerveDrive.setModuleStates(
-      swerveDrive.kinematics.toSwerveModuleStates(new ChassisSpeeds(0,0,0)), true
-      );
+        swerveDrive.kinematics.toSwerveModuleStates(new ChassisSpeeds(0, 0, 0)), true);
   }
 
   public Command stopCommand() {
     return this.runOnce(() -> {
       stop();
-  });
+    });
   }
 
   /**
@@ -257,18 +253,19 @@ public class SwerveSubsystem extends SubsystemBase {
   public Pose2d getPose() {
     Pose2d rawPose = swerveDrive.getPose();
     Pose2d baisedPose = new Pose2d(
-      rawPose.getTranslation(),
-      rawPose.getRotation().plus(Rotation2d.fromDegrees(headingBias))
-    );
-    //return swerveDrive.getPose();
+        rawPose.getTranslation(),
+        rawPose.getRotation().plus(Rotation2d.fromDegrees(headingBias)));
+    // return swerveDrive.getPose();
     return baisedPose;
   }
+
   public void drive(Translation2d translation, double rotation, boolean fieldRelative) {
     swerveDrive.drive(translation,
         rotation,
         fieldRelative,
         false); // Open loop is disabled since it shouldn't be used most of the time.
   }
+
   public Command zeroHeadingCommand() {
     return this.runOnce(() -> gyro.reset());
   }
@@ -293,9 +290,8 @@ public class SwerveSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     poseEstimator.update(
-      Rotation2d.fromDegrees(getGyroYaw()),
-      swerveDrive.getModulePositions() 
-      );
+        Rotation2d.fromDegrees(getGyroYaw()),
+        swerveDrive.getModulePositions());
 
     ScoreSafetyManager.updateWithCurrentPose(getPose());
 
