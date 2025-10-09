@@ -346,7 +346,8 @@ public class RobotContainer {
                 // driverAlignRightTrigger.whileTrue(new RAlignToReefTagRelative(drivebase));
                 driverAlignLeftTrigger.whileTrue(Commands.sequence(
                                 Commands.waitUntil(() -> LimelightHelpers.getTV("limelight-right")
-                                                && LimelightHelpers.getFiducialID("limelight-right") > 0),
+                                                && LimelightHelpers.getFiducialID("limelight-right") > 0
+                                                && m_coralSubsystem.isReady()),
                                 new LAlignToReefTagRelative(drivebase).andThen(
                                                 this.scoreUniversal().withTimeout(0.3)),
                                 Commands.waitSeconds(0.2),
@@ -357,7 +358,8 @@ public class RobotContainer {
 
                 driverAlignRightTrigger.whileTrue(Commands.sequence(
                                 Commands.waitUntil(() -> LimelightHelpers.getTV("limelight-left")
-                                                && LimelightHelpers.getFiducialID("limelight-left") > 0),
+                                                && LimelightHelpers.getFiducialID("limelight-left") > 0
+                                                && m_coralSubsystem.isReady()),
                                 new RAlignToReefTagRelative(drivebase).andThen(
                                                 this.scoreUniversal().withTimeout(0.3)),
                                 Commands.waitSeconds(0.2),

@@ -47,7 +47,7 @@ public class CoralSubsystem extends SubsystemBase {
     public static boolean ElevatorAtL4;
     private static boolean SubsystemAtPos = false;
     public static boolean runFunnelIntake;
-    private Setpoint lastSetpoint = Setpoint.FeederStation;
+    public Setpoint lastSetpoint = Setpoint.FeederStation;
     private boolean checkTargetSetpointForAutoAlign = false;
     private boolean DriverIsPressingRightBumperOrLeftBumper = false; // True while driver holds either bumper override
 
@@ -180,6 +180,10 @@ public class CoralSubsystem extends SubsystemBase {
     // r_elevatorMotor.set(0);
     // });
     // }
+    public boolean isReady() {
+        return lastSetpoint == Setpoint.L1 || lastSetpoint == Setpoint.L2 || lastSetpoint == Setpoint.L3
+                || lastSetpoint == Setpoint.L4;
+    }
 
     /** Zero the arm encoder when the user button is pressed on the roboRIO */
     private void zeroOnUserButton() {
