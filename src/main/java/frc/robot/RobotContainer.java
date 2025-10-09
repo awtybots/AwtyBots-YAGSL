@@ -350,7 +350,7 @@ public class RobotContainer {
                                 new LAlignToReefTagRelative(drivebase).andThen(
                                                 this.scoreUniversal().withTimeout(0.3)),
                                 Commands.waitSeconds(0.2),
-                                drivebase.backUpRobotCommand().withTimeout(0.9).andThen(drivebase.stopCommand(),
+                                drivebase.backUpRobotCommand().withTimeout(0.8).andThen(drivebase.stopCommand(),
                                                 m_coralSubsystem.setSetpointCommand(Setpoint.FeederStation, false))));
                 driverOverrideTrigger.onTrue(Commands.runOnce(() -> m_coralSubsystem.setDriverOverrideActive(true)));
                 driverOverrideTrigger.onFalse(Commands.runOnce(() -> m_coralSubsystem.setDriverOverrideActive(false)));
@@ -361,7 +361,7 @@ public class RobotContainer {
                                 new RAlignToReefTagRelative(drivebase).andThen(
                                                 this.scoreUniversal().withTimeout(0.3)),
                                 Commands.waitSeconds(0.2),
-                                drivebase.backUpRobotCommand().withTimeout(0.9).andThen(drivebase.stopCommand(),
+                                drivebase.backUpRobotCommand().withTimeout(0.8).andThen(drivebase.stopCommand(),
                                                 m_coralSubsystem.setSetpointCommand(Setpoint.FeederStation, false))));
 
                 // B Button -> Elevator/Arm to human player position, set ball intake to stow
