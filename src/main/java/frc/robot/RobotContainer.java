@@ -17,7 +17,6 @@ import frc.robot.subsystems.CoralSubsystem.Setpoint;
 import frc.robot.subsystems.FunnelIntake;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.SwerveSubsystem;
-
 import swervelib.SwerveInputStream;
 // import frc.robot.subsystems.Algae;
 // import frc.robot.subsystems.AlgaeArmSubsystem;
@@ -154,11 +153,11 @@ public class RobotContainer {
                 NamedCommands.registerCommand("Gyroreset1",
                                 new InstantCommand(() -> drivebase.setInitialHeading(0), drivebase));
                 NamedCommands.registerCommand("ComboScoringR", Commands.sequence(
-                                new AutonRAlignToReefTagRelative(drivebase).andThen(this.scoreUniversal().withTimeout(0.3))
-                                ));
+                                new AutonRAlignToReefTagRelative(drivebase)
+                                                .andThen(this.scoreUniversal().withTimeout(0.3))));
                 NamedCommands.registerCommand("ComboScoringL", Commands.sequence(
-                                new AutonLAlignToReefTagRelative(drivebase).andThen(this.scoreUniversal().withTimeout(0.3))
-                                ));
+                                new AutonLAlignToReefTagRelative(drivebase)
+                                                .andThen(this.scoreUniversal().withTimeout(0.3))));
                 // NamedCommands.registerCommand("AlignR", new SequentialCommandGroup(
                 // Commands.waitUntil(() -> m_EndE.isCoralEngaged()),
                 // m_coralSubsystem.setSetpointCommand(Setpoint.L4),
@@ -345,8 +344,9 @@ public class RobotContainer {
                 // m_driverController.leftBumper().whileTrue(new
                 // LAlignToReefTagRelative(drivebase));
                 // driverAlignRightTrigger.whileTrue(new RAlignToReefTagRelative(drivebase));
-                driverAlignLeftTrigger.whileTrue(Commands.sequence(Commands.waitUntil(() -> LimelightHelpers.getTV("limelight-right")),
-
+                driverAlignLeftTrigger.whileTrue(Commands.sequence(
+                                Commands.waitUntil(() -> LimelightHelpers.getTV("limelight-right")
+                                                && LimelightHelpers.getFiducialID("limelight-right") > 0),
                                 new LAlignToReefTagRelative(drivebase).andThen(
                                                 this.scoreUniversal().withTimeout(0.3)),
                                 Commands.waitSeconds(0.2),
@@ -355,8 +355,9 @@ public class RobotContainer {
                 driverOverrideTrigger.onTrue(Commands.runOnce(() -> m_coralSubsystem.setDriverOverrideActive(true)));
                 driverOverrideTrigger.onFalse(Commands.runOnce(() -> m_coralSubsystem.setDriverOverrideActive(false)));
 
-                driverAlignRightTrigger.whileTrue(Commands.sequence(Commands.waitUntil(() -> LimelightHelpers.getTV("limelight-left")),
-
+                driverAlignRightTrigger.whileTrue(Commands.sequence(
+                                Commands.waitUntil(() -> LimelightHelpers.getTV("limelight-left")
+                                                && LimelightHelpers.getFiducialID("limelight-left") > 0),
                                 new RAlignToReefTagRelative(drivebase).andThen(
                                                 this.scoreUniversal().withTimeout(0.3)),
                                 Commands.waitSeconds(0.2),
