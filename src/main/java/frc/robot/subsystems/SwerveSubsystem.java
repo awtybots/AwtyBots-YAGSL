@@ -235,6 +235,10 @@ public class SwerveSubsystem extends SubsystemBase {
         swerveDrive.kinematics.toSwerveModuleStates(new ChassisSpeeds(0, 0, 0)), true);
   }
 
+  public ChassisSpeeds getRobotRelativeSpeeds() {
+    return swerveDrive.getRobotVelocity();
+  }
+
   public Command stopCommand() {
     return this.runOnce(() -> {
       stop();

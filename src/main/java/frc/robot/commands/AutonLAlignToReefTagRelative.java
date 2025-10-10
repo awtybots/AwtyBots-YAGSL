@@ -10,6 +10,7 @@ import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
@@ -105,6 +106,7 @@ public class AutonLAlignToReefTagRelative extends Command {
 
     // Latch the first tag we see so the robot does not jump between IDs mid-align.
     tagID = LimelightHelpers.getFiducialID("limelight-right");
+    LatPose = false;
   }
 
   @Override
@@ -154,9 +156,29 @@ public class AutonLAlignToReefTagRelative extends Command {
       }
 
       double ySpeed = yController.calculate(postions[0]);
+      double yError = yController.getPositionError();
       double rotValue = rotController.calculate(postions[4]);
+      double xError = xController.getPositionError();
+      double rotError = rotController.getPositionError();
 
-      boolean atPose = rotController.atSetpoint() && yController.atSetpoint() && xController.atSetpoint();
+      double xClose = Constants.AUTO_ALIGNMENT_X_CLOSE_ENOUGH;
+      double yClose = Constants.AUTO_ALIGNMENT_Y_CLOSE_ENOUGH;
+      double rotClose = Constants.AUTO_ALIGNMENT_ROT_CLOSE_ENOUGH;
+      if (Math.abs(xError) < 0.15 && Math.abs(yError) < 0.2) {
+        xClose = Constants.X_TOLERANCE_REEF_ALIGNMENT;
+        yClose = Constants.Y_TOLERANCE_REEF_ALIGNMENT;
+        rotClose = Constants.ROT_TOLERANCE_REEF_ALIGNMENT;
+      }
+      boolean withinTolerances = Math.abs(xError) < xClose
+          && Math.abs(yError) < yClose
+          && Math.abs(rotError) < rotClose;
+      ChassisSpeeds robotSpeeds = drivebase.getRobotRelativeSpeeds();
+      boolean translationSettled = Math.hypot(robotSpeeds.vxMetersPerSecond,
+          robotSpeeds.vyMetersPerSecond) < Constants.AUTO_ALIGNMENT_LINEAR_SETTLE_SPEED;
+      boolean rotationSettled = Math
+          .abs(robotSpeeds.omegaRadiansPerSecond) < Constants.AUTO_ALIGNMENT_ANGULAR_SETTLE_SPEED;
+      boolean atPose = withinTolerances && translationSettled && rotationSettled;
+
       if (atPose) {
         drivebase.stop();
         if (stopTimer.hasElapsed(Constants.POSE_VALIDATION_TIME)) {
@@ -170,8 +192,9 @@ public class AutonLAlignToReefTagRelative extends Command {
           }
         }
       } else {
-        stopTimer.reset();
+        stopTimer.restart();
         lastPoseValidatedTimestamp = -1;
+        LatPose = false;
         drivebase.drive(
             new Translation2d(
                 // If we jump forward before we are centered, increase the Y tolerance gate or

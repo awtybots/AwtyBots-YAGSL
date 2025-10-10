@@ -228,6 +228,11 @@ public final class Constants {
                                                                                   // speed to PID control
   public static final double AUTO_ALIGNMENT_FAST_APPROACH_SPEED = 1.2; // Fast approach speed in m/s when far from the
                                                                        // reef
+  public static final double AUTO_ALIGNMENT_LINEAR_SETTLE_SPEED = 0.12; // Robot linear speed considered "settled"
+  public static final double AUTO_ALIGNMENT_ANGULAR_SETTLE_SPEED = 0.6; // Robot angular speed considered "settled"
+  public static final double AUTO_ALIGNMENT_X_CLOSE_ENOUGH = 0.12; // Allowable X error to finish auto align early
+  public static final double AUTO_ALIGNMENT_Y_CLOSE_ENOUGH = 0.18; // Allowable Y error to finish auto align early
+  public static final double AUTO_ALIGNMENT_ROT_CLOSE_ENOUGH = 1; // Allowable rotation error (degrees) for completion
 
   // Shift these setpoints when the robot stops short, crashes the reef, or parks
   // off-center.
