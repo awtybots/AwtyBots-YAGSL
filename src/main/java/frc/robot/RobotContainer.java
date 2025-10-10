@@ -131,7 +131,7 @@ public class RobotContainer {
                 NamedCommands.registerCommand("outtake", m_EndE.reverseIntakeCommand().withTimeout(1));
                 NamedCommands.registerCommand("outtakeLD",
                                 m_EndE.BrunIntakeCommandFeeder().andThen(m_EndE.runIntakeCommand().withTimeout(.2)));
-                NamedCommands.registerCommand("outtakefast", m_EndE.fastrunIntakeCommand().withTimeout(0.3));
+                NamedCommands.registerCommand("outtakefast", this.scoreUniversal().withTimeout(0.3));
                 NamedCommands.registerCommand("outtake0.5", m_EndE.reverseIntakeCommand().withTimeout(0.5));
                 NamedCommands.registerCommand("fintake", m_funnelIntakeSubsystem.runIntakeCommand().withTimeout(1));
                 NamedCommands.registerCommand("FeederStation",
@@ -419,9 +419,9 @@ public class RobotContainer {
                 // m_operatorController.povRight().whileTrue(m_algae.runAlgaeOutCommand());
         }
 
-        public PathPlannerAuto pathPlannerAuto() {
-                return new PathPlannerAuto("Vision3CLeft", true);
-        }
+        // public PathPlannerAuto pathPlannerAuto() {
+        //         return new PathPlannerAuto("tryhard2left", true);
+        // }
 
         /**
          * Use this to pass the autonomous command to the main {@link Robot} class.

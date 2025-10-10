@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 4.990287162162162,
-        "y": 2.819425675675675
+        "x": 3.6894886363636368,
+        "y": 2.9829687499999995
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.001448863636363,
-        "y": 1.4274005681818187
+        "x": 2.6722013326214302,
+        "y": 1.792475896106466
       },
       "isLocked": false,
       "linkedName": null
@@ -20,8 +20,8 @@
         "y": 0.7103995901639337
       },
       "prevControl": {
-        "x": 2.4800381039697927,
-        "y": 1.3714624672225408
+        "x": 2.4896161167191053,
+        "y": 1.5377283673280875
       },
       "nextControl": null,
       "isLocked": false,
@@ -29,26 +29,12 @@
     }
   ],
   "rotationTargets": [],
-  "constraintZones": [
-    {
-      "name": "Constraints Zone",
-      "minWaypointRelativePos": 0.0,
-      "maxWaypointRelativePos": 0.047244094488189,
-      "constraints": {
-        "maxVelocity": 1.0,
-        "maxAcceleration": 1.0,
-        "maxAngularVelocity": 180.0,
-        "maxAngularAcceleration": 360.0,
-        "nominalVoltage": 12.0,
-        "unlimited": false
-      }
-    }
-  ],
+  "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [
     {
       "name": "FeederStation",
-      "waypointRelativePos": 0.3082114735658046,
+      "waypointRelativePos": 0.45198297342192684,
       "endWaypointRelativePos": null,
       "command": {
         "type": "named",
@@ -74,7 +60,7 @@
   "folder": "VisionPath",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -59.99999999999999
+    "rotation": -121.21840276434644
   },
   "useDefaultConstraints": true
 }

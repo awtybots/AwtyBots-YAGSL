@@ -33,6 +33,12 @@
           "data": {
             "name": "FeederStation"
           }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Gyroreset1"
+          }
         }
       ]
     }
