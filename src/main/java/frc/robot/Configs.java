@@ -113,8 +113,8 @@ public final class Configs {
                         //                 .maxAcceleration(1300)
                         //                 .allowedClosedLoopError(.25);
 
-                        l_elevatorMotorConfig.idleMode(IdleMode.kCoast).smartCurrentLimit(50).voltageCompensation(12);
-                        r_elevatorMotorConfig.idleMode(IdleMode.kCoast).smartCurrentLimit(50).voltageCompensation(12);
+                        l_elevatorMotorConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(50).voltageCompensation(12);
+                        r_elevatorMotorConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(50).voltageCompensation(12);
                         r_elevatorMotorConfig.follow(10, true);
 
                         l_elevatorMotorConfig.closedLoop

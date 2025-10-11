@@ -220,8 +220,8 @@ public final class Constants {
   // AutoAlign constants
   // Raise these gains if the chassis reacts slowly, lower if it oscillates or
   // overshoots.
-  public static final double X_REEF_ALIGNMENT_P = 1.9; // Proportional gain for X-axis reef alignment
-  public static final double Y_REEF_ALIGNMENT_P = 2.3; // Proportional gain for Y-axis reef alignment (previously 1.74)
+  public static final double X_REEF_ALIGNMENT_P = 2.1; // Proportional gain for X-axis reef alignment
+  public static final double Y_REEF_ALIGNMENT_P = 2.5; // Proportional gain for Y-axis reef alignment (previously 1.74)
   public static final double ROT_REEF_ALIGNMENT_P = 0.07; // Proportional gain for rotational reef alignment
   public static final boolean USE_AUTO_ALIGNMENT_FAST_APPROACH = false; // Turn fast appraoch for auto align
   public static final double AUTO_ALIGNMENT_FAST_APPROACH_DISTANCE_METERS = 0.60; // Distance where we switch from max

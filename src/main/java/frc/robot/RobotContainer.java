@@ -346,25 +346,25 @@ public class RobotContainer {
                 // driverAlignRightTrigger.whileTrue(new RAlignToReefTagRelative(drivebase));
                 driverAlignLeftTrigger.whileTrue(Commands.sequence(
                                 Commands.waitUntil(() -> LimelightHelpers.getTV("limelight-right")
-                                                && LimelightHelpers.getFiducialID("limelight-right") > 0
-                                                && m_coralSubsystem.isReady()),
+                                               
+                                                ),
                                 new LAlignToReefTagRelative(drivebase).andThen(
-                                                this.scoreUniversal().withTimeout(0.3)),
-                                Commands.waitSeconds(0.2),
-                                drivebase.backUpRobotCommand().withTimeout(0.8).andThen(drivebase.stopCommand(),
-                                                m_coralSubsystem.setSetpointCommand(Setpoint.FeederStation, false))));
+                                                this.scoreUniversal().withTimeout(0.3))
+                             ));
+                                // drivebase.backUpRobotCommand().withTimeout(0.8).andThen(drivebase.stopCommand(),
+                                //                 m_coralSubsystem.setSetpointCommand(Setpoint.FeederStation, false))));
                 driverOverrideTrigger.onTrue(Commands.runOnce(() -> m_coralSubsystem.setDriverOverrideActive(true)));
                 driverOverrideTrigger.onFalse(Commands.runOnce(() -> m_coralSubsystem.setDriverOverrideActive(false)));
 
                 driverAlignRightTrigger.whileTrue(Commands.sequence(
                                 Commands.waitUntil(() -> LimelightHelpers.getTV("limelight-left")
-                                                && LimelightHelpers.getFiducialID("limelight-left") > 0
-                                                && m_coralSubsystem.isReady()),
+                                               ),
                                 new RAlignToReefTagRelative(drivebase).andThen(
-                                                this.scoreUniversal().withTimeout(0.3)),
-                                Commands.waitSeconds(0.2),
-                                drivebase.backUpRobotCommand().withTimeout(0.8).andThen(drivebase.stopCommand(),
-                                                m_coralSubsystem.setSetpointCommand(Setpoint.FeederStation, false))));
+                                        
+                                                this.scoreUniversal().withTimeout(0.3))
+                               ));
+                                // drivebase.backUpRobotCommand().withTimeout(0.8).andThen(drivebase.stopCommand(),
+                                //                 m_coralSubsystem.setSetpointCommand(Setpoint.FeederStation, false))));
 
                 // B Button -> Elevator/Arm to human player position, set ball intake to stow
                 // when idle

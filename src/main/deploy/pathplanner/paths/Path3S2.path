@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.726229508196721,
-        "y": 0.7103995901639337
+        "x": 1.1148565573770493,
+        "y": 0.6744364754098353
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.7287511400894235,
-        "y": 1.390021263972029
+        "x": 2.1173781892697523,
+        "y": 1.3540581492179307
       },
       "isLocked": false,
       "linkedName": "t2"
@@ -48,7 +48,7 @@
   "folder": "VisionPath",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -125.5
+    "rotation": -127.40535663140857
   },
   "useDefaultConstraints": true
 }

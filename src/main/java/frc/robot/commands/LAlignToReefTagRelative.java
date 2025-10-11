@@ -167,7 +167,7 @@ public class LAlignToReefTagRelative extends Command {
             new Translation2d(
                 // If we jump forward before we are centered, increase the Y tolerance gate or
                 // lower this 0.03 safety creep.
-                yController.getError() < 1 && CoralSubsystem.isAtTarget() ? xSpeed : 0.00,
+                yController.getError() < 2 && CoralSubsystem.isAtTarget() ? xSpeed : 0.00,
                 ySpeed),
             rotValue,
             false);
