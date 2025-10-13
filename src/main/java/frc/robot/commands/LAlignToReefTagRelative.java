@@ -4,6 +4,8 @@
 
 package frc.robot.commands;
 
+import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralOnFly.CoralStationsSide;
+
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -15,8 +17,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.LimelightHelpers;
+//mport frc.robot.Configs.CoralSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.util.ScoreSafetyManager;
+import frc.robot.subsystems.CoralSubsystem;
 
 public class LAlignToReefTagRelative extends Command {
   private PIDController xController, yController, rotController;
@@ -28,11 +32,12 @@ public class LAlignToReefTagRelative extends Command {
   private double lastPoseValidatedTimestamp = -1;
   private int dashboardLoopCounter = Math.max(0, Constants.DASHBOARD_UPDATE_PERIOD_CYCLES - 1);
   private boolean completionReported = false;
-  private boolean LatPose = false;  // <-- make it a field
+  private boolean LatPose = false; // <-- make it a field
 
-  public boolean LisAtPose() {      // <-- getter for RobotContainer
-      return LatPose;
+  public boolean LisAtPose() { // <-- getter for RobotContainer
+    return LatPose;
   }
+
   private boolean shouldUpdateDashboard() {
     if (!Constants.LIMIT_DASHBOARD_PERIODIC_UPDATES || Constants.DASHBOARD_UPDATE_PERIOD_CYCLES <= 1) {
       return true;
@@ -135,7 +140,7 @@ public class LAlignToReefTagRelative extends Command {
     if (LimelightHelpers.getTV("limelight-right")
         && LimelightHelpers.getFiducialID("limelight-right") == tagID) {
       this.dontSeeTagTimer.reset();
-
+      SmartDashboard.putBoolean("LeftAlignReady", true);
       double[] postions = LimelightHelpers.getBotPose_TargetSpace("limelight-right");
 
       double xSpeed = -xController.calculate(postions[2]);
@@ -152,7 +157,7 @@ public class LAlignToReefTagRelative extends Command {
             System.out.println("Auto align left finished");
             SmartDashboard.putBoolean("AutoAlignLeftComplete", true);
             completionReported = true;
-            LatPose = true; 
+            LatPose = true;
           }
         }
       } else {
@@ -162,10 +167,11 @@ public class LAlignToReefTagRelative extends Command {
             new Translation2d(
                 // If we jump forward before we are centered, increase the Y tolerance gate or
                 // lower this 0.03 safety creep.
-                yController.getError() < 0.6 ? xSpeed : 0.00,
+                yController.getError() < 2 && CoralSubsystem.isAtTarget() ? xSpeed : 0.00,
                 ySpeed),
             rotValue,
             false);
+
       }
 
       if (updateDashboard) {
@@ -177,10 +183,11 @@ public class LAlignToReefTagRelative extends Command {
       // 0,
       // false);
       drivebase.stop();
+      SmartDashboard.putBoolean("AutoAlignLeftComplete", false);
       if (updateDashboard) {
         SmartDashboard.putNumber("xspeed", 0);
       }
-      
+
     }
 
     if (updateDashboard) {
@@ -190,7 +197,7 @@ public class LAlignToReefTagRelative extends Command {
 
   @Override
   public void end(boolean interrupted) {
-      // drivebase.drive(new Translation2d(), 0, false);
+    // drivebase.drive(new Translation2d(), 0, false);
     drivebase.stop();
     if (!interrupted) {
       ScoreSafetyManager.activateLockout(drivebase.getPose());
@@ -204,7 +211,8 @@ public class LAlignToReefTagRelative extends Command {
   public boolean isFinished() {
     // Requires the robot to stay in the correct position for 0.3 seconds, as long
     // as it gets a tag in the camera
-    // Extend DONT_SEE_TAG_WAIT_TIME if small camera dropouts end the command too early.
+    // Extend DONT_SEE_TAG_WAIT_TIME if small camera dropouts end the command too
+    // early.
     double now = Timer.getFPGATimestamp();
     boolean poseRecentlyValidated = lastPoseValidatedTimestamp > 0
         && (now - lastPoseValidatedTimestamp) <= Constants.POSE_LOSS_GRACE_PERIOD;

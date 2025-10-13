@@ -4,6 +4,8 @@
 
 package frc.robot.commands;
 
+import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralOnFly.CoralStationsSide;
+
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -15,11 +17,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.LimelightHelpers;
-import frc.robot.subsystems.CoralSubsystem;
+//mport frc.robot.Configs.CoralSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.util.ScoreSafetyManager;
+import frc.robot.subsystems.CoralSubsystem;
 
-public class RAlignToReefTagRelative extends Command {
+public class AutonLAlignToReefTagRelative extends Command {
   private PIDController xController, yController, rotController;
   private ProfiledPIDController rotControllerProfiled;
   // private boolean isRightScore;
@@ -29,11 +32,12 @@ public class RAlignToReefTagRelative extends Command {
   private double lastPoseValidatedTimestamp = -1;
   private int dashboardLoopCounter = Math.max(0, Constants.DASHBOARD_UPDATE_PERIOD_CYCLES - 1);
   private boolean completionReported = false;
-  private boolean RatPose = false;  // <-- make it a field
+  private boolean LatPose = false; // <-- make it a field
 
-  public boolean RisAtPose() {      // <-- getter for RobotContainer
-      return RatPose;
+  public boolean LisAtPose() { // <-- getter for RobotContainer
+    return LatPose;
   }
+
   private boolean shouldUpdateDashboard() {
     if (!Constants.LIMIT_DASHBOARD_PERIODIC_UPDATES || Constants.DASHBOARD_UPDATE_PERIOD_CYCLES <= 1) {
       return true;
@@ -46,13 +50,15 @@ public class RAlignToReefTagRelative extends Command {
     return false;
   }
 
-  public RAlignToReefTagRelative(SwerveSubsystem drivebase) {
-    // Forward/back: raise this gain if the robot crawls toward the reef, lower if
-    // it rockets past.
+  public AutonLAlignToReefTagRelative(SwerveSubsystem drivebase) {
+    // Forward/back: bump P up if the robot creeps in too slowly, drop it if it
+    // shoots past the tag.
     xController = new PIDController(Constants.X_REEF_ALIGNMENT_P, 0.0, 0);
-    // Strafe: tweak when the bot parks too far from the pole on the right side.
+    // Strafe: raise this P when the chassis stays offset left/right of the reef,
+    // lower if it oscillates.
     yController = new PIDController(Constants.Y_REEF_ALIGNMENT_P, 0.0, 0);
-    // Rotation: adjust when the bumper ends up angled inward/outward at the finish.
+    // Yaw: tune this when the robot finishes facing left/right instead of square to
+    // the reef.
     rotController = new PIDController(Constants.ROT_REEF_ALIGNMENT_P, 0, 0);
     // Rotation
     // rotControllerProfiled = new
@@ -82,35 +88,71 @@ public class RAlignToReefTagRelative extends Command {
     lastPoseValidatedTimestamp = -1;
     completionReported = false;
 
-    SmartDashboard.putBoolean("AutoAlignRightComplete", false);
+    SmartDashboard.putBoolean("AutoAlignLeftComplete", false);
 
     rotController.setSetpoint(Constants.ROT_SETPOINT_REEF_ALIGNMENT);
     rotController.setTolerance(Constants.ROT_TOLERANCE_REEF_ALIGNMENT);
 
-    // Adjust this X setpoint if we crash into or linger too far from the reef
-    // (positive drives closer).
+    // If the robot stops short or bumps the reef, shift this X setpoint (positive
+    // pulls closer).
     xController.setSetpoint(Constants.X_SETPOINT_REEF_ALIGNMENT);
     xController.setTolerance(Constants.X_TOLERANCE_REEF_ALIGNMENT);
 
-    // Nudge this Y setpoint when the right side scores off the mark (more positive
-    // drifts toward the driver side).
-    yController.setSetpoint(Constants.Y_R_SETPOINT_REEF_ALIGNMENT);
+    // Move this Y setpoint toward zero when the chassis finishes too far left of
+    // the pole.
+    yController.setSetpoint(Constants.Y_L_SETPOINT_REEF_ALIGNMENT);
     yController.setTolerance(Constants.Y_TOLERANCE_REEF_ALIGNMENT);
 
-    // Remember which tag we locked on so we stay tied to the correct reef face.
-    tagID = LimelightHelpers.getFiducialID("limelight-left");
+    // Latch the first tag we see so the robot does not jump between IDs mid-align.
+    tagID = LimelightHelpers.getFiducialID("limelight-right");
   }
 
   @Override
+  // public void execute() {
+  // if (LimelightHelpers.getTV("limelight-right") &&
+  // LimelightHelpers.getFiducialID("limelight-right") == tagID) {
+  // this.dontSeeTagTimer.reset();
+
+  // double[] postions =
+  // LimelightHelpers.getBotPose_TargetSpace("limelight-right");
+  // SmartDashboard.putNumber("x", postions[2]);
+
+  // double xSpeed = -xController.calculate(postions[2]);
+  // SmartDashboard.putNumber("xspeed", xSpeed);
+  // double ySpeed = yController.calculate(postions[0]);
+  // double rotValue = rotController.calculate(postions[4]);
+
+  // drivebase.drive(new Translation2d(xSpeed, ySpeed), rotValue, false);
+
+  // if (!rotController.atSetpoint() ||
+  // !yController.atSetpoint() ||
+  // !xController.atSetpoint()) {
+  // stopTimer.reset();
+  // }
+  // } else {
+  // drivebase.drive(new Translation2d(), 0, false);
+  // }
+
+  // SmartDashboard.putNumber("poseValidTimer", stopTimer.get());
+  // }
   public void execute() {
     boolean updateDashboard = shouldUpdateDashboard();
-    if (LimelightHelpers.getTV("limelight-left") && LimelightHelpers.getFiducialID("limelight-left") == tagID) {
+    if (LimelightHelpers.getTV("limelight-right")
+        && LimelightHelpers.getFiducialID("limelight-right") == tagID) {
       this.dontSeeTagTimer.reset();
-      SmartDashboard.putBoolean("AutoAlignLeftComplete", false);
 
-      double[] postions = LimelightHelpers.getBotPose_TargetSpace("limelight-left");
+      double[] postions = LimelightHelpers.getBotPose_TargetSpace("limelight-right");
 
-      double xSpeed = -xController.calculate(postions[2]);
+      double xDistanceFromReef = postions[2];
+      double xSpeed;
+      if (Constants.USE_AUTO_ALIGNMENT_FAST_APPROACH
+          && Math.abs(xDistanceFromReef) > Constants.AUTO_ALIGNMENT_FAST_APPROACH_DISTANCE_METERS) {
+        // Run at our configured max approach velocity when far from the reef
+        xSpeed = Math.copySign(Constants.AUTO_ALIGNMENT_FAST_APPROACH_SPEED, -xDistanceFromReef);
+      } else {
+        xSpeed = -xController.calculate(xDistanceFromReef);
+      }
+
       double ySpeed = yController.calculate(postions[0]);
       double rotValue = rotController.calculate(postions[4]);
 
@@ -120,23 +162,21 @@ public class RAlignToReefTagRelative extends Command {
         if (stopTimer.hasElapsed(Constants.POSE_VALIDATION_TIME)) {
           lastPoseValidatedTimestamp = Timer.getFPGATimestamp();
           if (!completionReported) {
-            DriverStation.reportWarning("Auto align right finished", false);
-            System.out.println("Auto align right finished");
-            SmartDashboard.putBoolean("AutoAlignRightComplete", true);
+            DriverStation.reportWarning("Auto align left finished", false);
+            System.out.println("Auto align left finished");
+            SmartDashboard.putBoolean("AutoAlignLeftComplete", true);
             completionReported = true;
-            RatPose = true; 
+            LatPose = true;
           }
         }
       } else {
         stopTimer.reset();
         lastPoseValidatedTimestamp = -1;
-        // If the right-side approach veers left/right swap the sign of ySpeed or tune Y
-        // setpoint/tolerance.
         drivebase.drive(
             new Translation2d(
                 // If we jump forward before we are centered, increase the Y tolerance gate or
                 // lower this 0.03 safety creep.
-                yController.getError() < 2 && CoralSubsystem.isAtTarget() ? xSpeed : 0.00,
+                yController.getError() < 0.6 ? xSpeed : 0.00,
                 ySpeed),
             rotValue,
             false);
@@ -152,10 +192,10 @@ public class RAlignToReefTagRelative extends Command {
       // 0,
       // false);
       drivebase.stop();
-      SmartDashboard.putBoolean("AutoAlignLeftComplete", false);
       if (updateDashboard) {
         SmartDashboard.putNumber("xspeed", 0);
       }
+
     }
 
     if (updateDashboard) {
@@ -165,12 +205,13 @@ public class RAlignToReefTagRelative extends Command {
 
   @Override
   public void end(boolean interrupted) {
+    // drivebase.drive(new Translation2d(), 0, false);
     drivebase.stop();
     if (!interrupted) {
       ScoreSafetyManager.activateLockout(drivebase.getPose());
     }
     if (!completionReported) {
-      SmartDashboard.putBoolean("AutoAlignRightComplete", false);
+      SmartDashboard.putBoolean("AutoAlignLeftComplete", false);
     }
   }
 
@@ -178,8 +219,8 @@ public class RAlignToReefTagRelative extends Command {
   public boolean isFinished() {
     // Requires the robot to stay in the correct position for 0.3 seconds, as long
     // as it gets a tag in the camera
-    // Increase the wait time if intermittent vision causes premature cancel,
-    // shorten to bail faster.
+    // Extend DONT_SEE_TAG_WAIT_TIME if small camera dropouts end the command too
+    // early.
     double now = Timer.getFPGATimestamp();
     boolean poseRecentlyValidated = lastPoseValidatedTimestamp > 0
         && (now - lastPoseValidatedTimestamp) <= Constants.POSE_LOSS_GRACE_PERIOD;

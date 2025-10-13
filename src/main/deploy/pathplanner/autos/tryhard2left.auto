@@ -7,38 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "New New Path"
-          }
-        },
-        {
-          "type": "parallel",
-          "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "ElevatorLiftL4"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "ComboScoringL"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Path2"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "outtakeLD"
+            "pathName": "Copy of New New Path"
           }
         },
         {
@@ -61,15 +30,22 @@
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "Path4"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "outtakeLD"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Copy of Copy of Path2"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "outtakeLD"
+                }
+              }
+            ]
           }
         },
         {
@@ -92,21 +68,60 @@
           }
         },
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "outtakefast"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Copy of Copy of Path4"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "outtakeLD"
+                }
+              }
+            ]
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "Path6"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "ElevatorLiftL4"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "ComboScoringR"
+                }
+              }
+            ]
           }
         },
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "outtakeLD"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Copy of Copy of Path6"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "outtakeLD"
+                }
+              }
+            ]
           }
         }
       ]

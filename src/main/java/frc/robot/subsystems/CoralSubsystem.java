@@ -35,19 +35,19 @@ public class CoralSubsystem extends SubsystemBase {
         L3,
         L4,
         AlgaeLow,
-        AlgaeHigh, 
+        AlgaeHigh,
         Barge;
     }
 
-    //LaserCan setup
+    // LaserCan setup
     private LaserCan lc = new LaserCan(29);
     LaserCan.Measurement measurement = lc.getMeasurement();
 
     // Variable use for tracking if the elevator was raised to L4
     public static boolean ElevatorAtL4;
-    private boolean SubsystemAtPos= false;
+    private static boolean SubsystemAtPos = false;
     public static boolean runFunnelIntake;
-    private Setpoint lastSetpoint = Setpoint.FeederStation;
+    public Setpoint lastSetpoint = Setpoint.FeederStation;
     private boolean checkTargetSetpointForAutoAlign = false;
     private boolean DriverIsPressingRightBumperOrLeftBumper = false; // True while driver holds either bumper override
 
@@ -56,10 +56,9 @@ public class CoralSubsystem extends SubsystemBase {
     private SparkFlex l_armMotor = new SparkFlex(ArmConstants.ArmLeftCanID, MotorType.kBrushless);
     private SparkClosedLoopController r_armController = r_armMotor.getClosedLoopController();
     private SparkClosedLoopController l_armController = l_armMotor.getClosedLoopController();
-    
+
     private RelativeEncoder armEncoder = l_armMotor.getEncoder();
-    //private AbsoluteEncoder armEncoder = l_armMotor.getAbsoluteEncoder();
-    
+    // private AbsoluteEncoder armEncoder = l_armMotor.getAbsoluteEncoder();
 
     // elevator setup
     private SparkFlex l_elevatorMotor = new SparkFlex(ElevatorConstants.LeftElevatorCanID, MotorType.kBrushless);
@@ -71,11 +70,12 @@ public class CoralSubsystem extends SubsystemBase {
     // wrist setup
     private SparkFlex wristMotor = new SparkFlex(ArmConstants.WristCanID, MotorType.kBrushless);
     private SparkClosedLoopController wristController = wristMotor.getClosedLoopController();
-   // private RelativeEncoder wristEncoder = wristMotor.getEncoder();
+    // private RelativeEncoder wristEncoder = wristMotor.getEncoder();
     private AbsoluteEncoder wristAbsoluteEncoder = wristMotor.getAbsoluteEncoder();
 
     // intake setup
-   // private SparkFlex intakeMotor = new SparkFlex(ArmConstants.IntakeCanID, MotorType.kBrushless);
+    // private SparkFlex intakeMotor = new SparkFlex(ArmConstants.IntakeCanID,
+    // MotorType.kBrushless);
 
     private boolean wasReset = false;
     private double armCurrentTarget = ArmSetpoints.FeederStation;
@@ -112,15 +112,13 @@ public class CoralSubsystem extends SubsystemBase {
                 PersistMode.kPersistParameters);
 
         // intakeMotor.configure(
-        //         Configs.CoralSubsystem.intakeMotorConfig,
-        //         ResetMode.kResetSafeParameters,
-        //         PersistMode.kPersistParameters);
+        // Configs.CoralSubsystem.intakeMotorConfig,
+        // ResetMode.kResetSafeParameters,
+        // PersistMode.kPersistParameters);
 
-        
         elevatorEncoder.setPosition(0);
         armEncoder.setPosition(0);
-       
-        
+
     }
 
     private void moveToSetpoint() {
@@ -128,55 +126,64 @@ public class CoralSubsystem extends SubsystemBase {
 
             return;
         }
-       
+
+        if (ScoreSafetyManager.isMovementBlocked()) {
+            ScoreSafetyManager.notifyBlocked();
+            return;
+        }
+
         l_elevatorController.setReference(elevatorCurrentTarget, ControlType.kMAXMotionPositionControl);
-        
-        
+
         // if(runFunnelIntake){
-        //     double elevatorPos = elevatorEncoder.getPosition();
-        //     double elevatorError = Math.abs(elevatorCurrentTarget - elevatorPos);
-        //     double stopThreshold = 40;
+        // double elevatorPos = elevatorEncoder.getPosition();
+        // double elevatorError = Math.abs(elevatorCurrentTarget - elevatorPos);
+        // double stopThreshold = 40;
 
-        //     if (elevatorError > stopThreshold){
+        // if (elevatorError > stopThreshold){
 
-        //         return;
-        //     }
-
-
+        // return;
+        // }
 
         // }
-        
-    
+
         l_armController.setReference(armCurrentTarget, ControlType.kMAXMotionPositionControl);
         wristController.setReference(wristCurrentTarget, ControlType.kMAXMotionPositionControl);
-    
+
         double elevatorPos = elevatorEncoder.getPosition();
         double armPos = armEncoder.getPosition();
         double wristPos = wristAbsoluteEncoder.getPosition();
 
-        boolean elevatorOnTarget = Math.abs(elevatorCurrentTarget - elevatorPos) < CoralToleranceConstants.ELEVATOR_TOLERANCE;
+        boolean elevatorOnTarget = Math
+                .abs(elevatorCurrentTarget - elevatorPos) < CoralToleranceConstants.ELEVATOR_TOLERANCE;
         boolean armOnTarget = Math.abs(armCurrentTarget - armPos) < CoralToleranceConstants.ARM_TOLERANCE;
         boolean wristOnTarget = Math.abs(wristCurrentTarget - wristPos) < CoralToleranceConstants.WRIST_TOLERANCE;
 
         SubsystemAtPos = elevatorOnTarget && armOnTarget && wristOnTarget;
     }
 
-    /** Returns true when elevator, arm, and wrist are each within their tolerance window. */
-    public boolean isAtTarget() {
+    /**
+     * Returns true when elevator, arm, and wrist are each within their tolerance
+     * window.
+     */
+    public static boolean isAtTarget() {
         return SubsystemAtPos;
     }
 
     // public Command manualElevatorDown() {
-    //     return Commands.startEnd(
-    //             () -> {
-    //                 l_elevatorMotor.set(0.5);
-    //                 r_elevatorMotor.set(-0.5);
-    //             },
-    //             () -> {
-    //                 l_elevatorMotor.set(0);
-    //                 r_elevatorMotor.set(0);
-    //             });
+    // return Commands.startEnd(
+    // () -> {
+    // l_elevatorMotor.set(0.5);
+    // r_elevatorMotor.set(-0.5);
+    // },
+    // () -> {
+    // l_elevatorMotor.set(0);
+    // r_elevatorMotor.set(0);
+    // });
     // }
+    public boolean isReady() {
+        return lastSetpoint == Setpoint.L1 || lastSetpoint == Setpoint.L2 || lastSetpoint == Setpoint.L3
+                || lastSetpoint == Setpoint.L4;
+    }
 
     /** Zero the arm encoder when the user button is pressed on the roboRIO */
     private void zeroOnUserButton() {
@@ -198,17 +205,12 @@ public class CoralSubsystem extends SubsystemBase {
     }
 
     // private void setIntakePower(double power) {
-    //     intakeMotor.set(power);
+    // intakeMotor.set(power);
     // }
 
     public Command setSetpointCommand(Setpoint setpoint, Boolean override) {
         return this.runOnce(
                 () -> {
-
-                    if (ScoreSafetyManager.isMovementBlocked()) {
-                        ScoreSafetyManager.notifyBlocked();
-                        return;
-                    }
 
                     SubsystemAtPos = false;
 
@@ -216,35 +218,45 @@ public class CoralSubsystem extends SubsystemBase {
                     // boolean isL3ToL4 = (lastSetpoint == Setpoint.L3 && setpoint == Setpoint.L4);
                     // boolean isL2ToL4 = (lastSetpoint == Setpoint.L2 && setpoint == Setpoint.L4);
                     // boolean isL1ToL4 = (lastSetpoint == Setpoint.L1 && setpoint == Setpoint.L4);
-                    // boolean isFeederToL4 = (lastSetpoint == Setpoint.FeederStation && setpoint == Setpoint.L4);
-                    // boolean isFeederToL3 = (lastSetpoint == Setpoint.FeederStation && setpoint == Setpoint.L3);
-                    // boolean isL4ToAlgaeHigh = (lastSetpoint == Setpoint.L4 && setpoint == Setpoint.AlgaeHigh);
-                    // boolean isL4ToAlgaeLow = (lastSetpoint == Setpoint.L4 && setpoint == Setpoint.AlgaeLow);
+                    // boolean isFeederToL4 = (lastSetpoint == Setpoint.FeederStation && setpoint ==
+                    // Setpoint.L4);
+                    // boolean isFeederToL3 = (lastSetpoint == Setpoint.FeederStation && setpoint ==
+                    // Setpoint.L3);
+                    // boolean isL4ToAlgaeHigh = (lastSetpoint == Setpoint.L4 && setpoint ==
+                    // Setpoint.AlgaeHigh);
+                    // boolean isL4ToAlgaeLow = (lastSetpoint == Setpoint.L4 && setpoint ==
+                    // Setpoint.AlgaeLow);
                     // boolean isL3ToL2 = (lastSetpoint == Setpoint.L3 && setpoint == Setpoint.L2);
                     // boolean isL4ToL2 = (lastSetpoint == Setpoint.L4 && setpoint == Setpoint.L2);
-                    // boolean isBargeToL3 = (lastSetpoint == Setpoint.Barge && setpoint == Setpoint.L3);
-                    // boolean isBargeToL2 = (lastSetpoint == Setpoint.Barge && setpoint == Setpoint.L2);
-                    // boolean isBargeToL1 = (lastSetpoint == Setpoint.Barge && setpoint == Setpoint.L1);
-                    // boolean isBargeToFeeder = (lastSetpoint == Setpoint.Barge && setpoint == Setpoint.FeederStation);
-                    // if (isL4ToL3 || isL3ToL4 || isL4ToAlgaeHigh || isL4ToAlgaeLow || isL3ToL2 || isL4ToL2 || isFeederToL4 || isL2ToL4 ||isFeederToL3 ||isL1ToL4 || isBargeToL3 || isBargeToL2 || isBargeToL1 || isBargeToFeeder) {
-                    //     // Apply slow config
-                    //     r_armMotor.configure(Configs.CoralSubsystem.r_armMotorSlowConfig,
-                    //             ResetMode.kResetSafeParameters,
-                    //             PersistMode.kNoPersistParameters);
-                    //     l_armMotor.configure(Configs.CoralSubsystem.l_armMotorSlowConfig,
-                    //             ResetMode.kResetSafeParameters,
-                    //             PersistMode.kNoPersistParameters);
+                    // boolean isBargeToL3 = (lastSetpoint == Setpoint.Barge && setpoint ==
+                    // Setpoint.L3);
+                    // boolean isBargeToL2 = (lastSetpoint == Setpoint.Barge && setpoint ==
+                    // Setpoint.L2);
+                    // boolean isBargeToL1 = (lastSetpoint == Setpoint.Barge && setpoint ==
+                    // Setpoint.L1);
+                    // boolean isBargeToFeeder = (lastSetpoint == Setpoint.Barge && setpoint ==
+                    // Setpoint.FeederStation);
+                    // if (isL4ToL3 || isL3ToL4 || isL4ToAlgaeHigh || isL4ToAlgaeLow || isL3ToL2 ||
+                    // isL4ToL2 || isFeederToL4 || isL2ToL4 ||isFeederToL3 ||isL1ToL4 || isBargeToL3
+                    // || isBargeToL2 || isBargeToL1 || isBargeToFeeder) {
+                    // // Apply slow config
+                    // r_armMotor.configure(Configs.CoralSubsystem.r_armMotorSlowConfig,
+                    // ResetMode.kResetSafeParameters,
+                    // PersistMode.kNoPersistParameters);
+                    // l_armMotor.configure(Configs.CoralSubsystem.l_armMotorSlowConfig,
+                    // ResetMode.kResetSafeParameters,
+                    // PersistMode.kNoPersistParameters);
                     // } else {
-                        // Default config
-                        // r_armMotor.configure(
-                        //         Configs.CoralSubsystem.r_armMotorConfig,
-                        //         ResetMode.kResetSafeParameters,
-                        //         PersistMode.kNoPersistParameters);
+                    // Default config
+                    // r_armMotor.configure(
+                    // Configs.CoralSubsystem.r_armMotorConfig,
+                    // ResetMode.kResetSafeParameters,
+                    // PersistMode.kNoPersistParameters);
 
-                        // l_armMotor.configure(
-                        //         Configs.CoralSubsystem.l_armMotorConfig,
-                        //         ResetMode.kResetSafeParameters,
-                        //         PersistMode.kNoPersistParameters);
+                    // l_armMotor.configure(
+                    // Configs.CoralSubsystem.l_armMotorConfig,
+                    // ResetMode.kResetSafeParameters,
+                    // PersistMode.kNoPersistParameters);
                     // }
                     checkTargetSetpointForAutoAlign = override;
 
@@ -308,31 +320,35 @@ public class CoralSubsystem extends SubsystemBase {
                             break;
 
                     }
-                    lastSetpoint = setpoint; 
+                    lastSetpoint = setpoint;
                 });
     }
 
-    /** Updates whether the driver is actively holding the alignment override bumpers. */
+    /**
+     * Updates whether the driver is actively holding the alignment override
+     * bumpers.
+     */
     public void setDriverOverrideActive(boolean isPressed) {
         DriverIsPressingRightBumperOrLeftBumper = isPressed;
     }
 
     // public Command runIntakeCommand() {
 
-    //     /*if(measurement.status > 10){
-    //         return Commands.startEnd(
-    //             () -> setIntakePower(IntakeSetpoints.kForward), () -> setIntakePower(0.0));
-    //     }else{
-    //         return Commands.startEnd(
-    //             () -> setIntakePower(0.0), () -> setIntakePower(0.0));
-    //     }*/
-    //     return Commands.startEnd(
-    //             () -> setIntakePower(IntakeSetpoints.kForward), () -> setIntakePower(0.0));
+    // /*if(measurement.status > 10){
+    // return Commands.startEnd(
+    // () -> setIntakePower(IntakeSetpoints.kForward), () -> setIntakePower(0.0));
+    // }else{
+    // return Commands.startEnd(
+    // () -> setIntakePower(0.0), () -> setIntakePower(0.0));
+    // }*/
+    // return Commands.startEnd(
+    // () -> setIntakePower(IntakeSetpoints.kForward), () -> setIntakePower(0.0));
     // }
 
     // public Command reverseIntakeCommand() {
-    //     return this.startEnd(
-    //             () -> this.setIntakePower(IntakeSetpoints.kReverse), () -> this.setIntakePower(0.0));
+    // return this.startEnd(
+    // () -> this.setIntakePower(IntakeSetpoints.kReverse), () ->
+    // this.setIntakePower(0.0));
     // }
 
     public void periodic() {
@@ -344,15 +360,21 @@ public class CoralSubsystem extends SubsystemBase {
         // SmartDashboard.putNumber("Coral/Arm/Target Position", armCurrentTarget);
         // SmartDashboard.putNumber("Coral/Arm/Actual Position",
         // armEncoder.getPosition());
-        //SmartDashboard.putNumber("Coral/Elevator/Target Position", elevatorCurrentTarget);
-        //SmartDashboard.putNumber("Coral/Elevator/Actual Position", elevatorEncoder.getPosition());
-        //SmartDashboard.putNumber("Coral/Wrist/Target Position", wristAbsoluteEncoder.getPosition());
-        
-        //SmartDashboard.putNumber("Coral/Arm/Target Position", armEncoder.getPosition());
-        
-       // System.out.println("Wrist Encoder Position: " + wristAbsoluteEncoder.getPosition());
-        //System.out.println("LaserCan value: " + measurement.status);
-        //System.out.println("Normal Arm Position: " + armEncoder.getPosition()+ " Absolute Arm Position: ");
+        // SmartDashboard.putNumber("Coral/Elevator/Target Position",
+        // elevatorCurrentTarget);
+        // SmartDashboard.putNumber("Coral/Elevator/Actual Position",
+        // elevatorEncoder.getPosition());
+        // SmartDashboard.putNumber("Coral/Wrist/Target Position",
+        // wristAbsoluteEncoder.getPosition());
+
+        // SmartDashboard.putNumber("Coral/Arm/Target Position",
+        // armEncoder.getPosition());
+
+        // System.out.println("Wrist Encoder Position: " +
+        // wristAbsoluteEncoder.getPosition());
+        // System.out.println("LaserCan value: " + measurement.status);
+        // System.out.println("Normal Arm Position: " + armEncoder.getPosition()+ "
+        // Absolute Arm Position: ");
         // SmartDashboard.putNumber("Coral/Intake/Applied Output",
         // intakeMotor.getAppliedOutput());
     }
