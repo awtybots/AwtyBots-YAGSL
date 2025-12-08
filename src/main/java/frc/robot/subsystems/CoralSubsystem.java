@@ -124,6 +124,7 @@ public class CoralSubsystem extends SubsystemBase {
 
     private void moveToSetpoint() {
         l_armController.setReference(armCurrentTarget, ControlType.kMAXMotionPositionControl);
+        wristController.setReference(wristCurrentTarget, ControlType.kMAXMotionPositionControl);
         if (checkTargetSetpointForAutoAlign && !DriverIsPressingRightBumperOrLeftBumper) {
 
             return;
@@ -149,7 +150,7 @@ public class CoralSubsystem extends SubsystemBase {
         // }
 
         
-        wristController.setReference(wristCurrentTarget, ControlType.kMAXMotionPositionControl);
+       
 
         double elevatorPos = elevatorEncoder.getPosition();
         double armPos = armEncoder.getPosition();
