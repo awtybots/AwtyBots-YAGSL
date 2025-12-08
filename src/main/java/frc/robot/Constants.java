@@ -107,6 +107,7 @@ public final class Constants {
     public static final int AlgaeHigh = 42; // Elevator position for high algae removal
     public static final int L3 = 0; // Elevator position placeholder for level 3 coral scoring
     public static final int L4 = 73; // Elevator position for level 4 coral scoring
+    public static final int TFF = 77; // Elevator position after level 4 coral scoring
     public static final int Barge = 73; // Elevator position for barge scoring
   }
 

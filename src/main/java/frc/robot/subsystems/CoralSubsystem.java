@@ -36,7 +36,8 @@ public class CoralSubsystem extends SubsystemBase {
         L4,
         AlgaeLow,
         AlgaeHigh,
-        Barge;
+        Barge,
+        TFF;
     }
 
     // LaserCan setup
@@ -72,7 +73,7 @@ public class CoralSubsystem extends SubsystemBase {
     private SparkClosedLoopController wristController = wristMotor.getClosedLoopController();
     // private RelativeEncoder wristEncoder = wristMotor.getEncoder();
     private AbsoluteEncoder wristAbsoluteEncoder = wristMotor.getAbsoluteEncoder();
-
+    EndE endEInstance = new EndE();
     // intake setup
     // private SparkFlex intakeMotor = new SparkFlex(ArmConstants.IntakeCanID,
     // MotorType.kBrushless);
@@ -122,6 +123,7 @@ public class CoralSubsystem extends SubsystemBase {
     }
 
     private void moveToSetpoint() {
+        l_armController.setReference(armCurrentTarget, ControlType.kMAXMotionPositionControl);
         if (checkTargetSetpointForAutoAlign && !DriverIsPressingRightBumperOrLeftBumper) {
 
             return;
@@ -146,7 +148,7 @@ public class CoralSubsystem extends SubsystemBase {
 
         // }
 
-        l_armController.setReference(armCurrentTarget, ControlType.kMAXMotionPositionControl);
+        
         wristController.setReference(wristCurrentTarget, ControlType.kMAXMotionPositionControl);
 
         double elevatorPos = elevatorEncoder.getPosition();
@@ -159,6 +161,10 @@ public class CoralSubsystem extends SubsystemBase {
         boolean wristOnTarget = Math.abs(wristCurrentTarget - wristPos) < CoralToleranceConstants.WRIST_TOLERANCE;
 
         SubsystemAtPos = elevatorOnTarget && armOnTarget && wristOnTarget;
+
+        if (lastSetpoint == Setpoint.L4 && !endEInstance.isCoralEngaged()) {
+            l_elevatorController.setReference(ElevatorSetpoints.TFF, ControlType.kMAXMotionPositionControl);
+        }
     }
 
     /**
@@ -317,6 +323,13 @@ public class CoralSubsystem extends SubsystemBase {
                             armCurrentTarget = ArmSetpoints.Barge;
                             wristCurrentTarget = WristSetpoints.Barge;
                             elevatorCurrentTarget = ElevatorSetpoints.Barge;
+                            break;
+                        case TFF:
+                            ElevatorAtL4 = true;
+                            runFunnelIntake = false;
+                            armCurrentTarget = ArmSetpoints.L4;
+                            wristCurrentTarget = WristSetpoints.L4;
+                            elevatorCurrentTarget = ElevatorSetpoints.TFF;
                             break;
 
                     }
