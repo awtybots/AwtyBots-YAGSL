@@ -239,6 +239,10 @@ public class SwerveSubsystem extends SubsystemBase {
       );
   }
 
+  public ChassisSpeeds getRobotRelativeSpeeds() {
+    return swerveDrive.getRobotVelocity();
+  }
+
   public Command stopCommand() {
     return this.runOnce(() -> {
       stop();
